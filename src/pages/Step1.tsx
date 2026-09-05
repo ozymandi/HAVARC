@@ -1,28 +1,38 @@
-import { Clock, Plus } from 'lucide-react'
+import { AlertCircle, Clock, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
 import { BottomNav } from '../components/BottomNav'
 import { Button } from '../components/Button'
 import { ChoiceChip } from '../components/ChoiceChip'
+import { Dialog } from '../components/Dialog'
 import { EMPTY_EQUIPMENT, EquipmentCard, type Equipment } from '../components/EquipmentCard'
 import { FormField } from '../components/FormField'
 import { Section } from '../components/Section'
+import { MOCK_JOBS } from '../data/mockJobs'
 
 const SERVICE_TYPES = ['Preventive Maintenance', 'Diagnostic / Repair Call']
 const COMPLAINTS = ['No Cooling', 'No Heating', 'Water Leak', 'Airflow Issue', 'Noise / Vibration', 'Thermostat / Controls']
 
 const nowLabel = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 const todayLabel = () => new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+const nextWorkOrder = () => {
+  const max = Math.max(0, ...MOCK_JOBS.map((j) => Number(j.workOrder.replace('WO-', '')) || 0))
+  return `WO-${max + 1}`
+}
 
-/** Figma: 03 · Step 1 · Service Call & Equipment (100:3579). Next doesn't advance yet —
- *  Step 2 isn't built. Back/Exit both return to Jobs; the draft itself isn't persisted
- *  anywhere yet (no backend), so nothing is actually saved on exit at this stage. */
+/** Figma: 03 · Step 1 · Service Call & Equipment (100:3579), validation 03d (182:3282),
+ *  discard confirm 03e (100:4142). Next doesn't advance yet — Step 2 isn't built. The
+ *  draft itself isn't persisted anywhere yet (no backend), so "Keep draft & exit" doesn't
+ *  actually save anything at this stage — it just matches the confirmed copy/flow. */
 export function Step1() {
   const navigate = useNavigate()
 
-  const [date] = useState(todayLabel)
-  const [technician] = useState('T. Holloway')
+  const [workOrder, setWorkOrder] = useState(nextWorkOrder)
+  const [date, setDate] = useState(todayLabel)
+  const [technician, setTechnician] = useState('T. Holloway')
+  const [showErrors, setShowErrors] = useState(false)
+  const [showDiscard, setShowDiscard] = useState(false)
   const [unitSuite, setUnitSuite] = useState('')
   const [customer, setCustomer] = useState('')
   const [address, setAddress] = useState('')
@@ -40,23 +50,50 @@ export function Step1() {
   const removeEquipment = (id: string) => setEquipment((prev) => prev.filter((u) => u.id !== id))
   const addEquipment = () => setEquipment((prev) => [...prev, EMPTY_EQUIPMENT(`unit-${prev.length + 1}`)])
 
+  const missing = {
+    workOrder: !workOrder.trim(),
+    date: !date.trim(),
+    technician: !technician.trim(),
+    customer: !customer.trim(),
+    address: !address.trim(),
+  }
+  const missingCount = Object.values(missing).filter(Boolean).length
+  const requiredError = (field: keyof typeof missing) => (showErrors && missing[field] ? 'Required' : undefined)
+
+  const handleNext = () => {
+    if (missingCount > 0) {
+      setShowErrors(true)
+      return
+    }
+    navigate('/jobs/new/step-2')
+  }
+
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
-      <AppHeader step={1} title="Service Call & Equipment" onExit={() => navigate('/jobs')} />
+      <AppHeader step={1} title="Service Call & Equipment" onExit={() => setShowDiscard(true)} />
 
       <div className="flex flex-1 flex-col gap-2xl p-lg">
+        {showErrors && missingCount > 0 && (
+          <div className="flex w-full items-center gap-sm rounded-xs bg-danger-soft p-md">
+            <AlertCircle size={20} strokeWidth={1.5} className="shrink-0 text-danger" />
+            <p className="flex-1 text-caption text-danger">
+              {missingCount} required field{missingCount > 1 ? 's' : ''} {missingCount > 1 ? 'are' : 'is'} missing. Fields are highlighted below.
+            </p>
+          </div>
+        )}
+
         <Section label="WORK ORDER">
           <div className="flex w-full flex-col gap-md p-md">
             <div className="flex w-full gap-2xs">
-              <FormField className="min-w-0 flex-1" label="Work Order #" value="Auto-assigned" disabled />
-              <FormField className="min-w-0 flex-1" label="Date" value={date} disabled />
+              <FormField className="min-w-0 flex-1" label="Work Order #" value={workOrder} onChange={(e) => setWorkOrder(e.target.value)} error={requiredError('workOrder')} />
+              <FormField className="min-w-0 flex-1" label="Date" value={date} onChange={(e) => setDate(e.target.value)} error={requiredError('date')} />
             </div>
             <div className="flex w-full gap-2xs">
-              <FormField className="min-w-0 flex-1" label="Technician" value={technician} disabled />
+              <FormField className="min-w-0 flex-1" label="Technician" value={technician} onChange={(e) => setTechnician(e.target.value)} error={requiredError('technician')} />
               <FormField className="min-w-0 flex-1" label="Unit / Suite" value={unitSuite} onChange={(e) => setUnitSuite(e.target.value)} />
             </div>
-            <FormField label="Customer / Property" value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" />
-            <FormField label="Service Address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Street, city, state ZIP" />
+            <FormField label="Customer / Property" value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" error={requiredError('customer')} />
+            <FormField label="Service Address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Street, city, state ZIP" error={requiredError('address')} />
             <div className="flex w-full gap-2xs">
               <FormField className="min-w-0 flex-1" label="Arrival Time" value={arrival} onChange={(e) => setArrival(e.target.value)} placeholder="—" />
               <FormField className="min-w-0 flex-1" label="Departure Time" value={departure} onChange={(e) => setDeparture(e.target.value)} placeholder="—" />
@@ -125,7 +162,26 @@ export function Step1() {
         </Button>
       </div>
 
-      <BottomNav isFirst onBack={() => navigate('/jobs')} onNext={() => navigate('/jobs/new/step-2')} />
+      <BottomNav isFirst onBack={() => setShowDiscard(true)} onNext={handleNext} />
+
+      {showDiscard && (
+        <Dialog
+          icon={
+            <img
+              src="/images/illustrations/dialog-draft.webp"
+              srcSet="/images/illustrations/dialog-draft.webp 1x, /images/illustrations/dialog-draft@2x.webp 2x"
+              alt=""
+              className="h-[140px] w-auto"
+            />
+          }
+          title="Leave this job?"
+          message="Your changes are saved as a draft. You can finish it later from the Jobs list."
+          primaryLabel="Keep draft & exit"
+          onPrimary={() => navigate('/jobs')}
+          secondaryLabel="Continue editing"
+          onSecondary={() => setShowDiscard(false)}
+        />
+      )}
     </div>
   )
 }
