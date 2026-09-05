@@ -1,5 +1,5 @@
 import { Plus, Share, SquarePlus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from './Button'
 
 /** Figma: 01f · Install on iPhone (100:3019) — "Bottom Sheet · Install" over a 40% scrim.
@@ -48,11 +48,7 @@ const STEPS = [
 ]
 
 export function InstallSheet() {
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    if (shouldShow()) setOpen(true)
-  }, [])
+  const [open, setOpen] = useState(shouldShow)
 
   if (!open) return null
 
