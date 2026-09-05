@@ -51,10 +51,12 @@ export const SAMPLE_REPORT: ReportData = {
   serviceNotes: 'Capacitor reading 38/45 MFD — replaced. System was 1 lb low on R-410A; charged to 9°F subcooling. Cooling restored, 19°F split.',
   parts: '1 × 45/5 MFD capacitor · 1 lb R-410A',
   recommendedWork: 'Leak search on suction line; condenser coil cleaning at next PM.',
+  // The four sample photos Yaroslav put in public/photo, captioned as on the Figma page 4.
   photos: [
     { src: '/photo/photo-1513694203232-719a280e022f.avif', caption: 'Condenser coil before cleaning' },
     { src: '/photo/photo-1583847268964-b28dc8f51f92.avif', caption: 'Failed 45/5 MFD capacitor' },
     { src: '/photo/photo-1598928506311-c55ded91a20c.avif', caption: 'Gauge readings after charge' },
+    { src: '/photo/photo-1616047006789-b7af5afb8c20.avif', caption: 'Unit label — RTU-1' },
   ],
   customerSignature: { name: 'Brenda Johnson', signedAt: '09/02/26 11:38 AM' },
   technicianSignature: { name: 'T. Holloway', signedAt: '09/02/26 11:40 AM' },
@@ -106,7 +108,7 @@ export function reportForJob(job: Job): ReportData {
     phone: job.phone,
     customerNotes: job.customerNotes ?? '',
     status: job.finalStatus ?? SAMPLE_REPORT.status,
-    photos: job.photos ? job.photos.map((src, i) => ({ src, caption: SAMPLE_REPORT.photos[i]?.caption })) : [],
+    photos: job.photos ? job.photos.map((src, i) => ({ src, caption: SAMPLE_REPORT.photos[i]?.caption })) : SAMPLE_REPORT.photos,
     customerSignature: SAMPLE_REPORT.customerSignature && { ...SAMPLE_REPORT.customerSignature, name: job.customer },
   }
 }
