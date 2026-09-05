@@ -27,6 +27,7 @@ function App() {
           <Route path="/jobs/:id/invoice" element={<InvoiceEditor />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/settings/change-password" element={<ChangePassword />} />
+          <Route path="/" element={<Navigate to="/splash" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
