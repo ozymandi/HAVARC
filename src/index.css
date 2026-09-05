@@ -21,3 +21,11 @@ body {
 @utility brand-gradient {
   background-image: linear-gradient(to bottom, var(--color-brand-strong), var(--color-brand));
 }
+
+/* Status Button (14:63) "pattern fill (raw)" — a single white diagonal hairline
+   (Figma vector "M 8.5 0 L 0 8.5", 1px stroke) tiled at scale 0.59 and 20% opacity over
+   the solid status color. Reproduced as CSS, not an exported asset — it's a plain
+   geometric tile, not an illustration. Apply alongside a bg-status-* color class. */
+@utility status-pattern {
+  background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2) 0, rgba(255, 255, 255, 0.2) 0.6px, transparent 0.6px, transparent 5px);
+}

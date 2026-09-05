@@ -18,7 +18,7 @@ const bgClass: Record<StatusColor, string> = {
 
 export function StatusBanner({ color, label, description }: StatusBannerProps) {
   return (
-    <div className={`flex h-[72px] w-full flex-col justify-center rounded-sm p-md ${bgClass[color]}`}>
+    <div className={`flex h-[72px] w-full flex-col justify-center rounded-sm p-md status-pattern ${bgClass[color]}`}>
       <p className="text-status text-inverse">{label.toUpperCase()}</p>
       <p className="text-status-sm text-inverse opacity-70">{description}</p>
     </div>

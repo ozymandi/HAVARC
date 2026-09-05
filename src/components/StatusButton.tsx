@@ -41,7 +41,7 @@ export function StatusButtonGrid({ value, onChange }: StatusButtonGridProps) {
             type="button"
             onClick={() => onChange(color)}
             className={
-              `relative flex h-[72px] flex-col justify-center rounded-sm p-md text-left ${bgClass[color]} ` +
+              `relative flex h-[72px] flex-col justify-center rounded-sm p-md text-left status-pattern ${bgClass[color]} ` +
               (selected ? `border-[length:var(--stroke-regular)] ${borderClass[color]}` : '')
             }
           >
