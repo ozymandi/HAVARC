@@ -21,6 +21,7 @@ export function ForgotPassword() {
           <p className="text-section text-brand">RESET PASSWORD</p>
 
           <form
+            noValidate
             className="flex flex-col gap-2xl rounded-xs bg-surface p-md shadow-card"
             onSubmit={(e) => {
               e.preventDefault()

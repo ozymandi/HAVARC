@@ -19,6 +19,7 @@ export function Login() {
           <p className="text-section text-brand">SIGN IN</p>
 
           <form
+            noValidate
             className="flex flex-col gap-2xl rounded-xs bg-surface p-md shadow-card"
             onSubmit={(e) => {
               e.preventDefault()

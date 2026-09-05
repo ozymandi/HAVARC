@@ -20,10 +20,19 @@ export interface Job {
   completedMeta?: string
   summary?: { label: string; value: string }[]
   documents?: { title: string; meta: string }[]
-  photoCount?: number
+  photos?: string[]
   phone?: string
   invoiceNumber?: string
 }
+
+/** Simple generated placeholder "photo" (a labelled color swatch as an inline SVG data
+ *  URI) — there's no real captured photo to reference for mock completed jobs, and this is
+ *  synthetic test data like the rest of this file, not a design asset standing in for one.
+ *  Real photos come from Step 4's file capture once a job actually goes through it. */
+const placeholderPhoto = (label: string, color: string) =>
+  `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="${color}"/><text x="200" y="200" font-family="sans-serif" font-size="28" fill="white" text-anchor="middle" dominant-baseline="middle">${label}</text></svg>`,
+  )}`
 
 export const MOCK_JOBS: Job[] = [
   {
@@ -69,7 +78,7 @@ export const MOCK_JOBS: Job[] = [
     ],
     phone: '770-994-8768',
     invoiceNumber: '646',
-    photoCount: 3,
+    photos: [placeholderPhoto('Unit nameplate', '#12365a'), placeholderPhoto('Before', '#6d7a85'), placeholderPhoto('After', '#21884a')],
   },
   {
     id: 'wo-10028',
@@ -95,3 +104,11 @@ export const MOCK_JOBS: Job[] = [
     finalStatus: { color: 'green', label: 'Green', description: 'Operating Normally' },
   },
 ]
+
+/** Mutates the shared array in place — the only "delete" mechanism available without a
+ *  backend. Real deletion (removing the server record, its PDFs, photos) is Phase-1
+ *  backend work; this just makes the Jobs list stop showing it for this session. */
+export const removeJob = (id: string) => {
+  const index = MOCK_JOBS.findIndex((j) => j.id === id)
+  if (index !== -1) MOCK_JOBS.splice(index, 1)
+}

@@ -27,5 +27,5 @@ body {
    the solid status color. Reproduced as CSS, not an exported asset — it's a plain
    geometric tile, not an illustration. Apply alongside a bg-status-* color class. */
 @utility status-pattern {
-  background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2) 0, rgba(255, 255, 255, 0.2) 0.6px, transparent 0.6px, transparent 5px);
+  background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0, rgba(255, 255, 255, 0.08) 0.6px, transparent 0.6px, transparent 5px);
 }

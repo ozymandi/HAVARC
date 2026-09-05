@@ -6,24 +6,33 @@ import { Camera, Image, X } from 'lucide-react'
 interface FilledPhotoTileProps {
   src?: string
   onRemove?: () => void
+  onView?: () => void
 }
 
-export function PhotoTile({ src, onRemove }: FilledPhotoTileProps) {
+/** `onRemove` is only passed while creating/editing a job (Step 4) — a completed, read-only
+ *  Job Detail passes neither, so the remove button doesn't render there at all. `onView`
+ *  opens a bigger preview (e.g. Job Detail tapping a captured photo). */
+export function PhotoTile({ src, onRemove, onView }: FilledPhotoTileProps) {
   return (
-    <div className="relative flex h-[104px] flex-1 items-center justify-center rounded-xs bg-canvas p-md">
-      {src ? (
-        <img src={src} alt="" className="absolute inset-0 h-full w-full rounded-xs object-cover" />
-      ) : (
-        <Image size={32} strokeWidth={1.5} className="text-icon opacity-20" />
-      )}
+    <div className="relative h-[104px] flex-1">
       <button
         type="button"
-        onClick={onRemove}
-        aria-label="Remove photo"
-        className="absolute right-1 top-1 flex items-center rounded-full bg-brand p-2xs text-inverse"
+        onClick={onView}
+        disabled={!onView}
+        className="flex h-full w-full items-center justify-center rounded-xs bg-canvas p-md disabled:cursor-default"
       >
-        <X size={16} strokeWidth={1.5} />
+        {src ? <img src={src} alt="" className="absolute inset-0 h-full w-full rounded-xs object-cover" /> : <Image size={32} strokeWidth={1.5} className="text-icon opacity-20" />}
       </button>
+      {onRemove && (
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label="Remove photo"
+          className="absolute right-1 top-1 flex items-center rounded-full bg-brand p-2xs text-inverse"
+        >
+          <X size={16} strokeWidth={1.5} />
+        </button>
+      )}
     </div>
   )
 }

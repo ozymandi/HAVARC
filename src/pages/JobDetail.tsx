@@ -1,13 +1,17 @@
-import { MoreHorizontal, Share } from 'lucide-react'
+import { MoreHorizontal, Share, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { ActionMenu } from '../components/ActionMenu'
 import { Button } from '../components/Button'
 import { CustomerNotesCallout } from '../components/CustomerNotesCallout'
+import { Dialog } from '../components/Dialog'
 import { DocumentRow } from '../components/DocumentRow'
+import { PhotoLightbox } from '../components/PhotoLightbox'
 import { PhotoTile } from '../components/PhotoTile'
 import { Section } from '../components/Section'
 import { StatusBanner } from '../components/StatusBanner'
 import { TopBar } from '../components/TopBar'
-import { MOCK_JOBS } from '../data/mockJobs'
+import { MOCK_JOBS, removeJob } from '../data/mockJobs'
 
 const badgeClass: Record<'draft' | 'completed' | 'pending', string> = {
   draft: 'bg-warning-soft text-warning',
@@ -24,14 +28,22 @@ export function JobDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const job = MOCK_JOBS.find((j) => j.id === id)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [preview, setPreview] = useState<string | null>(null)
 
   if (!job) return <Navigate to="/jobs" replace />
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
-      {/* Figma: Top Bar action here is "more" (08c · Job Detail · Menu, Action Menu 71:2182)
-          — the menu itself (edit / delete) isn't built yet, just the correct icon. */}
-      <TopBar variant="child" title={job.workOrder} onBack={() => navigate(-1)} action={<MoreHorizontal size={24} strokeWidth={1.5} />} />
+      {/* Figma: 08c · Job Detail · Menu (Action Menu 71:2182) — "more" opens Edit/Delete. */}
+      <TopBar
+        variant="child"
+        title={job.workOrder}
+        onBack={() => navigate(-1)}
+        action={<MoreHorizontal size={24} strokeWidth={1.5} />}
+        onAction={() => setMenuOpen(true)}
+      />
 
       <div className="flex flex-1 flex-col gap-lg p-lg pb-5xl">
         <div className="flex flex-col gap-xs">
@@ -74,11 +86,11 @@ export function JobDetail() {
           </Section>
         )}
 
-        {job.photoCount !== undefined && (
-          <Section label={`PHOTOS · ${job.photoCount}`}>
+        {job.photos && (
+          <Section label={`PHOTOS · ${job.photos.length}`}>
             <div className="flex w-full gap-xs">
-              {Array.from({ length: job.photoCount }).map((_, i) => (
-                <PhotoTile key={i} />
+              {job.photos.map((photo, i) => (
+                <PhotoTile key={i} src={photo} onView={() => setPreview(photo)} />
               ))}
             </div>
           </Section>
@@ -92,6 +104,38 @@ export function JobDetail() {
           </Button>
         </div>
       )}
+
+      {menuOpen && (
+        <ActionMenu
+          onEdit={() => {
+            // Editing a completed job would need Step 1-4 pre-filled from its existing
+            // data, which isn't a capability yet — left as a stub until that's built.
+            setMenuOpen(false)
+          }}
+          onDelete={() => {
+            setMenuOpen(false)
+            setConfirmingDelete(true)
+          }}
+          onClose={() => setMenuOpen(false)}
+        />
+      )}
+
+      {confirmingDelete && (
+        <Dialog
+          icon={<Trash2 size={40} strokeWidth={1.5} className="text-danger" />}
+          title="Delete this job?"
+          message={`${job.workOrder} · ${job.customer}, its service report, invoice and photos will be permanently removed on all devices.`}
+          primaryLabel="Delete job"
+          onPrimary={() => {
+            removeJob(job.id)
+            navigate('/jobs')
+          }}
+          secondaryLabel="Cancel"
+          onSecondary={() => setConfirmingDelete(false)}
+        />
+      )}
+
+      <PhotoLightbox src={preview} onClose={() => setPreview(null)} />
     </div>
   )
 }
