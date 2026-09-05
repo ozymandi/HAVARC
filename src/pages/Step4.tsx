@@ -126,8 +126,11 @@ export function Step4() {
               />
               <AddPhotoTile onClick={() => photoInputRef.current?.click()} />
             </div>
+            {/* Figma 06c · Step 4 · No photos (100:4212) shows a hint instead of the count. */}
             <p className="text-caption text-ink-faint">
-              {photos.length} {photos.length === 1 ? 'photo' : 'photos'} · JPEG compressed on device before upload
+              {photos.length === 0
+                ? 'No photos yet — add from camera or library. Photos are attached to the service report.'
+                : `${photos.length} ${photos.length === 1 ? 'photo' : 'photos'} · JPEG compressed on device before upload`}
             </p>
           </div>
         </Section>

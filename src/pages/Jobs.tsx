@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChoiceChip } from '../components/ChoiceChip'
 import { Fab } from '../components/Fab'
+import { InstallSheet } from '../components/InstallSheet'
 import { JobCard, type JobStatus } from '../components/JobCard'
 import { SyncBanner } from '../components/SyncBanner'
 import { TopBar } from '../components/TopBar'
@@ -119,6 +120,7 @@ export function Jobs() {
       </div>
 
       <Fab label="New job" onClick={() => navigate('/jobs/new')} />
+      <InstallSheet />
     </div>
   )
 }
