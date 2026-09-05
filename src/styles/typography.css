@@ -1,0 +1,109 @@
+/* Figma named text styles (page "Screens · Mobile Design"). One class per style,
+   composite properties (family+weight+size+line-height+tracking) don't map onto
+   Tailwind's flat font-size scale, so they live here instead of @theme. */
+
+.text-caption {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-regular);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  letter-spacing: -0.3px;
+}
+
+.text-section {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-sm);
+  letter-spacing: -0.2px;
+}
+
+.text-label {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  letter-spacing: -0.3px;
+}
+
+.text-body {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-regular);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-base);
+  letter-spacing: -0.5px;
+}
+
+.text-body-strong {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-md);
+  letter-spacing: -0.5px;
+}
+
+.text-h1 {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-xl);
+  letter-spacing: -0.5px;
+}
+
+.text-h2 {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-sm);
+  letter-spacing: 0;
+}
+
+.text-status {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-extrabold);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-sm);
+  letter-spacing: -0.5px;
+}
+
+.text-status-sm {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  letter-spacing: -0.3px;
+}
+
+.text-chip {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  letter-spacing: 0;
+}
+
+.text-badge {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-xs);
+  letter-spacing: -0.3px;
+}
+
+.text-numeric {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-md);
+  letter-spacing: 0;
+}
+
+/* App/Button (13:74) — not resolved by the page-level variable dump, taken from ledger notes. */
+.text-button {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-medium);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-sm);
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}

@@ -1,0 +1,63 @@
+import { ChevronDown } from 'lucide-react'
+import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
+
+/** Figma: Form Field (15:92) — "Label + input. Type: Text / Select / Textarea.
+ *  State: Default (placeholder), Filled, Focus, Error (with message), Disabled."
+ *
+ *  Default vs Filled is just placeholder-vs-value color, which native `::placeholder`
+ *  already handles, and Focus is a real `:focus` state — modelling both as props would
+ *  make callers track state React already gives for free. Only `error` and `disabled`
+ *  are genuine props here. */
+
+interface Shared {
+  label: string
+  error?: string
+  id?: string
+  className?: string
+}
+
+type TextFieldProps = Shared &
+  Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
+    type?: 'text' | 'email' | 'password' | 'tel' | 'number'
+  }
+type SelectFieldProps = Shared &
+  SelectHTMLAttributes<HTMLSelectElement> & { type: 'select'; children: ReactNode }
+type TextareaFieldProps = Shared & TextareaHTMLAttributes<HTMLTextAreaElement> & { type: 'textarea' }
+
+export type FormFieldProps = TextFieldProps | SelectFieldProps | TextareaFieldProps
+
+const fieldClass = (error: boolean, textarea: boolean) =>
+  `peer w-full rounded-xs border-[length:var(--stroke-hairline)] bg-surface px-md text-body text-ink ` +
+  `placeholder:text-ink-faint focus:border-line-focus focus:outline-none disabled:bg-disabled disabled:text-ink-faint ` +
+  (textarea ? 'min-h-[92px] resize-y py-md ' : 'h-[var(--size-control)] ') +
+  (error ? 'border-line-error bg-danger-soft' : 'border-line-input')
+
+export function FormField({ label, error, id, className = '', ...props }: FormFieldProps) {
+  const fieldId = id ?? label.toLowerCase().replace(/\s+/g, '-')
+
+  return (
+    <div className={`flex flex-col gap-xs ${className}`}>
+      <label htmlFor={fieldId} className="text-label text-ink-soft">
+        {label}
+      </label>
+
+      {props.type === 'select' ? (
+        <div className="relative">
+          <select id={fieldId} className={`${fieldClass(!!error, false)} appearance-none pr-3xl`} {...props}>
+            {props.children}
+          </select>
+          <ChevronDown
+            size={20}
+            className="pointer-events-none absolute right-md top-1/2 -translate-y-1/2 text-icon-soft peer-disabled:text-ink-faint"
+          />
+        </div>
+      ) : props.type === 'textarea' ? (
+        <textarea id={fieldId} className={fieldClass(!!error, true)} {...props} />
+      ) : (
+        <input id={fieldId} className={fieldClass(!!error, false)} {...props} />
+      )}
+
+      {error && <p className="text-caption text-danger">{error}</p>}
+    </div>
+  )
+}

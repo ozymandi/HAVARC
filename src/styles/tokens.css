@@ -1,0 +1,128 @@
+/* Generated from Figma file dp3yEGxjciw7s94vRfCKt3 — collections Primitives / Color (Light) / Spacing / Typography.
+   Dark mode exists in Figma but is unused by any Phase 1 screen — not exported.
+
+   Everything lives in ONE @theme block, including raw primitives that never get their own
+   utility (--stroke-*, --weight-*, --font-size-*, --line-height-*, --family-sans). A plain
+   `:root { ... }` in this project's Tailwind v4 + @tailwindcss/vite pipeline gets silently
+   dropped on build — verified by inspecting the compiled CSS, every custom property declared
+   outside @theme vanished while ones inside @theme survived. @theme is the only place a
+   custom property reliably reaches the browser here, wanted-as-a-utility or not.
+
+   Semantic colors are flat, role-free names (e.g. `brand`, not `bg-brand`/`text-brand`/
+   `border-brand`) so Tailwind generates bg-, text- and border- utilities from ONE token. Figma
+   defines several of these identically across roles (color/bg/brand, color/text/brand and
+   color/border/brand are all #12365a) — flattening removes that duplication instead of hiding
+   it behind three near-identical variables. Where a role genuinely needs a different value
+   (accent has three distinct shades for bg/text/border), it gets three distinct names instead
+   of one ambiguous one. */
+
+@theme {
+  --font-sans: var(--family-sans);
+
+  /* Typography primitives (composite text styles live as classes in typography.css) */
+  --family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+  --font-size-xs: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 16px;
+  --font-size-3xl: 24px;
+  --line-height-xs: 16px;
+  --line-height-sm: 20px;
+  --line-height-base: 22px;
+  --line-height-md: 24px;
+  --line-height-xl: 32px;
+
+  /* Component sizes */
+  --size-control: 48px;
+  --size-touch-min: 44px;
+  --size-fab: 56px;
+  --size-nav-btn: 52px;
+
+  /* Stroke widths */
+  --stroke-hairline: 1px;
+  --stroke-regular: 1.5px;
+
+  /* Alpha overlays (decorative layers, shadows) */
+  --alpha-navy-03: #12365a08;
+  --alpha-orange-25: #e8792b40;
+  --alpha-white-05: #ffffff0d;
+  --alpha-white-07: #ffffff12;
+  --alpha-white-15: #ffffff26;
+  --alpha-white-20: #ffffff33;
+
+  --spacing-none: 0px;
+  --spacing-2xs: 4px;
+  --spacing-xs: 6px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+  --spacing-5xl: 48px;
+
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 999px;
+
+  --shadow-card: 0 4px 4px 0 var(--alpha-navy-03);
+  --shadow-fab: 0 12px 18px 0 var(--alpha-orange-25);
+  --shadow-modal: 0 10px 24px 0 #0f2d4b40;
+  --shadow-nav: 0 -2px 10px 0 #0000000f;
+
+  /* Backgrounds → bg-* */
+  --color-canvas: #eef3f7;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f4f7fa;
+  --color-disabled: #e1e8ee;
+  --color-selected: #e8f2fb;
+  --color-brand: #12365a;
+  --color-brand-strong: #0e2a47;
+  --color-accent: #e8792b;
+  --color-danger-soft: #fdf0f0;
+  --color-warning-soft: #fff7e0;
+  --color-success-soft: #edf8f1;
+
+  /* Text/icon → text-* (Lucide icons inherit via currentColor) */
+  --color-ink: #172530;
+  --color-ink-soft: #9aabba;
+  --color-ink-faint: #bac6cf;
+  --color-accent-ink: #d46c00;
+  --color-inverse: #ffffff;
+  --color-link: #1f6fae;
+  --color-danger: #c73939;
+  --color-warning: #8c6200;
+  --color-success: #175f34;
+  --color-icon: #31404d;
+  --color-icon-soft: #6d7a85;
+
+  /* Borders → border-* */
+  --color-line: #d7e0e7;
+  --color-line-input: #d7e5f0;
+  --color-line-strong: var(--color-ink-faint);
+  --color-line-subtle: #e9eef2;
+  --color-line-dashed: var(--color-ink-soft);
+  --color-line-error: var(--color-danger);
+  --color-line-focus: var(--color-link);
+  --color-accent-line: #de7429;
+
+  /* Status (Status Button / Badge). Selected-state border = a ~650 (darker) shade of the
+     same hue; yellow's was given by the designer, green/orange/red are derived to match
+     that pattern since Figma didn't specify them explicitly. */
+  --color-status-green: #21884a;
+  --color-status-green-line: #1a6b3a;
+  --color-status-red: var(--color-danger);
+  --color-status-red-line: #a52f2f;
+  --color-status-yellow: #c88c00;
+  --color-status-yellow-line: #b57f00;
+  --color-status-orange: var(--color-accent-ink);
+  --color-status-orange-line: #b25900;
+}

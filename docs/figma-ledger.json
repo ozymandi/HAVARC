@@ -24,10 +24,10 @@
       "Inputs": "8:5",
       "Cards & Lists": "8:6",
       "Navigation & Status": "8:7",
-      "Screens \u00b7 Mobile": "8:9",
+      "Screens · Mobile": "8:9",
       "PDF Templates": "8:11",
       "Icons": "12:2",
-      "Screens \u00b7 Mobile Design": "100:2909",
+      "Screens · Mobile Design": "100:2909",
       "PDF Templates Design": "213:3678"
     },
     "components": {
@@ -116,6 +116,12 @@
       "Jobs/Invoice": "55:1537",
       "Jobs/Edit": "55:1538",
       "Settings": "55:1540"
+    },
+    "screensDesign": {
+      "01 Login": "100:2911",
+      "01 Login.hero": "100:2915",
+      "01 Login.hero.bg-blur": "124:5637",
+      "01 Login.hero.brand-lockup": "124:5598"
     }
   },
   "counts": {
@@ -227,12 +233,12 @@
   ],
   "notes": {
     "pdfFormat": "US Letter 612x792 (switched 2026-09-05), margins 36, footer top 704; Invoice P2 content pad 12/12, Report P2 pad 12 gap 12 (tight: need 620/620)",
-    "readingsOptional": "Client 2026-09-05: readings optional. Step 2 (100:3807): one Section \u00b7 Readings (label READINGS + muted Optional + x icon-button), 3 cards with card-title Airflow / Temperature, Electrical, Refrigerant / Cooling; 04b \u00b7 Step 2 \u00b7 Readings skipped = 254:7202 (hint + Secondary button Add readings). Job Detail summary Readings line and PDF Report P2 READINGS block render only when values exist.",
+    "readingsOptional": "Client 2026-09-05: readings optional. Step 2 (100:3807): one Section · Readings (label READINGS + muted Optional + x icon-button), 3 cards with card-title Airflow / Temperature, Electrical, Refrigerant / Cooling; 04b · Step 2 · Readings skipped = 254:7202 (hint + Secondary button Add readings). Job Detail summary Readings line and PDF Report P2 READINGS block render only when values exist.",
     "clockIcon": "Icon Name=clock = 260:2 (ellipse face + hands vector, 1.5 stroke, SCALE); set on all 12 'Set now' Text buttons on 100:2909",
     "status": "2026-09-05: designer confirmed mockups fully styled; next = pull final via MCP and start frontend",
     "cardStyle": "no stroke, bg surface, radius/xs, Shadow/Card (alpha/navy-03, 0/4/4)",
     "header": "Gradient/Header; no status bar frames; App Header paddingTop 56 (44 safe-area + 12), Top Bar paddingTop 44; Login hero +44; decorative Layer_1 (4 gradient blobs, layer blur 104 + noise) absolute at 20,78 in all App Header + Top Bar variants; title inverse@0.8",
-    "pages": "8:9 = wireframes (frozen, do not edit); 100:2909 = design page (edit here). Screen IDs in ledger refer to 8:9 \u2014 look up by name on 100:2909.",
+    "pages": "8:9 = wireframes (frozen, do not edit); 100:2909 = design page (edit here). Screen IDs in ledger refer to 8:9 — look up by name on 100:2909.",
     "fab": "size/fab 56, bg accent, stroke color/border/accent (orange/550) hairline, Shadow/FAB (alpha/orange-25 0/12/18)",
     "button": "App/Button = Inter Medium 16/20, tracking -0.5, uppercase (tokens: weight/medium, font-size/lg, line-height/sm)",
     "onboardingDesign": "hero fixed 299, Gradient/Header, pad 44/12/0/12, brand-sub group; content FILL space-between pad 32/16; card content pad 12 gap 24: fields(gap12)+actions(gap12)",
@@ -245,6 +251,7 @@
     "customerNotes": "Client request 2026-09-04: per-customer notes (access codes) auto-fill on every WO; Step 1 section ADDITIONAL NOTES, Job Detail head block, not printed on PDFs. Scope add ~2h.",
     "pdfPages": "8:11 = PDF wireframe/A4 base; 213:3678 = designer-styled PDF page (edit here)",
     "reportV2": "On 213:3678 below originals: P1 narrative (+tech notes/recs), P2 equipment+readings, P3 checklists+signatures+thank-you, P4 photos 2x3 appendix",
-    "reportFinal": "Designer layout on 213:3678: P1 status+service type+complaint|notes; P2 tech notes|recs + equipment + readings; P3 checklists+signatures; P4 photos"
+    "reportFinal": "Designer layout on 213:3678: P1 status+service type+complaint|notes; P2 tech notes|recs + equipment + readings; P3 checklists+signatures; P4 photos",
+    "screensKeyWarning": "entities.screens maps to the FROZEN wireframe page 8:9 (Screens . Mobile), NOT the styled design page 100:2909 (Screens . Mobile Design). Do not use those IDs for implementation - look up each screen by name on 100:2909 (get_metadata on the screen frame once found) and record the real ID in entities.screensDesign as you go. Confirmed 2026-09-05 after building against the wrong page for Login."
   }
 }

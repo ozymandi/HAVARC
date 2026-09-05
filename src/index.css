@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@import "./styles/tokens.css";
+@import "./styles/typography.css";
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--family-sans);
+}
+
+/* Brand gradient (Gradient/Header): brand-strong → brand, top to bottom.
+   Named without a `bg-` prefix — Tailwind's own dynamic `bg-*` matcher claims that
+   prefix for its built-in gradient/color utilities and silently drops an unrecognised
+   `bg-gradient-brand`, so a custom @utility needs a name Tailwind isn't already parsing. */
+@utility brand-gradient {
+  background-image: linear-gradient(to bottom, var(--color-brand-strong), var(--color-brand));
+}
