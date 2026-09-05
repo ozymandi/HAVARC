@@ -1,5 +1,5 @@
 import { Pencil } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
 import { AddPhotoTile, PhotoTile } from '../components/PhotoTile'
@@ -26,6 +26,7 @@ type Signer = 'customer' | 'technician' | null
  *  06b · Step 4 · Job saved (100:4004). */
 export function Step4() {
   const navigate = useNavigate()
+  const photoInputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<StatusColor | null>(null)
   const [photos, setPhotos] = useState<string[]>([])
   const [customerName, setCustomerName] = useState('')
@@ -78,19 +79,18 @@ export function Step4() {
               {photos.map((src, i) => (
                 <PhotoTile key={i} src={src} onRemove={() => removePhoto(i)} />
               ))}
-              <label className="flex-1">
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  onChange={(e) => {
-                    void addPhoto(e.target.files?.[0])
-                    e.target.value = ''
-                  }}
-                />
-                <AddPhotoTile />
-              </label>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  void addPhoto(e.target.files?.[0])
+                  e.target.value = ''
+                }}
+              />
+              <AddPhotoTile onClick={() => photoInputRef.current?.click()} />
             </div>
             <p className="text-caption text-ink-faint">
               {photos.length} {photos.length === 1 ? 'photo' : 'photos'} · JPEG compressed on device before upload

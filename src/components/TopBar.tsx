@@ -12,7 +12,7 @@ type TopBarProps =
 
 export function TopBar(props: TopBarProps) {
   return (
-    <div className="relative flex h-[100px] shrink-0 items-center overflow-hidden brand-gradient px-md pt-11">
+    <div className="sticky top-0 z-[5] flex h-[100px] shrink-0 items-center overflow-hidden brand-gradient px-md pt-11">
       {/* Decorative gradient layer, pre-flattened and cropped to the bar's exact size. */}
       <img
         src="/images/header.webp"

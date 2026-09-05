@@ -10,7 +10,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ step, title, onExit }: AppHeaderProps) {
   return (
-    <div className="relative flex w-full shrink-0 flex-col gap-md overflow-hidden brand-gradient px-lg pb-md pt-14">
+    <div className="sticky top-0 z-[5] flex w-full shrink-0 flex-col gap-md overflow-hidden brand-gradient px-lg pb-md pt-14">
       <img src="/images/header_tall.webp" srcSet="/images/header_tall.webp 1x, /images/header_tall@2x.webp 2x" alt="" className="absolute inset-0 h-full w-full object-cover" />
 
       <div className="relative flex w-full items-center gap-md">
