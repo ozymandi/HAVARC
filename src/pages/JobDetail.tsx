@@ -9,6 +9,7 @@ import { DocumentRow } from '../components/DocumentRow'
 import { PhotoLightbox } from '../components/PhotoLightbox'
 import { PhotoTile } from '../components/PhotoTile'
 import { Section } from '../components/Section'
+import { ShareSheet } from '../components/ShareSheet'
 import { StatusBanner } from '../components/StatusBanner'
 import { TopBar } from '../components/TopBar'
 import { MOCK_JOBS, removeJob } from '../data/mockJobs'
@@ -30,6 +31,7 @@ export function JobDetail() {
   const job = MOCK_JOBS.find((j) => j.id === id)
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
 
   if (!job) return <Navigate to="/jobs" replace />
@@ -99,11 +101,13 @@ export function JobDetail() {
 
       {job.documents && (
         <div className="flex w-full shrink-0 border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
-          <Button variant="primary" icon={<Share size={16} strokeWidth={1.5} />} className="w-full">
+          <Button variant="primary" icon={<Share size={16} strokeWidth={1.5} />} className="w-full" onClick={() => setShareOpen(true)}>
             Share PDFs
           </Button>
         </div>
       )}
+
+      {shareOpen && <ShareSheet job={job} onClose={() => setShareOpen(false)} />}
 
       {menuOpen && (
         <ActionMenu

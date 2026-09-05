@@ -1,4 +1,4 @@
-import { AlertCircle, Clock, Plus } from 'lucide-react'
+import { AlertCircle, Building2, Clock, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
@@ -9,6 +9,7 @@ import { Dialog } from '../components/Dialog'
 import { EMPTY_EQUIPMENT, EquipmentCard, type Equipment } from '../components/EquipmentCard'
 import { FormField } from '../components/FormField'
 import { Section } from '../components/Section'
+import { CUSTOMERS } from '../data/customers'
 import { MOCK_JOBS } from '../data/mockJobs'
 
 const SERVICE_TYPES = ['Preventive Maintenance', 'Diagnostic / Repair Call']
@@ -35,6 +36,7 @@ export function Step1() {
   const [showDiscard, setShowDiscard] = useState(false)
   const [unitSuite, setUnitSuite] = useState('')
   const [customer, setCustomer] = useState('')
+  const [customerFocused, setCustomerFocused] = useState(false)
   const [address, setAddress] = useState('')
   const [arrival, setArrival] = useState('')
   const [departure, setDeparture] = useState('')
@@ -49,6 +51,15 @@ export function Step1() {
   const updateEquipment = (id: string, value: Equipment) => setEquipment((prev) => prev.map((u) => (u.id === id ? value : u)))
   const removeEquipment = (id: string) => setEquipment((prev) => prev.filter((u) => u.id !== id))
   const addEquipment = () => setEquipment((prev) => [...prev, EMPTY_EQUIPMENT(`unit-${prev.length + 1}`)])
+
+  const customerMatches = customer.trim() ? CUSTOMERS.filter((c) => c.name.toLowerCase().includes(customer.trim().toLowerCase())) : []
+  const showSuggestions = customerFocused && customer.trim().length > 0
+
+  const selectCustomer = (c: (typeof CUSTOMERS)[number]) => {
+    setCustomer(c.name)
+    setAddress(c.address)
+    setCustomerFocused(false)
+  }
 
   const missing = {
     workOrder: !workOrder.trim(),
@@ -92,7 +103,55 @@ export function Step1() {
               <FormField className="min-w-0 flex-1" label="Technician" value={technician} onChange={(e) => setTechnician(e.target.value)} error={requiredError('technician')} />
               <FormField className="min-w-0 flex-1" label="Unit / Suite" value={unitSuite} onChange={(e) => setUnitSuite(e.target.value)} />
             </div>
-            <FormField label="Customer / Property" value={customer} onChange={(e) => setCustomer(e.target.value)} placeholder="Customer name" error={requiredError('customer')} />
+            <div className="relative w-full">
+              <FormField
+                label="Customer / Property"
+                value={customer}
+                onChange={(e) => setCustomer(e.target.value)}
+                onFocus={() => setCustomerFocused(true)}
+                onBlur={() => setCustomerFocused(false)}
+                placeholder="Customer name"
+                error={requiredError('customer')}
+              />
+              {showSuggestions && (
+                <div className="absolute inset-x-0 top-full z-10 mt-xs flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-modal">
+                  {customerMatches.map((c) => (
+                    <button
+                      key={c.name}
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        selectCustomer(c)
+                      }}
+                      className="flex items-center gap-md border-b border-line px-lg py-md text-left"
+                    >
+                      <Building2 size={20} strokeWidth={1.5} className="shrink-0 text-icon" />
+                      <div className="flex min-w-0 flex-1 flex-col gap-2xs">
+                        <p className="text-body-strong text-ink">{c.name}</p>
+                        <p className="text-caption text-ink-faint">
+                          {c.address} · {c.previousJobs} previous job{c.previousJobs > 1 ? 's' : ''}
+                          {c.hasNotes ? ' · Notes on file' : ''}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      setCustomerFocused(false)
+                    }}
+                    className="flex items-center gap-md px-lg py-md text-left"
+                  >
+                    <Plus size={20} strokeWidth={1.5} className="shrink-0 text-link" />
+                    <span className="flex-1 text-body-strong text-link">Add &quot;{customer}&quot; as a new customer</span>
+                  </button>
+                  <div className="bg-canvas px-lg py-sm">
+                    <p className="text-caption text-ink-faint">Selecting a customer fills in the service address.</p>
+                  </div>
+                </div>
+              )}
+            </div>
             <FormField label="Service Address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Street, city, state ZIP" error={requiredError('address')} />
             <div className="flex w-full gap-2xs">
               <FormField className="min-w-0 flex-1" label="Arrival Time" value={arrival} onChange={(e) => setArrival(e.target.value)} placeholder="—" />

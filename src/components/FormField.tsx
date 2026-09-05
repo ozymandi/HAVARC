@@ -61,3 +61,30 @@ export function FormField({ label, error, id, className = '', ...props }: FormFi
     </div>
   )
 }
+
+/** Same look as FormField's "select" state, but opens a `BottomSheetPicker` instead of a
+ *  native <select> — the OS-native dropdown (esp. on Android) doesn't match the Figma
+ *  design at all. Use for any single-select field that needs the custom bottom sheet. */
+interface PickerFieldProps {
+  label: string
+  value: string
+  placeholder?: string
+  onClick: () => void
+  className?: string
+}
+
+export function PickerField({ label, value, placeholder = 'Select', onClick, className = '' }: PickerFieldProps) {
+  return (
+    <div className={`flex flex-col gap-xs ${className}`}>
+      <p className="text-label text-ink-soft">{label}</p>
+      <button
+        type="button"
+        onClick={onClick}
+        className="relative flex h-[var(--size-control)] w-full items-center rounded-xs border-[length:var(--stroke-hairline)] border-line-input bg-surface px-md pr-3xl text-left text-body"
+      >
+        <span className={value ? 'text-ink' : 'text-ink-faint'}>{value || placeholder}</span>
+        <ChevronDown size={20} className="pointer-events-none absolute right-md top-1/2 -translate-y-1/2 text-icon-soft" />
+      </button>
+    </div>
+  )
+}
