@@ -1,10 +1,13 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ChangePassword } from './pages/ChangePassword'
+import { CheckEmail } from './pages/CheckEmail'
+import { ForgotPassword } from './pages/ForgotPassword'
 import { InvoiceEditor } from './pages/InvoiceEditor'
 import { JobDetail } from './pages/JobDetail'
 import { Jobs } from './pages/Jobs'
 import { Login } from './pages/Login'
 import { Settings } from './pages/Settings'
+import { SetNewPassword } from './pages/SetNewPassword'
 import { Splash } from './pages/Splash'
 import { Step1 } from './pages/Step1'
 import { Step2 } from './pages/Step2'
@@ -18,6 +21,9 @@ function App() {
         <Routes>
           <Route path="/splash" element={<Splash />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/forgot-password/check-email" element={<CheckEmail />} />
+          <Route path="/reset-password" element={<SetNewPassword />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/jobs/new" element={<Step1 />} />
           <Route path="/jobs/new/step-2" element={<Step2 />} />

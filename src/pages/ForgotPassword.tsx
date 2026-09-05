@@ -1,14 +1,16 @@
-import { FileText } from 'lucide-react'
+import { ArrowLeft, FileText } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AuthHero } from '../components/AuthHero'
 import { Button } from '../components/Button'
 import { FormField } from '../components/FormField'
 
-/** Figma: 01 · Login (100:2911), hero 100:2915. No auth backend yet, so submitting just
- *  goes to Jobs — not a real sign-in, but a working stub consistent with the rest of the
- *  app's "no backend" stand-ins (Step 4 Complete, Invoice save, etc.). */
-export function Login() {
+/** Figma: 01c · Reset password (100:2953). No auth backend yet, so "Send reset link"
+ *  doesn't send anything — it just advances to the Check-your-email screen, carrying the
+ *  entered email along via router state for that screen to display. */
+export function ForgotPassword() {
   const navigate = useNavigate()
+  const [email, setEmail] = useState('')
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
@@ -16,25 +18,25 @@ export function Login() {
 
       <div className="flex flex-1 flex-col justify-between gap-2xl px-lg py-3xl">
         <div className="flex flex-1 flex-col gap-lg">
-          <p className="text-section text-brand">SIGN IN</p>
+          <p className="text-section text-brand">RESET PASSWORD</p>
 
           <form
             className="flex flex-col gap-2xl rounded-xs bg-surface p-md shadow-card"
             onSubmit={(e) => {
               e.preventDefault()
-              navigate('/jobs')
+              navigate('/forgot-password/check-email', { state: { email } })
             }}
           >
             <div className="flex flex-col gap-md">
-              <FormField label="Email" type="email" placeholder="owner@havarc.com" />
-              <FormField label="Password" type="password" placeholder="••••••••••" />
+              <p className="text-body text-ink-soft">Enter the email you use to sign in. We&apos;ll send a link to set a new password.</p>
+              <FormField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="owner@havarc.com" required />
             </div>
             <div className="flex flex-col gap-md">
               <Button type="submit" variant="primary">
-                Sign in
+                Send reset link
               </Button>
-              <Button type="button" variant="text" onClick={() => navigate('/forgot-password')}>
-                Forgot password?
+              <Button type="button" variant="text" icon={<ArrowLeft size={16} strokeWidth={1.5} />} onClick={() => navigate('/login')}>
+                Back to sign in
               </Button>
             </div>
           </form>
