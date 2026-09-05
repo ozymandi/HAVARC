@@ -11,16 +11,16 @@ import type { LineItem } from './LineItemRow'
  *  Edit drops the chips and gets "Save changes" + a text-style "Delete item".
  *
  *  Quick-add presets: Figma's hint is that a chip fills name + price from the rates in
- *  Settings, but Settings only has a labor rate today (and no shared store), so Labor uses
- *  that default; Refrigerant/Contactor use the sample invoice's prices; Capacitor and
- *  Service call have no known price anywhere in the design — they fill the name only and
- *  leave the price for the technician. Real rates land with the Settings backend. */
+ *  Settings, but Settings only has a labor rate today (and no shared store), so these are
+ *  placeholder rates — Labor = Settings' default labor rate, Refrigerant/Contactor = the
+ *  sample invoice, Capacitor/Service call = typical residential HVAC figures agreed with
+ *  Yaroslav 2026-09-05. Real per-company rates land with the Settings backend. */
 const QUICK_ADD: { label: string; unitPrice: number }[] = [
   { label: 'Labor', unitPrice: 80 },
   { label: 'Refrigerant', unitPrice: 115 },
-  { label: 'Capacitor', unitPrice: 0 },
+  { label: 'Capacitor', unitPrice: 150 },
   { label: 'Contactor', unitPrice: 179 },
-  { label: 'Service call', unitPrice: 0 },
+  { label: 'Service call', unitPrice: 89 },
 ]
 
 const money = (n: number) => `$${n.toFixed(2)}`
