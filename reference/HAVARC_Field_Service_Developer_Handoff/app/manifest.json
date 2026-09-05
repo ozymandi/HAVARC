@@ -1,0 +1,9 @@
+{
+  "name": "HAV'ARC HVAC Field Service",
+  "short_name": "HAV'ARC Field",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#12365a",
+  "description": "Technician-only HVAC field service report prototype."
+}

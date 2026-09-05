@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#12365a" />
+  <title>HAV'ARC Field Service</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app-shell">
+  <header class="app-header">
+    <div class="brand-row">
+      <div>
+        <div class="brand">HAV'ARC</div>
+        <div class="subtitle">HVAC Field Service Report</div>
+      </div>
+      <div class="step-chip" id="stepText">1 of 4</div>
+    </div>
+    <div class="progress"><div id="progressBar"></div></div>
+  </header>
+
+  <main>
+    <form id="serviceForm" autocomplete="off">
+      <section class="screen active" data-step="1">
+        <h1>Service Call & Equipment</h1>
+        <div class="card">
+          <h2>Work Order</h2>
+          <div class="grid two">
+            <label>Work Order #<input name="workOrder" required /></label>
+            <label>Date<input type="date" name="date" required /></label>
+            <label>Technician<input name="technician" required /></label>
+            <label>Unit / Suite<input name="unit" /></label>
+            <label class="span-2">Customer / Property<input name="customer" required /></label>
+            <label class="span-2">Service Address<input name="address" required /></label>
+            <label>Arrival Time<input type="time" name="arrival" /></label>
+            <label>Departure Time<input type="time" name="departure" /></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Service Type / Complaint</h2>
+          <div class="choice-grid">
+            <label class="choice"><input type="checkbox" name="serviceType" value="Diagnostic / Service Call"><span>Diagnostic / Service Call</span></label>
+            <label class="choice"><input type="checkbox" name="serviceType" value="Preventive Maintenance"><span>Preventive Maintenance</span></label>
+            <label class="choice"><input type="checkbox" name="serviceType" value="No Cooling"><span>No Cooling</span></label>
+            <label class="choice"><input type="checkbox" name="serviceType" value="No Heating"><span>No Heating</span></label>
+            <label class="choice"><input type="checkbox" name="serviceType" value="Water Leak"><span>Water Leak</span></label>
+            <label class="choice"><input type="checkbox" name="serviceType" value="Airflow Issue"><span>Airflow Issue</span></label>
+            <label class="choice"><input type="checkbox" name="serviceType" value="Noise / Vibration"><span>Noise / Vibration</span></label>
+            <label class="choice"><input type="checkbox" name="serviceType" value="Thermostat / Controls"><span>Thermostat / Controls</span></label>
+          </div>
+          <label>Customer Complaint / Reason for Call<textarea name="complaint" placeholder="Describe the issue reported by the customer..."></textarea></label>
+        </div>
+
+        <div class="card">
+          <h2>Equipment</h2>
+          <div class="grid two">
+            <label>Equipment ID<input name="equipmentId" placeholder="RTU-1" /></label>
+            <label>Location<input name="equipmentLocation" /></label>
+            <label>Equipment Type<select name="equipmentType"><option value=""></option><option>Split System</option><option>Heat Pump</option><option>Air Handler</option><option>Gas Furnace</option><option>Package Unit</option><option>RTU</option><option>Mini Split</option><option>VRF / VRV</option><option>Chiller</option><option>Other</option></select></label>
+            <label>Manufacturer<input name="manufacturer" /></label>
+            <label>Model #<input name="model" /></label>
+            <label>Serial #<input name="serial" /></label>
+            <label>Tonnage<input name="tonnage" inputmode="decimal" /></label>
+            <label>Refrigerant<select name="refrigerant"><option value=""></option><option>R-22</option><option>R-410A</option><option>R-32</option><option>R-454B</option><option>R-134A</option><option>R-404A</option><option>R-448A</option><option>R-449A</option><option>Other</option></select></label>
+            <label>Voltage / Phase<input name="voltagePhase" /></label>
+            <label>Filter Size<input name="filterSize" /></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" data-step="2">
+        <h1>Inspection & Readings</h1>
+        <div class="card">
+          <h2>Airflow / Temperature</h2>
+          <div class="grid three">
+            <label>Return Air °F<input type="number" step="0.1" name="returnTemp" /></label>
+            <label>Supply Air °F<input type="number" step="0.1" name="supplyTemp" /></label>
+            <label>Temp Split °F<input type="number" step="0.1" name="tempSplit" /></label>
+            <label>Return Static<input type="number" step="0.01" name="returnStatic" /></label>
+            <label>Supply Static<input type="number" step="0.01" name="supplyStatic" /></label>
+            <label>Total Static<input type="number" step="0.01" name="totalStatic" /></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Electrical</h2>
+          <div class="grid three">
+            <label>Incoming Voltage<input type="number" step="0.1" name="incomingVoltage" /></label>
+            <label>Compressor Amps<input type="number" step="0.1" name="compressorAmps" /></label>
+            <label>Condenser Fan Amps<input type="number" step="0.1" name="fanAmps" /></label>
+            <label>Blower Amps<input type="number" step="0.1" name="blowerAmps" /></label>
+            <label>Capacitor Rated MFD<input type="number" step="0.1" name="capRated" /></label>
+            <label>Capacitor Actual MFD<input type="number" step="0.1" name="capActual" /></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Refrigerant / Cooling</h2>
+          <div class="grid three">
+            <label>Suction Pressure PSIG<input type="number" step="0.1" name="suctionPressure" /></label>
+            <label>Head Pressure PSIG<input type="number" step="0.1" name="headPressure" /></label>
+            <label>Outdoor Temp °F<input type="number" step="0.1" name="outdoorTemp" /></label>
+            <label>Superheat °F<input type="number" step="0.1" name="superheat" /></label>
+            <label>Subcooling °F<input type="number" step="0.1" name="subcooling" /></label>
+            <label>Refrigerant Added (lbs)<input type="number" step="0.1" name="refrigerantAdded" /></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Condition Checks</h2>
+          <div class="choice-grid">
+            <label class="choice"><input type="checkbox" name="checks" value="Filter Good"><span>Filter Good</span></label>
+            <label class="choice"><input type="checkbox" name="checks" value="Filter Dirty"><span>Filter Dirty</span></label>
+            <label class="choice"><input type="checkbox" name="checks" value="Drain Good"><span>Drain Good</span></label>
+            <label class="choice"><input type="checkbox" name="checks" value="Drain Clogged"><span>Drain Clogged</span></label>
+            <label class="choice"><input type="checkbox" name="checks" value="Ductwork Good"><span>Ductwork Good</span></label>
+            <label class="choice"><input type="checkbox" name="checks" value="Duct Leakage / Sealing Needed"><span>Duct Leakage / Sealing</span></label>
+            <label class="choice"><input type="checkbox" name="checks" value="Heating Components Good"><span>Heating Good</span></label>
+            <label class="choice"><input type="checkbox" name="checks" value="Heating Needs Attention"><span>Heating Needs Attention</span></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" data-step="3">
+        <h1>Findings & Repairs</h1>
+        <div class="card">
+          <h2>Findings</h2>
+          <div class="choice-grid">
+            <label class="choice"><input type="checkbox" name="findings" value="No Defects Found"><span>No Defects Found</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Failed / Weak Capacitor"><span>Failed / Weak Capacitor</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Failed / Burned Contactor"><span>Failed / Burned Contactor</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Blower Motor Issue"><span>Blower Motor Issue</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Condenser Fan Motor Issue"><span>Condenser Fan Motor Issue</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Compressor Issue"><span>Compressor Issue</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Low Refrigerant"><span>Low Refrigerant</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Refrigerant Leak Suspected"><span>Leak Suspected</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Dirty Evaporator Coil"><span>Dirty Evaporator Coil</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Dirty Condenser Coil"><span>Dirty Condenser Coil</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Clogged Drain"><span>Clogged Drain</span></label>
+            <label class="choice"><input type="checkbox" name="findings" value="Electrical / Wiring Issue"><span>Electrical / Wiring</span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Repairs Performed</h2>
+          <div class="choice-grid">
+            <label class="choice"><input type="checkbox" name="repairs" value="Diagnostic Only"><span>Diagnostic Only</span></label>
+            <label class="choice"><input type="checkbox" name="repairs" value="Electrical Repair"><span>Electrical Repair</span></label>
+            <label class="choice"><input type="checkbox" name="repairs" value="Drain Repair"><span>Drain Repair</span></label>
+            <label class="choice"><input type="checkbox" name="repairs" value="Refrigerant Added"><span>Refrigerant Added</span></label>
+            <label class="choice"><input type="checkbox" name="repairs" value="Leak Search"><span>Leak Search</span></label>
+            <label class="choice"><input type="checkbox" name="repairs" value="Coil Cleaning"><span>Coil Cleaning</span></label>
+            <label class="choice"><input type="checkbox" name="repairs" value="Part Replaced"><span>Part Replaced</span></label>
+            <label class="choice"><input type="checkbox" name="repairs" value="No Repair Performed"><span>No Repair Performed</span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Technician Notes</h2>
+          <label>Service Notes<textarea name="techNotes" placeholder="Describe findings, work performed, and current system condition..."></textarea></label>
+          <label>Parts / Materials / Refrigerant Used<textarea name="materialsUsed"></textarea></label>
+        </div>
+
+        <div class="card">
+          <h2>Recommendations</h2>
+          <div class="choice-grid">
+            <label class="choice"><input type="checkbox" name="recommendations" value="No Further Action"><span>No Further Action</span></label>
+            <label class="choice"><input type="checkbox" name="recommendations" value="Repair Recommended"><span>Repair Recommended</span></label>
+            <label class="choice"><input type="checkbox" name="recommendations" value="Estimate Required"><span>Estimate Required</span></label>
+            <label class="choice"><input type="checkbox" name="recommendations" value="Parts Required"><span>Parts Required</span></label>
+            <label class="choice"><input type="checkbox" name="recommendations" value="Return Visit Required"><span>Return Visit Required</span></label>
+            <label class="choice"><input type="checkbox" name="recommendations" value="Equipment Replacement Recommended"><span>Replacement Recommended</span></label>
+          </div>
+          <label>Recommended Work<textarea name="recommendedWork"></textarea></label>
+        </div>
+      </section>
+
+      <section class="screen" data-step="4">
+        <h1>Complete Service Call</h1>
+        <div class="card">
+          <h2>Final System Status</h2>
+          <div class="status-grid">
+            <button type="button" class="status green" data-status="Operating Normally">GREEN<small>Operating Normally</small></button>
+            <button type="button" class="status yellow" data-status="Operating - Repairs Recommended">YELLOW<small>Repairs Recommended</small></button>
+            <button type="button" class="status orange" data-status="Limited Operation / Possible Failure">ORANGE<small>Limited Operation</small></button>
+            <button type="button" class="status red" data-status="Not Operational">RED<small>Not Operational</small></button>
+          </div>
+          <input type="hidden" name="systemStatus" id="systemStatus" required />
+        </div>
+
+        <div class="card">
+          <h2>Photo Documentation</h2>
+          <div class="upload-box">
+            <input type="file" id="photos" accept="image/*" capture="environment" multiple />
+            <div class="muted" id="photoCount">No photos selected</div>
+            <div class="photo-grid" id="photoPreview"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Customer Acknowledgment</h2>
+          <label>Customer / Representative Name<input name="customerRep" /></label>
+          <label>Customer Signature</label>
+          <canvas id="customerSig" class="signature"></canvas>
+          <button type="button" class="text-btn" data-clear="customerSig">Clear Signature</button>
+
+          <label>Technician Signature</label>
+          <canvas id="techSig" class="signature"></canvas>
+          <button type="button" class="text-btn" data-clear="techSig">Clear Signature</button>
+        </div>
+
+        <div class="card">
+          <h2>Final Review</h2>
+          <div class="summary" id="finalSummary">Tap “Review” to generate a service-call summary.</div>
+          <div class="button-row">
+            <button type="button" class="secondary" id="reviewBtn">Review</button>
+            <button type="button" class="secondary" id="printBtn">Print / Save PDF</button>
+            <button type="button" class="secondary" id="exportBtn">Export JSON</button>
+          </div>
+          <div class="success" id="success">Service call saved on this device.</div>
+        </div>
+      </section>
+    </form>
+  </main>
+
+  <footer class="app-footer">
+    <button type="button" class="nav-btn" id="backBtn">Back</button>
+    <button type="button" class="nav-btn" id="saveBtn">Save</button>
+    <button type="button" class="nav-btn primary" id="nextBtn">Next</button>
+  </footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# internal / client-facing paperwork
+*Worksection*.pdf
+
+# local tooling
+.claude/
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
