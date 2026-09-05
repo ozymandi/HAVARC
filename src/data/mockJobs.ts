@@ -25,15 +25,6 @@ export interface Job {
   invoiceNumber?: string
 }
 
-/** Simple generated placeholder "photo" (a labelled color swatch as an inline SVG data
- *  URI) — there's no real captured photo to reference for mock completed jobs, and this is
- *  synthetic test data like the rest of this file, not a design asset standing in for one.
- *  Real photos come from Step 4's file capture once a job actually goes through it. */
-const placeholderPhoto = (label: string, color: string) =>
-  `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="${color}"/><text x="200" y="200" font-family="sans-serif" font-size="28" fill="white" text-anchor="middle" dominant-baseline="middle">${label}</text></svg>`,
-  )}`
-
 export const MOCK_JOBS: Job[] = [
   {
     id: 'wo-10031',
@@ -78,7 +69,11 @@ export const MOCK_JOBS: Job[] = [
     ],
     phone: '770-994-8768',
     invoiceNumber: '646',
-    photos: [placeholderPhoto('Unit nameplate', '#12365a'), placeholderPhoto('Before', '#6d7a85'), placeholderPhoto('After', '#21884a')],
+    photos: [
+      '/photo/photo-1513694203232-719a280e022f.avif',
+      '/photo/photo-1583847268964-b28dc8f51f92.avif',
+      '/photo/photo-1598928506311-c55ded91a20c.avif',
+    ],
   },
   {
     id: 'wo-10028',

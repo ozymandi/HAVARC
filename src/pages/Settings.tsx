@@ -19,7 +19,7 @@ const readFileAsDataUrl = (file: File) =>
 export function Settings() {
   const navigate = useNavigate()
 
-  const [logo, setLogo] = useState<string | null>(null)
+  const [logo, setLogo] = useState<string | null>('/brand/logo-pdf.png')
   const [companyName, setCompanyName] = useState("Hav' Arc Heating and Air")
   const [tagline, setTagline] = useState('Getting the job done right the first time.')
   const [phone, setPhone] = useState('678-750-0411')
