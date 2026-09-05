@@ -1,4 +1,3 @@
-import { FileText, Image as ImageIcon, Share, X } from 'lucide-react'
 import { useState } from 'react'
 import type { Job } from '../data/mockJobs'
 
@@ -12,7 +11,11 @@ interface ShareItem {
 /** Figma: 08b · Job Detail · Share (100:3294) — "Bottom Sheet · Share" over a 40% scrim.
  *  No real files exist yet (documents are placeholders, no backend PDF generation) — Share
  *  uses the Web Share API with what's actually real (the job's photos) plus a text summary,
- *  rather than faking a "shared successfully" result for files that don't exist. */
+ *  rather than faking a "shared successfully" result for files that don't exist.
+ *
+ *  Checkbox + row icons are exported straight from the Figma node (Checkbox Row 40:69) as
+ *  real SVG assets, not a native <input type=checkbox> — a native checkbox renders with the
+ *  OS's own styling (same class of problem as the native <select> dropdown elsewhere). */
 interface ShareSheetProps {
   job: Job
   onClose: () => void
@@ -55,31 +58,33 @@ export function ShareSheet({ job, onClose }: ShareSheetProps) {
               {job.workOrder} · {job.customer}
             </p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="flex size-11 shrink-0 items-center justify-center text-icon">
-            <X size={24} strokeWidth={1.5} />
+          <button type="button" onClick={onClose} aria-label="Close" className="flex size-11 shrink-0 items-center justify-center">
+            <img src="/icons/close.svg" alt="" className="size-6" />
           </button>
         </div>
         <div className="h-px w-full bg-line" />
         <div className="flex flex-col">
-          {items.map((item) => (
-            <label key={item.key} className="flex min-h-[60px] w-full items-center gap-md px-xl py-md">
-              <input
-                type="checkbox"
-                checked={checked[item.key]}
-                onChange={() => toggle(item.key)}
-                className="size-6 shrink-0 rounded-xs border-line-input accent-brand"
-              />
-              {item.icon === 'doc' ? (
-                <FileText size={22} strokeWidth={1.5} className="shrink-0 text-icon" />
-              ) : (
-                <ImageIcon size={22} strokeWidth={1.5} className="shrink-0 text-icon" />
-              )}
-              <div className="flex min-w-0 flex-1 flex-col gap-2xs">
-                <p className="text-body-strong text-ink">{item.title}</p>
-                <p className="text-caption text-ink-faint">{item.meta}</p>
-              </div>
-            </label>
-          ))}
+          {items.map((item) => {
+            const isChecked = checked[item.key]
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => toggle(item.key)}
+                aria-pressed={isChecked}
+                className="flex min-h-[60px] w-full items-center gap-md px-xl py-md text-left"
+              >
+                <span className={`flex size-6 shrink-0 items-center justify-center rounded-xs ${isChecked ? 'bg-brand' : 'border border-line-input'}`}>
+                  {isChecked && <img src="/icons/check.svg" alt="" className="size-4" />}
+                </span>
+                <img src={item.icon === 'doc' ? '/icons/file.svg' : '/icons/image.svg'} alt="" className="size-[22px] shrink-0" />
+                <span className="flex min-w-0 flex-1 flex-col gap-2xs">
+                  <span className="text-body-strong text-ink">{item.title}</span>
+                  <span className="text-caption text-ink-faint">{item.meta}</span>
+                </span>
+              </button>
+            )
+          })}
         </div>
         <div className="flex w-full flex-col px-lg pt-md">
           <button
@@ -88,7 +93,7 @@ export function ShareSheet({ job, onClose }: ShareSheetProps) {
             onClick={share}
             className="flex h-[var(--size-control)] w-full items-center justify-center gap-sm rounded-sm bg-accent text-button text-inverse disabled:bg-disabled disabled:text-ink-faint"
           >
-            <Share size={16} strokeWidth={1.5} />
+            <img src="/icons/share.svg" alt="" className="size-4" />
             Share {selectedCount} file{selectedCount === 1 ? '' : 's'}
           </button>
         </div>
