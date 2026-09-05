@@ -29,3 +29,49 @@ body {
 @utility status-pattern {
   background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0, rgba(255, 255, 255, 0.08) 0.6px, transparent 0.6px, transparent 5px);
 }
+
+/* Splash logo intro (SplashLogo.tsx): each petal's outline draws in (stroke-dashoffset,
+   using pathLength=1 so the dash math doesn't depend on the path's real length), then
+   fills with its real gradient color as the outline fades away. */
+@keyframes petal-reveal {
+  0% {
+    stroke-dashoffset: 1;
+    fill-opacity: 0;
+    stroke-opacity: 1;
+  }
+  65% {
+    stroke-dashoffset: 0;
+    fill-opacity: 0;
+    stroke-opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    fill-opacity: 1;
+    stroke-opacity: 0;
+  }
+}
+
+.animate-petal-reveal {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  fill-opacity: 0;
+  animation: petal-reveal 650ms ease-out forwards;
+}
+
+/* Splash logo intro: the wordmark and tagline rows rise + fade in, staggered via
+   animation-delay on each <g> (see SplashLogo.tsx). */
+@keyframes text-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-text-rise {
+  opacity: 0;
+  animation: text-rise 450ms ease-out forwards;
+}
