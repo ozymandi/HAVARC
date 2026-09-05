@@ -30,8 +30,8 @@ export function PdfHeroBig({ title, rows }: { title: string; rows: [string, stri
   return (
     <div className="relative flex h-[220px] w-full shrink-0 items-start gap-5xl p-3xl shadow-[0_4px_24px_0_var(--alpha-navy-30)]">
       <img {...bg('hero_big')} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="relative flex h-full flex-col justify-between">
-        <img src="/brand/header-lockup.svg" alt={COMPANY.name} width={174} height={45} className="h-[45px] w-auto" />
+      <div className="relative flex h-full min-w-0 flex-1 flex-col justify-between">
+        <img src="/brand/header-lockup.svg" alt={COMPANY.name} width={174} height={45} className="h-[45px] w-auto self-start" />
         <div className="flex flex-col gap-xs text-inverse">
           {contacts.map(([icon, text], i) => (
             <div key={i} className="flex items-center gap-xs">
@@ -41,7 +41,7 @@ export function PdfHeroBig({ title, rows }: { title: string; rows: [string, stri
           ))}
         </div>
       </div>
-      <div className="relative flex w-[250px] flex-col">
+      <div className="relative flex w-[250px] shrink-0 flex-col">
         <div className="rounded-t-xs bg-brand px-md py-sm text-pdf-emphasis text-inverse">{title}</div>
         <div className="flex flex-col rounded-b-xs bg-[var(--alpha-neutral-05)]">
           {rows.map(([label, value]) => (
