@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
 import { AppHeader } from '../components/AppHeader'
 import { BottomNav } from '../components/BottomNav'
 import { ChoiceChip } from '../components/ChoiceChip'
 import { FormField } from '../components/FormField'
 import { Section } from '../components/Section'
+import { useDraftState } from '../data/draft'
 
 /** Multi-select where one or more labels are "none-like" (No Defects Found, Diagnostic
  *  Only, No Further Action, …): picking an exclusive label clears everything else,
@@ -40,12 +40,12 @@ const RECOMMENDATIONS_EXCLUSIVE = new Set(['No Further Action'])
 /** Figma: 05 · Step 3 · Findings & Repairs (100:3871). */
 export function Step3() {
   const navigate = useNavigate()
-  const [findings, setFindings] = useState<string[]>([])
-  const [repairs, setRepairs] = useState<string[]>([])
-  const [recommendations, setRecommendations] = useState<string[]>([])
-  const [serviceNotes, setServiceNotes] = useState('')
-  const [parts, setParts] = useState('')
-  const [recommendedWork, setRecommendedWork] = useState('')
+  const [findings, setFindings] = useDraftState<string[]>('step3.findings', [])
+  const [repairs, setRepairs] = useDraftState<string[]>('step3.repairs', [])
+  const [recommendations, setRecommendations] = useDraftState<string[]>('step3.recommendations', [])
+  const [serviceNotes, setServiceNotes] = useDraftState('step3.serviceNotes', '')
+  const [parts, setParts] = useDraftState('step3.parts', '')
+  const [recommendedWork, setRecommendedWork] = useDraftState('step3.recommendedWork', '')
 
   const chipGrid = (options: string[], selected: string[], exclusive: Set<string>, setSelected: (v: string[]) => void) => (
     <div className="grid w-full grid-cols-2 gap-2xs">

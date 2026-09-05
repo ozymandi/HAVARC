@@ -1,5 +1,5 @@
 import { Plus, X } from 'lucide-react'
-import { Fragment, useState } from 'react'
+import { Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
 import { BottomNav } from '../components/BottomNav'
@@ -7,6 +7,7 @@ import { Button } from '../components/Button'
 import { ChoiceChip } from '../components/ChoiceChip'
 import { FormField } from '../components/FormField'
 import { Section } from '../components/Section'
+import { useDraftState } from '../data/draft'
 
 interface Readings {
   returnAir: string
@@ -73,9 +74,9 @@ const EMPTY_CONDITIONS: Conditions = { filter: null, drain: null, ductwork: null
  *  client's 2026-09-05 request — optional, mainly for maintenance calls. */
 export function Step2() {
   const navigate = useNavigate()
-  const [readingsOpen, setReadingsOpen] = useState(false)
-  const [readings, setReadings] = useState<Readings>(EMPTY_READINGS)
-  const [conditions, setConditions] = useState<Conditions>(EMPTY_CONDITIONS)
+  const [readingsOpen, setReadingsOpen] = useDraftState('step2.readingsOpen', false)
+  const [readings, setReadings] = useDraftState<Readings>('step2.readings', EMPTY_READINGS)
+  const [conditions, setConditions] = useDraftState<Conditions>('step2.conditions', EMPTY_CONDITIONS)
 
   const set = <K extends keyof Readings>(key: K, v: Readings[K]) => setReadings((prev) => ({ ...prev, [key]: v }))
   const setCondition = (key: keyof Conditions, v: CheckState) =>

@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { ChangePassword } from './pages/ChangePassword'
 import { CheckEmail } from './pages/CheckEmail'
 import { ForgotPassword } from './pages/ForgotPassword'
-import { InvoiceEditor } from './pages/InvoiceEditor'
+import { InvoiceEditorPage } from './pages/InvoiceEditor'
 import { JobDetail } from './pages/JobDetail'
 import { Jobs } from './pages/Jobs'
 import { Login } from './pages/Login'
@@ -30,7 +30,7 @@ function App() {
           <Route path="/jobs/new/step-3" element={<Step3 />} />
           <Route path="/jobs/new/step-4" element={<Step4 />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
-          <Route path="/jobs/:id/invoice" element={<InvoiceEditor />} />
+          <Route path="/jobs/:id/invoice" element={<InvoiceEditorPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/settings/change-password" element={<ChangePassword />} />
           <Route path="/" element={<Navigate to="/splash" replace />} />

@@ -9,6 +9,7 @@ import { Dialog } from '../components/Dialog'
 import { EMPTY_EQUIPMENT, EquipmentCard, type Equipment } from '../components/EquipmentCard'
 import { FormField } from '../components/FormField'
 import { Section } from '../components/Section'
+import { useDraftState } from '../data/draft'
 import { CUSTOMERS } from '../data/customers'
 import { MOCK_JOBS } from '../data/mockJobs'
 
@@ -29,22 +30,22 @@ const nextWorkOrder = () => {
 export function Step1() {
   const navigate = useNavigate()
 
-  const [workOrder, setWorkOrder] = useState(nextWorkOrder)
-  const [date, setDate] = useState(todayLabel)
-  const [technician, setTechnician] = useState('T. Holloway')
+  const [workOrder, setWorkOrder] = useDraftState('step1.workOrder', nextWorkOrder)
+  const [date, setDate] = useDraftState('step1.date', todayLabel)
+  const [technician, setTechnician] = useDraftState('step1.technician', 'T. Holloway')
   const [showErrors, setShowErrors] = useState(false)
   const [showDiscard, setShowDiscard] = useState(false)
-  const [unitSuite, setUnitSuite] = useState('')
-  const [customer, setCustomer] = useState('')
+  const [unitSuite, setUnitSuite] = useDraftState('step1.unitSuite', '')
+  const [customer, setCustomer] = useDraftState('step1.customer', '')
   const [customerFocused, setCustomerFocused] = useState(false)
-  const [address, setAddress] = useState('')
-  const [arrival, setArrival] = useState('')
-  const [departure, setDeparture] = useState('')
-  const [customerNotes, setCustomerNotes] = useState('')
-  const [serviceType, setServiceType] = useState('')
-  const [complaints, setComplaints] = useState<string[]>([])
-  const [complaintDetails, setComplaintDetails] = useState('')
-  const [equipment, setEquipment] = useState<Equipment[]>([EMPTY_EQUIPMENT('unit-1')])
+  const [address, setAddress] = useDraftState('step1.address', '')
+  const [arrival, setArrival] = useDraftState('step1.arrival', '')
+  const [departure, setDeparture] = useDraftState('step1.departure', '')
+  const [customerNotes, setCustomerNotes] = useDraftState('step1.customerNotes', '')
+  const [serviceType, setServiceType] = useDraftState('step1.serviceType', '')
+  const [complaints, setComplaints] = useDraftState<string[]>('step1.complaints', [])
+  const [complaintDetails, setComplaintDetails] = useDraftState('step1.complaintDetails', '')
+  const [equipment, setEquipment] = useDraftState<Equipment[]>('step1.equipment', [EMPTY_EQUIPMENT('unit-1')])
 
   const toggleComplaint = (c: string) => setComplaints((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
 

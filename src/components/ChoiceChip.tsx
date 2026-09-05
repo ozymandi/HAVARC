@@ -4,16 +4,18 @@ interface ChoiceChipProps {
   label: string
   selected?: boolean
   onClick?: () => void
+  /** Hug the label (Figma chips inside sheets) instead of filling the row. */
+  hug?: boolean
 }
 
-export function ChoiceChip({ label, selected = false, onClick }: ChoiceChipProps) {
+export function ChoiceChip({ label, selected = false, onClick, hug = false }: ChoiceChipProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={selected}
       className={
-        'min-h-11 flex-1 rounded-xs border-solid px-sm py-md text-chip text-center ' +
+        `min-h-11 ${hug ? 'shrink-0' : 'flex-1'} rounded-xs border-solid px-sm py-md text-chip text-center ` +
         (selected
           ? 'border-[length:var(--stroke-regular)] border-line-focus bg-selected text-link'
           : 'border-[length:var(--stroke-hairline)] border-line bg-surface text-ink')
