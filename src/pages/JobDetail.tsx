@@ -1,4 +1,4 @@
-import { Share } from 'lucide-react'
+import { MoreHorizontal, Share } from 'lucide-react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { CustomerNotesCallout } from '../components/CustomerNotesCallout'
@@ -29,7 +29,9 @@ export function JobDetail() {
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
-      <TopBar variant="child" title={job.workOrder} onBack={() => navigate(-1)} />
+      {/* Figma: Top Bar action here is "more" (08c · Job Detail · Menu, Action Menu 71:2182)
+          — the menu itself (edit / delete) isn't built yet, just the correct icon. */}
+      <TopBar variant="child" title={job.workOrder} onBack={() => navigate(-1)} action={<MoreHorizontal size={24} strokeWidth={1.5} />} />
 
       <div className="flex flex-1 flex-col gap-lg p-lg pb-5xl">
         <div className="flex flex-col gap-xs">

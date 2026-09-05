@@ -27,9 +27,9 @@ export function TopBar(props: TopBarProps) {
             <ChevronLeft size={24} strokeWidth={1.5} />
           </button>
           <p className="text-h2 flex-1 text-inverse opacity-80">{props.title}</p>
-          {props.action ?? (
+          {props.action && (
             <button type="button" onClick={props.onAction} className="shrink-0 text-inverse">
-              <Settings size={24} strokeWidth={1.5} />
+              {props.action}
             </button>
           )}
         </div>
