@@ -81,7 +81,7 @@ export function JobDetail() {
                   key={doc.title}
                   title={doc.title}
                   meta={doc.meta}
-                  onClick={doc.title.startsWith('Invoice') ? () => navigate(`/jobs/${job.id}/invoice`) : undefined}
+                  onClick={doc.title.startsWith('Invoice') ? () => navigate(`/jobs/${job.id}/invoice`) : () => navigate(`/jobs/${job.id}/report`)}
                 />
               ))}
             </div>

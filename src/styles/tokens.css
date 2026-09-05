@@ -26,11 +26,13 @@
   --weight-semibold: 600;
   --weight-bold: 700;
   --weight-extrabold: 800;
+  --font-size-2xs: 11px; /* PDF body/section (PDF Templates Design) */
   --font-size-xs: 12px;
   --font-size-base: 14px;
   --font-size-md: 15px;
   --font-size-lg: 16px;
   --font-size-3xl: 24px;
+  --line-height-2xs: 14px; /* PDF body */
   --line-height-xs: 16px;
   --line-height-sm: 20px;
   --line-height-base: 22px;
@@ -49,6 +51,8 @@
 
   /* Alpha overlays (decorative layers, shadows) */
   --alpha-navy-03: #12365a08;
+  --alpha-navy-30: #12365a4a; /* Shadow/PDF Hero */
+  --alpha-neutral-05: #9aabba0d; /* PDF hero info-table fill */
   --alpha-orange-25: #e8792b40;
   --alpha-white-05: #ffffff0d;
   --alpha-white-07: #ffffff12;
@@ -66,6 +70,7 @@
   --spacing-3xl: 32px;
   --spacing-5xl: 48px;
 
+  --radius-2xs: 3px; /* PDF section/table frames */
   --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 10px;
@@ -82,6 +87,7 @@
   --color-canvas: #eef3f7;
   --color-surface: #ffffff;
   --color-surface-alt: #f4f7fa;
+  --color-pdf-footer: #68bff5; /* sky/400 — PDF footer band + "We appreciate your business" */
   --color-disabled: #e1e8ee;
   --color-selected: #e8f2fb;
   --color-brand: #12365a;

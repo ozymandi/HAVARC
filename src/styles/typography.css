@@ -107,3 +107,45 @@
   letter-spacing: -0.5px;
   text-transform: uppercase;
 }
+
+/* PDF Templates Design (213:3678) named styles — used only by src/pdf/. Sizes are absolute
+   px because the page is a fixed 612×792 US Letter sheet, not a responsive screen. */
+.text-pdf-body {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-regular);
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-2xs);
+  letter-spacing: -0.3px;
+}
+
+.text-pdf-section {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-2xs);
+  letter-spacing: -0.5px;
+}
+
+.text-pdf-table {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-bold);
+  font-size: var(--font-size-2xs);
+  line-height: var(--line-height-xs);
+  letter-spacing: 0;
+}
+
+.text-pdf-emphasis {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-extrabold);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-xs);
+  letter-spacing: 0;
+}
+
+.text-pdf-small {
+  font-family: var(--family-sans);
+  font-weight: var(--weight-regular);
+  font-size: 9px;
+  line-height: 12px;
+  letter-spacing: 0;
+}

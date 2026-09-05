@@ -8,8 +8,10 @@ import { LineItemRow, type LineItem } from '../components/LineItemRow'
 import { Section } from '../components/Section'
 import { TotalsRow } from '../components/TotalsRow'
 import { TopBar } from '../components/TopBar'
+import { useDraftState } from '../data/draft'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
 import { MOCK_JOBS } from '../data/mockJobs'
+import { SAMPLE_INVOICE_ITEMS } from '../data/sampleReport'
 
 const money = (n: number) => `$${n.toFixed(2)}`
 
@@ -35,13 +37,15 @@ interface InvoiceEditorProps {
   onChange: (next: InvoiceData) => void
   onBack: () => void
   onSave: () => void
+  /** Opens the PDF preview; absent while the job has no id yet (Step 4 draft). */
+  onPreview?: () => void
 }
 
 /** Figma: 07 · Invoice Editor (100:4375). Controlled: the caller owns the invoice data, so
  *  the same screen serves both an existing job (route `/jobs/:id/invoice`, see
  *  `InvoiceEditorPage`) and the in-progress draft on Step 4, where it renders as an overlay
  *  so Step 4's own unsaved fields survive. Add/Edit item open the 07b/07c bottom sheets. */
-export function InvoiceEditor({ workOrder, billTo, value, onChange, onBack, onSave }: InvoiceEditorProps) {
+export function InvoiceEditor({ workOrder, billTo, value, onChange, onBack, onSave, onPreview }: InvoiceEditorProps) {
   const [sheet, setSheet] = useState<Sheet>(null)
   const { items, taxRate, discount, description } = value
   const patch = (next: Partial<InvoiceData>) => onChange({ ...value, ...next })
@@ -127,7 +131,7 @@ export function InvoiceEditor({ workOrder, billTo, value, onChange, onBack, onSa
       </div>
 
       <div className="sticky bottom-0 flex w-full shrink-0 gap-2xs border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
-        <Button variant="secondary" className="flex-1" disabled title="PDF rendering is server-side work, not built yet">
+        <Button variant="secondary" className="flex-1" disabled={!onPreview} onClick={onPreview} title={onPreview ? undefined : "Available once the job is completed"}>
           Preview PDF
         </Button>
         <Button variant="primary" icon={<FileText size={16} strokeWidth={1.5} />} className="flex-1" onClick={onSave}>
@@ -169,16 +173,9 @@ export function InvoiceEditorPage() {
   const navigate = useNavigate()
   const job = MOCK_JOBS.find((j) => j.id === id)
 
-  const [invoice, setInvoice] = useState<InvoiceData>(() => ({
-    ...EMPTY_INVOICE,
-    items: [
-      { id: 'item-1', description: 'Labor', qty: 3.5, unitPrice: 80, customerPaid: false },
-      { id: 'item-2', description: 'Refrigerant', qty: 1, unitPrice: 115, customerPaid: false },
-      { id: 'item-3', description: 'Contactor', qty: 1, unitPrice: 179, customerPaid: false },
-      { id: 'item-4', description: 'Thermostat', qty: 1, unitPrice: 450, customerPaid: true },
-      { id: 'item-5', description: 'Disconnect', qty: 1, unitPrice: 250, customerPaid: true },
-    ],
-  }))
+  // Kept in the draft store (keyed by job id) rather than component state so the PDF
+  // preview route shows the edited items, not the seed rows.
+  const [invoice, setInvoice] = useDraftState<InvoiceData>(`invoice.${id}`, () => ({ ...EMPTY_INVOICE, items: SAMPLE_INVOICE_ITEMS }))
 
   if (!job) return <Navigate to="/jobs" replace />
 
@@ -190,6 +187,7 @@ export function InvoiceEditorPage() {
       onChange={setInvoice}
       onBack={() => navigate(-1)}
       onSave={() => navigate(`/jobs/${job.id}`)}
+      onPreview={() => navigate(`/jobs/${job.id}/invoice/pdf`)}
     />
   )
 }

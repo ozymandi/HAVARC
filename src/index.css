@@ -75,3 +75,39 @@ body {
   opacity: 0;
   animation: text-rise 450ms ease-out forwards;
 }
+
+/* PDF templates (src/pdf/): on screen the 612×792 sheets are scaled to fit the phone by
+   PdfPreview; in print each sheet is one US Letter page at 1:1, so "Print → Save as PDF"
+   yields the real document until server-side rendering (headless Chrome, same components)
+   exists. `print-hidden` hides app chrome (top bar, gaps) from the printout. */
+@media print {
+  @page {
+    size: letter;
+    margin: 0;
+  }
+  body {
+    background: white;
+  }
+  .print-hidden {
+    display: none !important;
+  }
+  .pdf-sheet {
+    width: 612px !important;
+    height: 792px !important;
+    transform: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    break-after: page;
+  }
+  .pdf-sheet:last-child {
+    break-after: auto;
+  }
+  .pdf-stack {
+    display: block !important;
+    padding: 0 !important;
+  }
+  .pdf-scale {
+    width: auto !important;
+    height: auto !important;
+  }
+}
