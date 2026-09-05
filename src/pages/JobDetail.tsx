@@ -1,4 +1,4 @@
-import { MoreHorizontal, Share, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Share } from 'lucide-react'
 import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ActionMenu } from '../components/ActionMenu'
@@ -122,7 +122,14 @@ export function JobDetail() {
 
       {confirmingDelete && (
         <Dialog
-          icon={<Trash2 size={40} strokeWidth={1.5} className="text-danger" />}
+          icon={
+            <img
+              src="/images/illustrations/dialog-delete.webp"
+              srcSet="/images/illustrations/dialog-delete.webp 1x, /images/illustrations/dialog-delete@2x.webp 2x"
+              alt=""
+              className="h-[140px] w-auto"
+            />
+          }
           title="Delete this job?"
           message={`${job.workOrder} · ${job.customer}, its service report, invoice and photos will be permanently removed on all devices.`}
           primaryLabel="Delete job"

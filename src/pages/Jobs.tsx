@@ -78,10 +78,11 @@ export function Jobs() {
 
         {jobs.length === 0 ? (
           <div className="flex flex-1 flex-col items-center gap-2xl pt-3xl text-center">
-            {/* tags @Yaroslav Okhranchuk: empty-state illustration not exported yet —
-                node "Layer_1" under 02c · Jobs · Empty (166:8858, ~246×180) for no-jobs,
-                and under 02d · Jobs · No results (166:9002, ~188×145) for no-matches.
-                PNG/SVG → public/images/. Showing text-only until then. */}
+            {query || filter !== 'all' ? (
+              <img src="/images/illustrations/no-matches.webp" srcSet="/images/illustrations/no-matches.webp 1x, /images/illustrations/no-matches@2x.webp 2x" alt="" className="h-auto w-[188px]" />
+            ) : (
+              <img src="/images/illustrations/no-jobs.webp" srcSet="/images/illustrations/no-jobs.webp 1x, /images/illustrations/no-jobs@2x.webp 2x" alt="" className="h-auto w-[246px]" />
+            )}
             <div>
               <p className="text-h1 text-ink">{query || filter !== 'all' ? 'No matches' : 'No jobs yet'}</p>
               <p className="text-body text-ink-faint">

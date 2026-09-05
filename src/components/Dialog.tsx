@@ -1,12 +1,9 @@
 import type { ReactNode } from 'react'
 import { Button } from './Button'
 
-/** Figma: Dialog (44:35) — "Centered modal (326 wide) over 40% scrim. Success icon, Title,
- *  Message; primary/secondary Button instances. Show secondary toggles the text button."
- *
- *  `icon` is a slot rather than a fixed illustration — the Figma reference uses a bespoke
- *  multi-part success illustration that isn't exported as an asset yet; pass a Lucide icon
- *  or similar until Yaroslav provides one (see [[ask-before-graphics]]). */
+/** Figma: Dialog (44:35) — "Centered modal (326 wide) over the brand-gradient scrim at
+ *  85% opacity (confirmed via the Rectangle behind 08c/08d). Illustration slot, Title,
+ *  Message; primary/secondary Button instances. Show secondary toggles the text button." */
 interface DialogProps {
   icon?: ReactNode
   title: string
@@ -19,8 +16,9 @@ interface DialogProps {
 
 export function Dialog({ icon, title, message, primaryLabel, onPrimary, secondaryLabel, onSecondary }: DialogProps) {
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/40 px-xl">
-      <div className="flex w-full max-w-[326px] flex-col items-center gap-5xl rounded-sm bg-surface px-2xl py-5xl shadow-modal">
+    <div className="fixed inset-0 z-10 flex items-center justify-center px-xl">
+      <div className="brand-gradient absolute inset-0 opacity-[85%]" />
+      <div className="relative flex w-full max-w-[326px] flex-col items-center gap-5xl rounded-sm bg-surface px-2xl py-5xl shadow-modal">
         <div className="flex w-full flex-col items-center gap-lg text-center">
           {icon}
           <div className="flex w-full flex-col items-center gap-sm">

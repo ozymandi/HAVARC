@@ -1,4 +1,4 @@
-import { PartyPopper, Pencil } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
@@ -23,7 +23,7 @@ const readFileAsDataUrl = (file: File) =>
 type Signer = 'customer' | 'technician' | null
 
 /** Figma: 06 · Step 4 · Complete Service Call (100:3943), success state
- *  06b · Step 4 · Job saved (100:4004, Dialog over a 40% scrim). */
+ *  06b · Step 4 · Job saved (100:4004). */
 export function Step4() {
   const navigate = useNavigate()
   const [status, setStatus] = useState<StatusColor | null>(null)
@@ -158,7 +158,7 @@ export function Step4() {
 
       {saved && (
         <Dialog
-          icon={<PartyPopper size={64} strokeWidth={1.5} className="text-accent" />}
+          icon={<img src="/images/illustrations/dialog-save.png" srcSet="/images/illustrations/dialog-save.png 1x, /images/illustrations/dialog-save@2x.png 2x" alt="" className="h-[140px] w-auto" />}
           title="Job saved"
           message="WO-10031 · Brenda Johnson is complete. The service report and invoice are being generated — they will appear in the job in a few seconds."
           primaryLabel="View job"
