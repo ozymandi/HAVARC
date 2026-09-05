@@ -19,6 +19,7 @@ Details: `estimate.md`.
 
 - Frontend: React + Vite + TypeScript + Tailwind, PWA via Workbox.
 - Backend: Supabase (Postgres + Auth + Storage + RLS), edge functions for PDF generation and invoice numbering.
+- Hosting: Vercel, project `ohrakazokus-projects/havarc`, auto-deploy from `main` on GitHub `ozymandi/HAVARC`. Frontend only; Supabase stays separate.
 - PDF: server-side from HTML templates via headless Chrome. Page size **US Letter 612×792 pt**, margins 36, running header + footer with "Page n of N".
 
 ## Design source
