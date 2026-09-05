@@ -8,7 +8,7 @@ import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
 import { FormField } from '../components/FormField'
 import { Section } from '../components/Section'
-import { SignaturePad } from '../components/SignaturePad'
+import { SignatureCapture } from '../components/SignatureCapture'
 import type { StatusColor } from '../components/StatusBanner'
 import { StatusButtonGrid } from '../components/StatusButton'
 
@@ -20,6 +20,8 @@ const readFileAsDataUrl = (file: File) =>
     reader.readAsDataURL(file)
   })
 
+type Signer = 'customer' | 'technician' | null
+
 /** Figma: 06 · Step 4 · Complete Service Call (100:3943), success state
  *  06b · Step 4 · Job saved (100:4004, Dialog over a 40% scrim). */
 export function Step4() {
@@ -29,6 +31,7 @@ export function Step4() {
   const [customerName, setCustomerName] = useState('')
   const [customerSignature, setCustomerSignature] = useState<string | null>(null)
   const [techSignature, setTechSignature] = useState<string | null>(null)
+  const [signing, setSigning] = useState<Signer>(null)
   const [saved, setSaved] = useState(false)
 
   const canComplete = status !== null && !!customerSignature && !!techSignature
@@ -39,6 +42,24 @@ export function Step4() {
     setPhotos((prev) => [...prev, dataUrl])
   }
   const removePhoto = (i: number) => setPhotos((prev) => prev.filter((_, idx) => idx !== i))
+
+  // Same look as the Figma Signature Pad (17:69, size/signature 155): bordered box,
+  // "Sign here" baseline when empty, the drawn signature centered when filled. Only the
+  // interaction differs — tapping it opens the full-screen signing page instead of
+  // drawing directly on this small box.
+  const signatureSlot = (label: string, value: string | null, who: Exclude<Signer, null>) => (
+    <div className="flex w-full flex-col gap-xs">
+      <p className="text-label text-ink-soft">{label}</p>
+      <button
+        type="button"
+        onClick={() => setSigning(who)}
+        className="relative flex h-[155px] w-full flex-col items-center justify-end gap-md overflow-hidden rounded-xs border border-line-subtle bg-surface py-md pl-lg pr-sm"
+      >
+        {value ? <img src={value} alt={`${label} preview`} className="absolute inset-0 h-full w-full object-contain p-md" /> : <p className="text-caption text-ink-faint">Sign here</p>}
+        <div className="h-px w-full border-t border-dashed border-line-dashed" />
+      </button>
+    </div>
+  )
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
@@ -85,10 +106,8 @@ export function Step4() {
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Full name"
             />
-            <p className="text-label text-ink-soft">Customer Signature</p>
-            <SignaturePad onChange={setCustomerSignature} />
-            <p className="text-label text-ink-soft">Technician Signature</p>
-            <SignaturePad onChange={setTechSignature} />
+            {signatureSlot('Customer Signature', customerSignature, 'customer')}
+            {signatureSlot('Technician Signature', techSignature, 'technician')}
           </div>
         </Section>
 
@@ -119,6 +138,23 @@ export function Step4() {
       </div>
 
       <BottomNav isLast onBack={() => navigate('/jobs/new/step-3')} onNext={() => setSaved(true)} nextDisabled={!canComplete} />
+
+      {signing && (
+        <SignatureCapture
+          title={signing === 'customer' ? 'Customer signature' : 'Technician signature'}
+          instructions={
+            signing === 'customer'
+              ? `${customerName || 'Customer'} — please sign below to acknowledge the work performed and agree to the charges.`
+              : 'Technician — please sign below to confirm the work performed.'
+          }
+          onCancel={() => setSigning(null)}
+          onDone={(dataUrl) => {
+            if (signing === 'customer') setCustomerSignature(dataUrl)
+            else setTechSignature(dataUrl)
+            setSigning(null)
+          }}
+        />
+      )}
 
       {saved && (
         <Dialog
