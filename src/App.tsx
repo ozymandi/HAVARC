@@ -17,7 +17,10 @@ import { Step4 } from './pages/Step4'
 function App() {
   return (
     <div className="min-h-svh bg-surface-alt">
-      <div className="relative mx-auto min-h-svh w-full max-w-[390px]">
+      {/* Phones get the full width (Figma's 390px frame is a reference size, not a cap —
+          414/430px phones should stretch, not get gutters); from tablet width up the app
+          is centered at 390px so it still previews as a phone on desktop. */}
+      <div className="relative mx-auto min-h-svh w-full sm:max-w-[390px]">
         <Routes>
           <Route path="/splash" element={<Splash />} />
           <Route path="/login" element={<Login />} />
