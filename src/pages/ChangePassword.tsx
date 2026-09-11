@@ -28,7 +28,7 @@ export function ChangePassword() {
     <div className="flex min-h-svh flex-col bg-canvas">
       <TopBar variant="child" title="Change password" onBack={() => navigate(-1)} />
 
-      <div className="flex flex-1 flex-col gap-lg p-lg">
+      <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         <Section label="PASSWORD">
           <div className="flex w-full flex-col gap-md p-md">
             <p className="text-caption text-ink-faint">Signed in as owner@havarc.com</p>

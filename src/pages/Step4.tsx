@@ -100,7 +100,7 @@ export function Step4() {
     <div className="flex min-h-svh flex-col bg-canvas">
       <AppHeader step={4} title="Complete Service Call" onExit={() => navigate('/jobs')} />
 
-      <div className="flex flex-1 flex-col gap-lg p-lg">
+      <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         <Section label="FINAL SYSTEM STATUS">
           <div className="p-md">
             <StatusButtonGrid value={status} onChange={setStatus} />

@@ -1,6 +1,7 @@
-import { Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '../components/Button'
 import { ChoiceChip } from '../components/ChoiceChip'
 import { Fab } from '../components/Fab'
 import { InstallSheet } from '../components/InstallSheet'
@@ -40,7 +41,7 @@ export function Jobs() {
       <TopBar variant="root" onAction={() => navigate('/settings')} />
       {!online && <SyncBanner state="offline" message="Offline — changes are saved on this device and will sync when connected" />}
 
-      <div className="flex flex-1 flex-col gap-lg px-lg pb-5xl pt-lg">
+      <div className="app-col flex flex-1 flex-col gap-lg px-lg pb-5xl pt-lg">
         {searchOpen ? (
           <div className="flex items-center gap-sm">
             <input
@@ -68,8 +69,14 @@ export function Jobs() {
               <button type="button" onClick={() => setSearchOpen(true)} aria-label="Search jobs" className="flex size-11 items-center justify-center text-icon">
                 <Search size={24} strokeWidth={1.5} />
               </button>
+              {/* Desktop (02 · Jobs 320:14793): the FAB is replaced by an accent "New job" button here. */}
+              <div className="hidden md:block">
+                <Button variant="accent" icon={<Plus size={16} strokeWidth={1.5} />} className="w-[160px]" onClick={() => navigate('/jobs/new')}>
+                  New job
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2xs">
+            <div className="flex gap-2xs md:w-[358px]">
               {FILTERS.map((f) => (
                 <ChoiceChip key={f.value} label={f.label} selected={filter === f.value} onClick={() => setFilter(f.value)} />
               ))}
@@ -119,7 +126,9 @@ export function Jobs() {
         )}
       </div>
 
-      <Fab label="New job" onClick={() => navigate('/jobs/new')} />
+      <div className="md:hidden">
+        <Fab label="New job" onClick={() => navigate('/jobs/new')} />
+      </div>
       <InstallSheet />
     </div>
   )

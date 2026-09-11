@@ -84,7 +84,7 @@ export function Step1() {
     <div className="flex min-h-svh flex-col bg-canvas">
       <AppHeader step={1} title="Service Call & Equipment" onExit={() => setShowDiscard(true)} />
 
-      <div className="flex flex-1 flex-col gap-2xl p-lg">
+      <div className="app-col flex flex-1 flex-col gap-2xl p-lg">
         {showErrors && missingCount > 0 && (
           <div className="flex w-full items-center gap-sm rounded-xs bg-danger-soft p-md">
             <AlertCircle size={20} strokeWidth={1.5} className="shrink-0 text-danger" />
@@ -217,9 +217,11 @@ export function Step1() {
           </div>
         </Section>
 
-        <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full" onClick={addEquipment}>
-          {equipment.length === 1 ? 'Add second unit' : 'Add another unit'}
-        </Button>
+        <div className="flex w-full md:justify-end">
+          <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full md:w-[200px]" onClick={addEquipment}>
+            {equipment.length === 1 ? 'Add second unit' : 'Add another unit'}
+          </Button>
+        </div>
       </div>
 
       <BottomNav isFirst onBack={() => setShowDiscard(true)} onNext={handleNext} />

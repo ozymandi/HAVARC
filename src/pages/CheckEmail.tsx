@@ -1,7 +1,7 @@
-import { ArrowLeft, FileText, Mail } from 'lucide-react'
+import { ArrowLeft, Mail } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AuthHero } from '../components/AuthHero'
+import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
 
 const RESEND_SECONDS = 47
@@ -23,45 +23,33 @@ export function CheckEmail() {
   }, [secondsLeft])
 
   return (
-    <div className="flex min-h-svh flex-col bg-canvas">
-      <AuthHero />
+    <AuthLayout label="CHECK YOUR EMAIL">
 
-      <div className="flex flex-1 flex-col justify-between gap-2xl px-lg py-3xl">
-        <div className="flex flex-1 flex-col gap-lg">
-          <p className="text-section text-brand">CHECK YOUR EMAIL</p>
-
-          <div className="flex flex-col gap-2xl rounded-xs bg-surface p-md shadow-card">
-            <div className="flex flex-col items-center gap-md">
-              <div className="flex size-16 items-center justify-center rounded-full bg-selected">
-                <Mail size={30} strokeWidth={1.5} className="text-link" />
-              </div>
-              <p className="text-center text-body text-ink">We sent a reset link to {email}. It expires in 1 hour.</p>
-              <p className="text-center text-caption text-ink-faint">
-                The link opens in your browser. After saving a new password, return to the HAV&apos;ARC app on your home screen.
-              </p>
-            </div>
-            <div className="flex flex-col gap-md">
-              <Button
-                type="button"
-                variant="primary"
-                disabled={secondsLeft > 0}
-                onClick={() => setSecondsLeft(RESEND_SECONDS)}
-                className="w-full"
-              >
-                {secondsLeft > 0 ? `Resend in 0:${secondsLeft.toString().padStart(2, '0')}` : 'Resend'}
-              </Button>
-              <Button type="button" variant="text" icon={<ArrowLeft size={16} strokeWidth={1.5} />} onClick={() => navigate('/login')}>
-                Back to sign in
-              </Button>
-            </div>
+      <div className="flex flex-col gap-2xl rounded-xs bg-surface p-md shadow-card">
+        <div className="flex flex-col items-center gap-md">
+          <div className="flex size-16 items-center justify-center rounded-full bg-selected">
+            <Mail size={30} strokeWidth={1.5} className="text-link" />
           </div>
+          <p className="text-center text-body text-ink">We sent a reset link to {email}. It expires in 1 hour.</p>
+          <p className="text-center text-caption text-ink-faint">
+            The link opens in your browser. After saving a new password, return to the HAV&apos;ARC app on your home screen.
+          </p>
         </div>
-
-        <div className="flex items-center justify-center gap-md text-ink-faint">
-          <FileText size={12} strokeWidth={1.5} className="opacity-30" />
-          <span className="text-caption">HAV&apos;ARC app</span>
+        <div className="flex flex-col gap-md">
+          <Button
+            type="button"
+            variant="primary"
+            disabled={secondsLeft > 0}
+            onClick={() => setSecondsLeft(RESEND_SECONDS)}
+            className="w-full"
+          >
+            {secondsLeft > 0 ? `Resend in 0:${secondsLeft.toString().padStart(2, '0')}` : 'Resend'}
+          </Button>
+          <Button type="button" variant="text" icon={<ArrowLeft size={16} strokeWidth={1.5} />} onClick={() => navigate('/login')}>
+            Back to sign in
+          </Button>
         </div>
       </div>
-    </div>
+    </AuthLayout>
   )
 }

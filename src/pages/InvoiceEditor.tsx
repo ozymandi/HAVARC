@@ -62,7 +62,7 @@ export function InvoiceEditor({ workOrder, billTo, value, onChange, onBack, onSa
     <div className="flex min-h-svh flex-col bg-canvas">
       <TopBar variant="child" title={`Invoice · ${workOrder}`} onBack={onBack} />
 
-      <div className="flex flex-1 flex-col gap-lg p-lg">
+      <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         <Section label="BILL TO">
           <div className="flex w-full flex-col gap-2xs rounded-xs bg-canvas p-md text-caption">
             <div className="flex w-full gap-sm">
@@ -130,13 +130,15 @@ export function InvoiceEditor({ workOrder, billTo, value, onChange, onBack, onSa
         </Section>
       </div>
 
-      <div className="sticky bottom-0 flex w-full shrink-0 gap-2xs border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
-        <Button variant="secondary" className="flex-1" disabled={!onPreview} onClick={onPreview} title={onPreview ? undefined : "Available once the job is completed"}>
+      <div className="sticky bottom-0 w-full shrink-0 border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
+        <div className="app-col flex gap-2xs md:justify-center">
+        <Button variant="secondary" className="flex-1 md:w-[200px] md:flex-none" disabled={!onPreview} onClick={onPreview} title={onPreview ? undefined : "Available once the job is completed"}>
           Preview PDF
         </Button>
-        <Button variant="primary" icon={<FileText size={16} strokeWidth={1.5} />} className="flex-1" onClick={onSave}>
+        <Button variant="primary" icon={<FileText size={16} strokeWidth={1.5} />} className="flex-1 md:w-[200px] md:flex-none" onClick={onSave}>
           Save invoice
         </Button>
+        </div>
       </div>
 
       {sheet?.mode === 'add' && (

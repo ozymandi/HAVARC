@@ -13,6 +13,7 @@ export function AppHeader({ step, title, onExit }: AppHeaderProps) {
     <div className="sticky top-0 z-[5] flex w-full shrink-0 flex-col gap-md overflow-hidden brand-gradient px-lg pb-md pt-14">
       <img src="/images/header_tall.webp" srcSet="/images/header_tall.webp 1x, /images/header_tall@2x.webp 2x" alt="" className="absolute inset-0 h-full w-full object-cover" />
 
+      <div className="app-col relative flex flex-col gap-md">
       <div className="relative flex w-full items-center gap-md">
         <button type="button" onClick={onExit} aria-label="Exit" className="flex size-10 shrink-0 items-center justify-center text-inverse">
           <X size={24} strokeWidth={1.5} />
@@ -25,6 +26,7 @@ export function AppHeader({ step, title, onExit }: AppHeaderProps) {
 
       <div className="relative h-[6px] w-full overflow-hidden rounded-full bg-[var(--alpha-white-20)]">
         <div className="h-full rounded-full bg-accent transition-[width]" style={{ width: `${(step / 4) * 100}%` }} />
+      </div>
       </div>
     </div>
   )

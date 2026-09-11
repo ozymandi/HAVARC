@@ -12,12 +12,13 @@ interface BottomNavProps {
 
 export function BottomNav({ isFirst = false, isLast = false, onBack, onNext, nextDisabled }: BottomNavProps) {
   return (
-    <div className="flex w-full shrink-0 gap-2xs border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
+    <div className="w-full shrink-0 border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
+      <div className="app-col flex gap-2xs md:justify-center">
       <button
         type="button"
         onClick={onBack}
         className={
-          'h-[var(--size-control)] flex-1 rounded-sm text-button ' +
+          'h-[var(--size-control)] flex-1 rounded-sm text-button md:w-[177px] md:flex-none ' +
           (isFirst ? 'bg-disabled text-ink-faint' : 'border-[length:var(--stroke-regular)] border-brand bg-surface text-brand')
         }
       >
@@ -27,10 +28,11 @@ export function BottomNav({ isFirst = false, isLast = false, onBack, onNext, nex
         type="button"
         onClick={onNext}
         disabled={nextDisabled}
-        className="h-[var(--size-control)] flex-1 rounded-sm brand-gradient text-button text-inverse disabled:bg-disabled disabled:[background-image:none] disabled:text-ink-faint"
+        className="h-[var(--size-control)] flex-1 rounded-sm brand-gradient text-button text-inverse disabled:bg-disabled disabled:[background-image:none] disabled:text-ink-faint md:w-[177px] md:flex-none"
       >
         {isLast ? 'Complete' : 'Next'}
       </button>
+      </div>
     </div>
   )
 }

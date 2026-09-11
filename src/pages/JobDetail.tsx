@@ -47,7 +47,7 @@ export function JobDetail() {
         onAction={() => setMenuOpen(true)}
       />
 
-      <div className="flex flex-1 flex-col gap-lg p-lg pb-5xl">
+      <div className="app-col flex flex-1 flex-col gap-lg p-lg pb-5xl">
         <div className="flex flex-col gap-xs">
           <p className="text-h1 text-ink">{job.customer}</p>
           <p className="text-body text-ink-soft">{job.address}</p>
@@ -100,10 +100,12 @@ export function JobDetail() {
       </div>
 
       {job.documents && (
-        <div className="flex w-full shrink-0 border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
-          <Button variant="primary" icon={<Share size={16} strokeWidth={1.5} />} className="w-full" onClick={() => setShareOpen(true)}>
-            Share PDFs
-          </Button>
+        <div className="w-full shrink-0 border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
+          <div className="app-col flex md:justify-end">
+            <Button variant="primary" icon={<Share size={16} strokeWidth={1.5} />} className="w-full md:w-[200px]" onClick={() => setShareOpen(true)}>
+              Share PDFs
+            </Button>
+          </div>
         </div>
       )}
 

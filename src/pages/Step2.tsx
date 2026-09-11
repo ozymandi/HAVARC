@@ -90,7 +90,7 @@ export function Step2() {
     <div className="flex min-h-svh flex-col bg-canvas">
       <AppHeader step={2} title="Inspection & Readings" onExit={() => navigate('/jobs')} />
 
-      <div className="flex flex-1 flex-col gap-lg p-lg">
+      <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         <div className="flex w-full flex-col gap-sm">
           <div className="flex w-full items-center gap-sm">
             <p className="text-section text-brand">READINGS</p>

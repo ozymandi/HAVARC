@@ -59,7 +59,7 @@ export function Step3() {
     <div className="flex min-h-svh flex-col bg-canvas">
       <AppHeader step={3} title="Findings & Repairs" onExit={() => navigate('/jobs')} />
 
-      <div className="flex flex-1 flex-col gap-lg p-lg">
+      <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         <Section label="FINDINGS">
           <div className="p-md">{chipGrid(FINDINGS, findings, FINDINGS_EXCLUSIVE, setFindings)}</div>
         </Section>

@@ -1,6 +1,5 @@
-import { FileText } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { AuthHero } from '../components/AuthHero'
+import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
 import { FormField } from '../components/FormField'
 
@@ -11,41 +10,29 @@ export function Login() {
   const navigate = useNavigate()
 
   return (
-    <div className="flex min-h-svh flex-col bg-canvas">
-      <AuthHero />
+    <AuthLayout label="SIGN IN">
 
-      <div className="flex flex-1 flex-col justify-between gap-2xl px-lg py-3xl">
-        <div className="flex flex-1 flex-col gap-lg">
-          <p className="text-section text-brand">SIGN IN</p>
-
-          <form
-            noValidate
-            className="flex flex-col gap-2xl rounded-xs bg-surface p-md shadow-card"
-            onSubmit={(e) => {
-              e.preventDefault()
-              navigate('/jobs')
-            }}
-          >
-            <div className="flex flex-col gap-md">
-              <FormField label="Email" type="email" placeholder="owner@havarc.com" />
-              <FormField label="Password" type="password" placeholder="••••••••••" />
-            </div>
-            <div className="flex flex-col gap-md">
-              <Button type="submit" variant="primary">
-                Sign in
-              </Button>
-              <Button type="button" variant="text" onClick={() => navigate('/forgot-password')}>
-                Forgot password?
-              </Button>
-            </div>
-          </form>
+      <form
+        noValidate
+        className="flex flex-col gap-2xl rounded-xs bg-surface p-md shadow-card"
+        onSubmit={(e) => {
+          e.preventDefault()
+          navigate('/jobs')
+        }}
+      >
+        <div className="flex flex-col gap-md">
+          <FormField label="Email" type="email" placeholder="owner@havarc.com" />
+          <FormField label="Password" type="password" placeholder="••••••••••" />
         </div>
-
-        <div className="flex items-center justify-center gap-md text-ink-faint">
-          <FileText size={12} strokeWidth={1.5} className="opacity-30" />
-          <span className="text-caption">HAV&apos;ARC app</span>
+        <div className="flex flex-col gap-md">
+          <Button type="submit" variant="primary">
+            Sign in
+          </Button>
+          <Button type="button" variant="text" onClick={() => navigate('/forgot-password')}>
+            Forgot password?
+          </Button>
         </div>
-      </div>
-    </div>
+      </form>
+    </AuthLayout>
   )
 }

@@ -21,6 +21,7 @@ export function TopBar(props: TopBarProps) {
         className="absolute inset-0 h-full w-full object-cover"
       />
 
+      <div className="app-col relative flex items-center">
       {props.variant === 'child' ? (
         <div className="relative flex flex-1 items-center gap-sm">
           <button type="button" onClick={props.onBack} aria-label="Back" className="shrink-0 text-inverse">
@@ -43,6 +44,7 @@ export function TopBar(props: TopBarProps) {
           )}
         </div>
       )}
+      </div>
     </div>
   )
 }

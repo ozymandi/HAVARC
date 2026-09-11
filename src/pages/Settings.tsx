@@ -41,7 +41,7 @@ export function Settings() {
     <div className="flex min-h-svh flex-col bg-canvas">
       <TopBar variant="child" title="Settings" onBack={() => navigate(-1)} />
 
-      <div className="flex flex-1 flex-col gap-lg p-lg">
+      <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         <Section label="COMPANY & BRANDING">
           <div className="flex w-full flex-col gap-md p-md">
             <div className="flex w-full items-center gap-md">

@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { ChangePassword } from './pages/ChangePassword'
 import { CheckEmail } from './pages/CheckEmail'
 import { ForgotPassword } from './pages/ForgotPassword'
@@ -16,15 +16,12 @@ import { Step3 } from './pages/Step3'
 import { Step4 } from './pages/Step4'
 
 function App() {
-  // PDF previews render 612px-wide Letter sheets — on desktop they need the full width, not
-  // the phone-sized column.
-  const isPdfPreview = /\/(report|invoice\/pdf)$/.test(useLocation().pathname)
   return (
     <div className="min-h-svh bg-surface-alt">
-      {/* Phones get the full width (Figma's 390px frame is a reference size, not a cap —
-          414/430px phones should stretch, not get gutters); from tablet width up the app
-          is centered at 390px so it still previews as a phone on desktop. */}
-      <div className={`relative mx-auto min-h-svh w-full ${isPdfPreview ? 'sm:max-w-[680px]' : 'sm:max-w-[390px]'}`}>
+      {/* Full width on every device: phones stretch to their own width, and from 768px up
+          each screen switches to its desktop layout (Figma 320:3662) with the content
+          column capped at 1440px via the `app-col` utility, headers/footers full-bleed. */}
+      <div className="relative min-h-svh w-full">
         <Routes>
           <Route path="/splash" element={<Splash />} />
           <Route path="/login" element={<Login />} />

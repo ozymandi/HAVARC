@@ -26,6 +26,14 @@ body {
    (Figma vector "M 8.5 0 L 0 8.5", 1px stroke) tiled at scale 0.59 and 20% opacity over
    the solid status color. Reproduced as CSS, not an exported asset — it's a plain
    geometric tile, not an illustration. Apply alongside a bg-status-* color class. */
+/* Desktop (Screens ·Desktop Design, 320:3662): page content is capped at 1440px and
+   centered, while headers/footers stretch the full viewport (Yaroslav 2026-09-11). */
+@utility app-col {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1440px;
+}
+
 @utility status-pattern {
   background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0, rgba(255, 255, 255, 0.08) 0.6px, transparent 0.6px, transparent 5px);
 }
