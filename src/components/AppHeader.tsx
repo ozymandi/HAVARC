@@ -12,8 +12,8 @@ export function AppHeader({ step, title, onExit }: AppHeaderProps) {
   return (
     <div className="sticky top-0 z-[5] flex w-full shrink-0 flex-col gap-md overflow-hidden brand-gradient px-lg pb-md pt-14">
       <img src="/images/header_tall.webp" srcSet="/images/header_tall.webp 1x, /images/header_tall@2x.webp 2x" alt="" className="absolute inset-0 h-full w-full object-cover md:hidden" />
-      {/* Interim on desktop: the Top Bar export (1440×100) cropped to the 126px header — no
-          dedicated App Header desktop export yet. */}
+      {/* Desktop: the App Header background is the same artwork as the Top Bar (Yaroslav,
+          2026-09-11), so the 1440×100 export is reused, cover-fitted to the 126px header. */}
       <img src="/images/top-bar-desktop.webp" srcSet="/images/top-bar-desktop.webp 1x, /images/top-bar-desktop@2x.webp 2x" alt="" className="absolute inset-0 hidden h-full w-full object-cover md:block" />
 
       <div className="app-col relative flex flex-col gap-md">
