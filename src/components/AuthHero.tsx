@@ -4,8 +4,7 @@
  *
  *  Desktop (01 · Login 320:9916): the hero becomes the left half of a 50/50 split, full
  *  viewport height, lockup at the top (120px down) and the tagline pinned to the bottom.
- *  The phone hero image (390×299) is swapped for the taller splash image there; a proper
- *  desktop export will replace both once Yaroslav delivers the desktop header backgrounds. */
+ *  The phone hero image (390×299) is swapped for the desktop half-hero export (720×1024). */
 export function AuthHero() {
   return (
     <div className="relative flex h-[299px] shrink-0 flex-col items-center justify-end gap-5xl overflow-hidden brand-gradient px-md pb-xl pt-11 md:h-auto md:min-h-svh md:w-1/2 md:justify-between md:pt-[120px]">
@@ -16,8 +15,8 @@ export function AuthHero() {
         className="absolute inset-0 h-full w-full object-cover md:hidden"
       />
       <img
-        src="/images/login-big-hero-bg.webp"
-        srcSet="/images/login-big-hero-bg.webp 1x, /images/login-big-hero-bg@2x.webp 2x"
+        src="/images/hero_desk_half.webp"
+        srcSet="/images/hero_desk_half.webp 1x, /images/hero_desk_half@2x.webp 2x"
         alt=""
         className="absolute inset-0 hidden h-full w-full object-cover md:block"
       />

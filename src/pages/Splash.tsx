@@ -23,7 +23,9 @@ export function Splash() {
 
   return (
     <div className="relative flex h-svh flex-col items-center overflow-hidden px-md pb-2xl">
-      <img src="/images/login-big-hero-bg.webp" srcSet="/images/login-big-hero-bg.webp 1x, /images/login-big-hero-bg@2x.webp 2x" alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <img src="/images/login-big-hero-bg.webp" srcSet="/images/login-big-hero-bg.webp 1x, /images/login-big-hero-bg@2x.webp 2x" alt="" className="absolute inset-0 h-full w-full object-cover md:hidden" />
+      {/* Desktop (00 · Login 320:9387): full-screen export 1440×1024. */}
+      <img src="/images/hero_desk_full.webp" srcSet="/images/hero_desk_full.webp 1x, /images/hero_desk_full@2x.webp 2x" alt="" className="absolute inset-0 hidden h-full w-full object-cover md:block" />
       <div className="relative flex flex-1 items-center justify-center">
         <SplashLogo />
       </div>

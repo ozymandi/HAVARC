@@ -18,7 +18,14 @@ export function TopBar(props: TopBarProps) {
         src="/images/header.webp"
         srcSet="/images/header.webp 1x, /images/header@2x.webp 2x"
         alt=""
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover md:hidden"
+      />
+      {/* Desktop export (1440×100) from Yaroslav, 2026-09-11. */}
+      <img
+        src="/images/top-bar-desktop.webp"
+        srcSet="/images/top-bar-desktop.webp 1x, /images/top-bar-desktop@2x.webp 2x"
+        alt=""
+        className="absolute inset-0 hidden h-full w-full object-cover md:block"
       />
 
       <div className="app-col relative flex items-center">
