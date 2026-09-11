@@ -48,20 +48,30 @@ export function JobDetail() {
       />
 
       <div className="app-col flex flex-1 flex-col gap-lg p-lg pb-5xl">
-        <div className="flex flex-col gap-xs">
-          <p className="text-h1 text-ink">{job.customer}</p>
-          <p className="text-body text-ink-soft">{job.address}</p>
-          <div className="flex items-center gap-sm">
-            <span className={`rounded-full px-md py-2xs text-label ${badgeClass[job.status]}`}>{badgeLabel[job.status]}</span>
-            {job.completedMeta && <p className="text-caption text-ink-faint">{job.completedMeta}</p>}
+        {/* Desktop (320:15062): head block and status banner side by side (358px each, banner
+            bottom-aligned), then Service summary | Documents in one row. */}
+        <div className="flex w-full flex-col gap-lg md:flex-row md:items-end">
+          <div className="flex flex-col gap-xs md:w-[358px] md:shrink-0">
+            <p className="text-h1 text-ink">{job.customer}</p>
+            <p className="text-body text-ink-soft">{job.address}</p>
+            <div className="flex items-center gap-sm">
+              <span className={`rounded-full px-md py-2xs text-label ${badgeClass[job.status]}`}>{badgeLabel[job.status]}</span>
+              {job.completedMeta && <p className="text-caption text-ink-faint">{job.completedMeta}</p>}
+            </div>
+            {job.customerNotes && <CustomerNotesCallout notes={job.customerNotes} />}
           </div>
-          {job.customerNotes && <CustomerNotesCallout notes={job.customerNotes} />}
+
+          {job.finalStatus && (
+            <div className="w-full md:w-[358px] md:shrink-0">
+              <StatusBanner color={job.finalStatus.color} label={job.finalStatus.label} description={job.finalStatus.description} />
+            </div>
+          )}
         </div>
 
-        {job.finalStatus && <StatusBanner color={job.finalStatus.color} label={job.finalStatus.label} description={job.finalStatus.description} />}
-
+        {(job.summary || job.documents) && (
+        <div className="flex w-full flex-col gap-lg md:flex-row md:items-stretch">
         {job.summary && (
-          <Section label="SERVICE SUMMARY">
+          <Section label="SERVICE SUMMARY" className="md:min-w-0 md:flex-1" cardClassName="md:flex-1">
             <div className="flex w-full flex-col gap-2xs rounded-xs bg-canvas p-md text-caption">
               {job.summary.map((row) => (
                 <div key={row.label} className="flex w-full items-start gap-sm">
@@ -74,7 +84,7 @@ export function JobDetail() {
         )}
 
         {job.documents && (
-          <Section label="DOCUMENTS">
+          <Section label="DOCUMENTS" className="md:min-w-0 md:flex-1" cardClassName="md:flex-1">
             <div className="flex w-full flex-col gap-2xs">
               {job.documents.map((doc) => (
                 <DocumentRow
@@ -86,6 +96,8 @@ export function JobDetail() {
               ))}
             </div>
           </Section>
+        )}
+        </div>
         )}
 
         {job.photos && (

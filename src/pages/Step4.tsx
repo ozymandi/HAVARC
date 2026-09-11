@@ -41,6 +41,13 @@ export function Step4() {
   const [signing, setSigning] = useState<Signer>(null)
   const [saved, setSaved] = useState(false)
 
+  // Desktop rule (Yaroslav 2026-09-11): with a mouse there's no drawing overlay — the slot
+  // accepts an image file instead. Decided by pointer type, not width, so an iPad (touch)
+  // still draws while a laptop uploads.
+  const [uploadsSignature] = useState(() => window.matchMedia('(pointer: fine)').matches && !window.matchMedia('(pointer: coarse)').matches)
+  const signatureInputRef = useRef<HTMLInputElement>(null)
+  const [signatureTarget, setSignatureTarget] = useState<Exclude<Signer, null>>('customer')
+
   // Final Review reads what the earlier steps actually captured (shared draft store).
   const workOrder = readDraft('step1.workOrder', '')
   const customer = readDraft('step1.customer', '')
@@ -66,6 +73,18 @@ export function Step4() {
   }
   const removePhoto = (i: number) => setPhotos((prev) => prev.filter((_, idx) => idx !== i))
 
+  const startSignature = (who: Exclude<Signer, null>) => {
+    if (!uploadsSignature) return setSigning(who)
+    setSignatureTarget(who)
+    signatureInputRef.current?.click()
+  }
+  const uploadSignature = async (file: File | undefined) => {
+    if (!file) return
+    const dataUrl = await readFileAsDataUrl(file)
+    if (signatureTarget === 'customer') setCustomerSignature(dataUrl)
+    else setTechSignature(dataUrl)
+  }
+
   const finish = (to: string) => {
     clearDraft()
     navigate(to)
@@ -80,10 +99,14 @@ export function Step4() {
       <p className="text-label text-ink-soft">{label}</p>
       <button
         type="button"
-        onClick={() => setSigning(who)}
+        onClick={() => startSignature(who)}
         className="relative flex h-[155px] w-full flex-col items-center justify-end gap-md overflow-hidden rounded-xs border border-line-subtle bg-surface py-md pl-lg pr-sm"
       >
-        {value ? <img src={value} alt={`${label} preview`} className="absolute inset-0 h-full w-full object-contain p-md" /> : <p className="text-caption text-ink-faint">Sign here</p>}
+        {value ? (
+          <img src={value} alt={`${label} preview`} className="absolute inset-0 h-full w-full object-contain p-md" />
+        ) : (
+          <p className="text-caption text-ink-faint">{uploadsSignature ? 'Upload signature image' : 'Sign here'}</p>
+        )}
         <div className="h-px w-full border-t border-dashed border-line-dashed" />
       </button>
     </div>
@@ -171,6 +194,17 @@ export function Step4() {
       </div>
 
       <BottomNav isLast onBack={() => navigate('/jobs/new/step-3')} onNext={() => setSaved(true)} nextDisabled={!canComplete} />
+
+      <input
+        ref={signatureInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          void uploadSignature(e.target.files?.[0])
+          e.target.value = ''
+        }}
+      />
 
       {/* Invoice editor as an overlay (not a route) for the same reason as the signature
           page: Step 4 stays mounted underneath, so nothing entered here is lost. */}

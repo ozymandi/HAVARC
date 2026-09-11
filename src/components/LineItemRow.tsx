@@ -43,7 +43,7 @@ export function LineItemRow({ item, onEdit, onDelete }: LineItemRowProps) {
       tabIndex={0}
       onClick={onEdit}
       onKeyDown={onKeyDown}
-      className="flex w-full cursor-pointer flex-col gap-md rounded-xs border border-line-subtle bg-surface py-md pl-lg pr-sm text-left shadow-card"
+      className="flex w-full cursor-pointer flex-col gap-md rounded-xs border border-line-subtle bg-surface py-md pl-lg pr-sm text-left shadow-card transition-colors hover:bg-selected"
     >
       <div className="flex w-full items-center gap-sm">
         <p className="min-w-0 flex-1 truncate text-body-strong text-ink">{item.description}</p>

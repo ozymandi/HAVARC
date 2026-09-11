@@ -45,10 +45,10 @@ export function ShareSheet({ job, onClose }: ShareSheetProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-20 flex flex-col justify-end">
+    <div className="fixed inset-0 z-20 flex flex-col justify-end md:items-center md:justify-center">
       <button type="button" aria-label="Close share sheet" className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative flex w-full flex-col rounded-t-lg bg-surface pb-2xl shadow-modal">
-        <div className="flex w-full items-center justify-center py-sm">
+      <div className="relative flex w-full flex-col rounded-t-lg bg-surface pb-2xl shadow-modal md:w-[480px] md:rounded-lg md:pt-md">
+        <div className="flex w-full items-center justify-center py-sm md:hidden">
           <div className="h-1 w-9 rounded-full bg-line-strong" />
         </div>
         <div className="flex w-full items-center gap-md py-xs pl-xl pr-md">

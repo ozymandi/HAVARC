@@ -86,8 +86,9 @@ export function InvoiceEditor({ workOrder, billTo, value, onChange, onBack, onSa
           </div>
         </Section>
 
-        <Section label="LINE ITEMS">
-          <div className="flex w-full flex-col gap-md p-md">
+        <div className="flex w-full flex-col gap-lg md:flex-row md:items-stretch">
+        <Section label="LINE ITEMS" className="md:min-w-0 md:flex-1" cardClassName="md:flex md:flex-1 md:flex-col">
+          <div className="flex w-full flex-1 flex-col gap-md p-md">
             {items.length > 0 && (
               <div className="flex w-full flex-col gap-2xs">
                 {items.map((item) => (
@@ -95,26 +96,31 @@ export function InvoiceEditor({ workOrder, billTo, value, onChange, onBack, onSa
                 ))}
               </div>
             )}
-            <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full" onClick={() => setSheet({ mode: 'add' })}>
-              Add item
-            </Button>
+            <div className="flex w-full md:mt-auto md:justify-end">
+              <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full md:w-[200px]" onClick={() => setSheet({ mode: 'add' })}>
+                Add item
+              </Button>
+            </div>
           </div>
         </Section>
 
-        <Section label="TOTALS">
-          <div className="flex w-full flex-col gap-md p-md">
+        <Section label="TOTALS" className="md:min-w-0 md:flex-1" cardClassName="md:flex md:flex-1 md:flex-col">
+          <div className="flex w-full flex-1 flex-col gap-md p-md">
             <div className="flex w-full gap-2xs">
               <FormField className="min-w-0 flex-1" label="Tax rate %" type="number" value={taxRate} onChange={(e) => patch({ taxRate: Number(e.target.value) })} />
               <FormField className="min-w-0 flex-1" label="Discount $" type="number" value={discount} onChange={(e) => patch({ discount: Number(e.target.value) })} />
             </div>
-            <div className="flex w-full flex-col gap-2xs">
+            <div className="flex w-full flex-1 flex-col gap-2xs">
               <TotalsRow label="Subtotal" amount={money(subtotal)} />
               <TotalsRow label={`Tax (${taxRate.toFixed(2)}%)`} amount={money(tax)} />
               <TotalsRow label="Discount" amount={`−${money(discount)}`} />
-              <TotalsRow label="TOTAL" amount={money(total)} emphasis="total" />
+              <div className="md:mt-auto md:pt-md">
+                <TotalsRow label="TOTAL" amount={money(total)} emphasis="total" />
+              </div>
             </div>
           </div>
         </Section>
+        </div>
 
         <Section label="DESCRIPTION OF WORK">
           <div className="flex w-full flex-col gap-md p-md">

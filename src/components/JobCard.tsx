@@ -29,7 +29,7 @@ export function JobCard({ workOrder, customer, meta, status, onClick }: JobCardP
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-start gap-md rounded-xs bg-surface py-md pl-lg pr-sm text-left shadow-card"
+      className="flex w-full items-start gap-md rounded-xs bg-surface py-md pl-lg pr-sm text-left shadow-card transition-colors hover:bg-selected"
     >
       <div className="flex min-w-0 flex-1 flex-col gap-sm">
         <div className="flex w-full items-center gap-sm">

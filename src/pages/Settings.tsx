@@ -42,7 +42,8 @@ export function Settings() {
       <TopBar variant="child" title="Settings" onBack={() => navigate(-1)} />
 
       <div className="app-col flex flex-1 flex-col gap-lg p-lg">
-        <Section label="COMPANY & BRANDING">
+        <div className="flex w-full flex-col gap-lg md:flex-row md:items-stretch">
+        <Section label="COMPANY & BRANDING" className="md:min-w-0 md:flex-1">
           <div className="flex w-full flex-col gap-md p-md">
             <div className="flex w-full items-center gap-md">
               <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-[13px] brand-gradient">
@@ -67,7 +68,7 @@ export function Settings() {
           </div>
         </Section>
 
-        <Section label="INVOICE DEFAULTS">
+        <Section label="INVOICE DEFAULTS" className="md:min-w-0 md:flex-1" cardClassName="md:flex-1">
           <div className="flex w-full flex-col gap-md p-md">
             <div className="flex w-full gap-2xs">
               <FormField
@@ -92,8 +93,9 @@ export function Settings() {
             <FormField label="Invoice footer note" type="textarea" value={invoiceFooter} onChange={(e) => setInvoiceFooter(e.target.value)} />
           </div>
         </Section>
+        </div>
 
-        <Section label="ACCOUNT">
+        <Section label="ACCOUNT" cardClassName="md:w-[calc(50%-8px)]">
           <div className="flex w-full flex-col gap-md p-md">
             <FormField label="Signed in as" value="owner@havarc.com" disabled />
             <Button variant="secondary" className="w-full" onClick={() => navigate('/settings/change-password')}>
@@ -105,7 +107,7 @@ export function Settings() {
           </div>
         </Section>
 
-        <p className="w-full text-center text-caption text-ink-faint">Version 1.0.0 · Last sync 2 min ago</p>
+        <p className="mt-auto w-full text-center text-caption text-ink-faint">Version 1.0.0 · Last sync 2 min ago</p>
       </div>
     </div>
   )

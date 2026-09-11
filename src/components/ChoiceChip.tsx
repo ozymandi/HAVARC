@@ -18,7 +18,7 @@ export function ChoiceChip({ label, selected = false, onClick, hug = false }: Ch
         `min-h-11 ${hug ? 'shrink-0' : 'flex-1'} rounded-xs border-solid px-sm py-md text-chip text-center ` +
         (selected
           ? 'border-[length:var(--stroke-regular)] border-line-focus bg-selected text-link'
-          : 'border-[length:var(--stroke-hairline)] border-line bg-surface text-ink')
+          : 'border-[length:var(--stroke-hairline)] border-line bg-surface text-ink hover:border-line-strong')
       }
     >
       {label}
