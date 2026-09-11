@@ -184,7 +184,7 @@ export function Step4() {
               {reviewRow('Status', status ? `${status.toUpperCase()} — set above` : 'Not set yet')}
             </div>
             <div className="flex w-full md:mt-auto md:justify-end">
-              <Button variant="secondary" icon={<FileText size={16} strokeWidth={1.5} />} className="w-full md:w-[200px]" onClick={() => setEditingInvoice(true)}>
+              <Button variant="secondary" icon={<FileText size={16} strokeWidth={1.5} />} className="w-full md:w-auto md:min-w-[200px]" onClick={() => setEditingInvoice(true)}>
                 Edit invoice
               </Button>
             </div>

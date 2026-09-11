@@ -223,7 +223,7 @@ export function Step1() {
         </Section>
 
         <div className="flex w-full md:justify-end">
-          <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full md:w-[200px]" onClick={addEquipment}>
+          <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full md:w-auto md:min-w-[200px]" onClick={addEquipment}>
             {equipment.length === 1 ? 'Add second unit' : 'Add another unit'}
           </Button>
         </div>

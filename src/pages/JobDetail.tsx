@@ -114,7 +114,7 @@ export function JobDetail() {
       {job.documents && (
         <div className="w-full shrink-0 border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
           <div className="app-col flex md:justify-end">
-            <Button variant="primary" icon={<Share size={16} strokeWidth={1.5} />} className="w-full md:w-[200px]" onClick={() => setShareOpen(true)}>
+            <Button variant="primary" icon={<Share size={16} strokeWidth={1.5} />} className="w-full md:w-auto md:min-w-[200px]" onClick={() => setShareOpen(true)}>
               Share PDFs
             </Button>
           </div>

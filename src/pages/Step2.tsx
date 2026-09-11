@@ -165,7 +165,7 @@ export function Step2() {
                 Airflow, electrical and refrigerant readings. Add them for maintenance calls — skip for service calls.
               </p>
               <div className="flex w-full md:justify-end">
-                <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full md:w-[200px]" onClick={() => setReadingsOpen(true)}>
+                <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full md:w-auto md:min-w-[200px]" onClick={() => setReadingsOpen(true)}>
                   Add readings
                 </Button>
               </div>

@@ -33,7 +33,7 @@ export function Button({ variant = 'primary', icon, className = '', children, ..
   return (
     <button type="button" className={`${base} ${variantClass[variant]} ${className}`} {...props}>
       {icon}
-      <span>{children}</span>
+      <span className="whitespace-nowrap">{children}</span>
     </button>
   )
 }
