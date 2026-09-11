@@ -169,9 +169,13 @@ export function Step1() {
           </div>
         </Section>
 
-        <Section label="ADDITIONAL NOTES">
-          <div className="flex w-full flex-col gap-md p-md">
+        {/* Desktop (320:15418): notes and service type share a row, the notes card
+            stretches to the row height and its textarea fills the card. */}
+        <div className="flex w-full flex-col gap-2xl md:flex-row md:items-stretch">
+        <Section label="ADDITIONAL NOTES" className="md:min-w-0 md:flex-1" cardClassName="md:flex md:flex-1 md:flex-col">
+          <div className="flex w-full flex-1 flex-col gap-md p-md">
             <FormField
+              className="flex-1 md:[&>textarea]:flex-1 md:[&>textarea]:min-h-0"
               label="Customer notes"
               type="textarea"
               value={customerNotes}
@@ -182,7 +186,7 @@ export function Step1() {
           </div>
         </Section>
 
-        <Section label="SERVICE TYPE / COMPLAINT">
+        <Section label="SERVICE TYPE / COMPLAINT" className="md:min-w-0 md:flex-1">
           <div className="flex w-full flex-col gap-md p-md">
             <div className="grid w-full grid-cols-2 gap-2xs">
               {SERVICE_TYPES.map((t) => (
@@ -201,6 +205,7 @@ export function Step1() {
             />
           </div>
         </Section>
+        </div>
 
         <Section label="EQUIPMENT" padded={false}>
           <div className="flex w-full flex-col divide-y divide-line">

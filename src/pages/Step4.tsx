@@ -135,7 +135,10 @@ export function Step4() {
           </div>
         </Section>
 
-        <Section label="CUSTOMER ACKNOWLEDGMENT">
+        {/* Desktop (320:15788): acknowledgment and final review share a row; the review
+            card stretches and keeps "Edit invoice" at its bottom-right. */}
+        <div className="flex w-full flex-col gap-lg md:flex-row md:items-stretch">
+        <Section label="CUSTOMER ACKNOWLEDGMENT" className="md:min-w-0 md:flex-1">
           <div className="flex w-full flex-col gap-md p-md">
             <FormField
               label="Customer / Representative Name"
@@ -148,20 +151,23 @@ export function Step4() {
           </div>
         </Section>
 
-        <Section label="FINAL REVIEW">
-          <div className="flex w-full flex-col gap-md p-md">
-            <div className="flex w-full flex-col gap-xs rounded-md bg-canvas p-md text-caption">
+        <Section label="FINAL REVIEW" className="md:min-w-0 md:flex-1" cardClassName="md:flex md:flex-1 md:flex-col">
+          <div className="flex w-full flex-1 flex-col gap-md p-md">
+            <div className="flex w-full flex-col gap-xs rounded-md bg-canvas p-md text-caption md:flex-1">
               {reviewRow('Work Order', [workOrder, customer].filter(Boolean).join(' · ') || 'Not set yet')}
               {reviewRow('Equipment', equipmentLabel || 'Not set yet')}
               {reviewRow('Findings', joinOr(findings, 'Not set yet'))}
               {reviewRow('Repairs', joinOr(repairs, 'Not set yet'))}
               {reviewRow('Status', status ? `${status.toUpperCase()} — set above` : 'Not set yet')}
             </div>
-            <Button variant="secondary" icon={<FileText size={16} strokeWidth={1.5} />} className="w-full" onClick={() => setEditingInvoice(true)}>
-              Edit invoice
-            </Button>
+            <div className="flex w-full md:mt-auto md:justify-end">
+              <Button variant="secondary" icon={<FileText size={16} strokeWidth={1.5} />} className="w-full md:w-[200px]" onClick={() => setEditingInvoice(true)}>
+                Edit invoice
+              </Button>
+            </div>
           </div>
         </Section>
+        </div>
       </div>
 
       <BottomNav isLast onBack={() => navigate('/jobs/new/step-3')} onNext={() => setSaved(true)} nextDisabled={!canComplete} />

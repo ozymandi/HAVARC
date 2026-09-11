@@ -60,15 +60,19 @@ export function Step3() {
       <AppHeader step={3} title="Findings & Repairs" onExit={() => navigate('/jobs')} />
 
       <div className="app-col flex flex-1 flex-col gap-lg p-lg">
-        <Section label="FINDINGS">
+        {/* Desktop (320:15719): two rows of two sections, right-hand cards stretch to the row. */}
+        <div className="flex w-full flex-col gap-lg md:flex-row md:items-stretch">
+        <Section label="FINDINGS" className="md:min-w-0 md:flex-1">
           <div className="p-md">{chipGrid(FINDINGS, findings, FINDINGS_EXCLUSIVE, setFindings)}</div>
         </Section>
 
-        <Section label="REPAIRS PERFORMED">
+        <Section label="REPAIRS PERFORMED" className="md:min-w-0 md:flex-1" cardClassName="md:flex-1">
           <div className="p-md">{chipGrid(REPAIRS, repairs, REPAIRS_EXCLUSIVE, setRepairs)}</div>
         </Section>
+        </div>
 
-        <Section label="TECHNICIAN NOTES">
+        <div className="flex w-full flex-col gap-lg md:flex-row md:items-stretch">
+        <Section label="TECHNICIAN NOTES" className="md:min-w-0 md:flex-1" cardClassName="md:flex-1">
           <div className="flex w-full flex-col gap-md p-md">
             <FormField
               label="Service Notes"
@@ -87,7 +91,7 @@ export function Step3() {
           </div>
         </Section>
 
-        <Section label="RECOMMENDATIONS">
+        <Section label="RECOMMENDATIONS" className="md:min-w-0 md:flex-1">
           <div className="flex w-full flex-col gap-md p-md">
             {chipGrid(RECOMMENDATIONS, recommendations, RECOMMENDATIONS_EXCLUSIVE, setRecommendations)}
             <FormField
@@ -99,6 +103,7 @@ export function Step3() {
             />
           </div>
         </Section>
+        </div>
       </div>
 
       <BottomNav onBack={() => navigate('/jobs/new/step-2')} onNext={() => navigate('/jobs/new/step-4')} />

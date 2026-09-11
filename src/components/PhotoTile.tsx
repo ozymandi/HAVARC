@@ -14,7 +14,7 @@ interface FilledPhotoTileProps {
  *  opens a bigger preview (e.g. Job Detail tapping a captured photo). */
 export function PhotoTile({ src, onRemove, onView }: FilledPhotoTileProps) {
   return (
-    <div className="relative h-[104px] flex-1">
+    <div className="relative h-[104px] flex-1 md:aspect-square md:h-auto md:flex-none md:basis-[calc((100%-16px)/3)]">
       <button
         type="button"
         onClick={onView}
@@ -42,7 +42,7 @@ export function AddPhotoTile({ onClick }: { onClick?: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[104px] flex-1 flex-col items-center justify-center gap-xs rounded-xs border-[length:var(--stroke-hairline)] border-dashed border-line-dashed bg-surface p-md text-brand"
+      className="flex h-[104px] flex-1 flex-col items-center justify-center gap-xs rounded-xs border-[length:var(--stroke-hairline)] border-dashed border-line-dashed bg-surface p-md text-brand md:aspect-square md:h-auto md:flex-none md:basis-[calc((100%-16px)/3)]"
     >
       <Camera size={24} strokeWidth={1.5} />
       <p className="text-label">Add photo</p>

@@ -112,8 +112,8 @@ export function Step2() {
           </div>
 
           {readingsOpen ? (
-            <div className="flex w-full flex-col gap-sm">
-              <div className="w-full rounded-xs bg-surface p-md shadow-card">
+            <div className="flex w-full flex-col gap-sm lg:flex-row">
+              <div className="w-full rounded-xs bg-surface p-md shadow-card lg:min-w-0 lg:flex-1">
                 <div className="flex w-full flex-col gap-md">
                   <p className="text-h2 text-ink">Airflow / Temperature</p>
                   <div className="flex w-full gap-2xs">
@@ -128,7 +128,7 @@ export function Step2() {
                   </div>
                 </div>
               </div>
-              <div className="w-full rounded-xs bg-surface p-md shadow-card">
+              <div className="w-full rounded-xs bg-surface p-md shadow-card lg:min-w-0 lg:flex-1">
                 <div className="flex w-full flex-col gap-md">
                   <p className="text-h2 text-ink">Electrical</p>
                   <div className="flex w-full gap-2xs">
@@ -143,7 +143,7 @@ export function Step2() {
                   </div>
                 </div>
               </div>
-              <div className="w-full rounded-xs bg-surface p-md shadow-card">
+              <div className="w-full rounded-xs bg-surface p-md shadow-card lg:min-w-0 lg:flex-1">
                 <div className="flex w-full flex-col gap-md">
                   <p className="text-h2 text-ink">Refrigerant / Cooling</p>
                   <div className="flex w-full gap-2xs">
@@ -164,14 +164,16 @@ export function Step2() {
               <p className="text-body text-ink-faint">
                 Airflow, electrical and refrigerant readings. Add them for maintenance calls — skip for service calls.
               </p>
-              <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full" onClick={() => setReadingsOpen(true)}>
-                Add readings
-              </Button>
+              <div className="flex w-full md:justify-end">
+                <Button variant="secondary" icon={<Plus size={16} strokeWidth={1.5} />} className="w-full md:w-[200px]" onClick={() => setReadingsOpen(true)}>
+                  Add readings
+                </Button>
+              </div>
             </div>
           )}
         </div>
 
-        <Section label="CONDITION CHECKS">
+        <Section label="CONDITION CHECKS" cardClassName="lg:w-2/3">
           <div className="grid w-full grid-cols-2 gap-2xs p-md">
             {CONDITION_PAIRS.map(({ key, good, issue }) => (
               <Fragment key={key}>

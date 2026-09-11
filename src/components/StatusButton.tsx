@@ -32,7 +32,7 @@ interface StatusButtonGridProps {
 
 export function StatusButtonGrid({ value, onChange }: StatusButtonGridProps) {
   return (
-    <div className="grid w-full grid-cols-2 gap-2xs">
+    <div className="grid w-full grid-cols-2 gap-2xs md:grid-cols-4">
       {STATUS_OPTIONS.map(({ color, label, description }) => {
         const selected = value === color
         return (
