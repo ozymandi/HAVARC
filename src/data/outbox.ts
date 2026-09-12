@@ -22,8 +22,11 @@ const notify = () => listeners.forEach((l) => l())
 let loaded: Promise<void> | null = null
 /** Reads the persisted queue once per app start. */
 export const loadOutbox = (): Promise<void> => {
-  loaded ??= idbGetAll<OutboxEntry>('outbox').then((list) => {
-    for (const entry of list ?? []) entries.set(entry.jobId, entry)
+  loaded ??= idbGetAll<OutboxEntry>('outbox').then(async (list) => {
+    for (const entry of list ?? []) {
+      if (!entry.jobId) await idbDelete('outbox', '') // a snapshot without an id can never be written
+      else entries.set(entry.jobId, entry)
+    }
     notify()
   })
   return loaded
@@ -40,6 +43,7 @@ export const getOutbox = (): OutboxEntry[] => [...entries.values()].sort((a, b) 
 export const getEntry = (jobId: string) => entries.get(jobId)
 
 export async function enqueueJob(draft: JobDraft, complete: boolean): Promise<OutboxEntry> {
+  if (!draft.jobId) throw new Error('Cannot queue a draft without a job id')
   await loadOutbox()
   const previous = entries.get(draft.jobId)
   const entry: OutboxEntry = {

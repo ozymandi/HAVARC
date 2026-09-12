@@ -1,4 +1,4 @@
-import { hasContent, readJobDraft } from './jobDraft'
+import { ensureJobId, hasContent, readJobDraft } from './jobDraft'
 import { enqueueJob } from './outbox'
 
 const AUTOSAVE_DELAY_MS = 1500
@@ -8,9 +8,9 @@ let timer: ReturnType<typeof setTimeout> | undefined
 /** Every write of the draft goes through the outbox (one entry per job, latest snapshot
  *  wins); the sync engine writes it to Supabase as soon as the network allows. */
 const queueDraft = async (complete = false) => {
-  const draft = readJobDraft()
-  if (!hasContent(draft)) return
-  await enqueueJob(draft, complete)
+  if (!hasContent(readJobDraft())) return
+  ensureJobId() // the id is minted at the first write, so every later snapshot targets the same row
+  await enqueueJob(readJobDraft(), complete)
 }
 
 /** Called on every draft change: (re)starts the autosave timer. */
@@ -30,7 +30,7 @@ export const flushDraft = async (): Promise<void> => {
  *  the entry is stored on the device — offline, the job shows Pending sync until it syncs. */
 export const completeDraft = async (): Promise<string> => {
   clearTimeout(timer)
-  const draft = readJobDraft()
-  const entry = await enqueueJob(draft, true)
+  ensureJobId()
+  const entry = await enqueueJob(readJobDraft(), true)
   return entry.jobId
 }

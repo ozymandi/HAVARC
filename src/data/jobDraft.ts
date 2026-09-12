@@ -336,8 +336,9 @@ export interface SavedJob {
  *  current status. Pure with respect to the on-screen draft — the sync engine decides what
  *  to feed back into it (the snapshot may belong to a job no longer being edited). */
 export async function saveJobDraft(input: JobDraft, complete = false): Promise<SavedJob> {
+  if (!input.jobId) throw new Error('Draft has no job id')
   const d = await uploadPending(input)
-  const jobId = d.jobId || crypto.randomUUID()
+  const jobId = d.jobId
   const {
     data: { session },
   } = await supabase.auth.getSession()
