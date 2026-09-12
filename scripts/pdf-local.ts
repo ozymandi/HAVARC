@@ -8,11 +8,11 @@ import { generatePdfs } from '../api/_pdf.js'
  * Reads VITE_SUPABASE_URL / SUPABASE_SECRET_KEY from .env.local; CHROME_PATH overrides the
  * browser. Writes the same files to Storage as production and copies them to outDir. */
 
-const env = Object.fromEntries(
+const env: Record<string, string> = Object.fromEntries(
   readFileSync('.env.local', 'utf8')
     .split(/\r?\n/)
     .filter((l) => l.includes('='))
-    .map((l) => l.split('=', 2).map((s) => s.trim())),
+    .map((l) => l.split('=', 2).map((s) => s.trim()) as [string, string]),
 )
 for (const [k, v] of Object.entries(env)) process.env[k] ??= v // SMTP_* for the documents email
 const [jobArg, outDir = '.'] = process.argv.slice(2)
