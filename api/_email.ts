@@ -13,10 +13,14 @@ export interface DocumentsEmail {
   to: string
   job: PdfJobRow
   company: PdfCompany
-  /** Where the app is served from — used for the logo in the email. */
+  /** Where the app is served from (kept for future links; the logo uses LOGO_URL). */
   origin: string
   attachments: { kind: PdfKind; filename: string; content: Uint8Array }[]
 }
+
+/** Same lockup as the password-reset email, always from the public app — a local run or a
+ *  protected preview deployment would otherwise hand Gmail an address it cannot load. */
+const LOGO_URL = `${process.env.APP_PUBLIC_URL ?? 'https://havarc.vercel.app'}/brand/header-lockup-big@3x.png`
 
 const money = (n: number) => `$${n.toFixed(2)}`
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c] as string)
@@ -76,7 +80,7 @@ const html = (mail: DocumentsEmail, rows: [string, string][]) => `<!doctype html
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#eef3f7;"><tr><td align="center" style="padding:32px 16px;">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:480px;background:#ffffff;border-radius:12px;overflow:hidden;">
   <tr><td align="center" style="background:#12365a;padding:28px 24px;">
-    <img src="${mail.origin}/brand/header-lockup-big@3x.png" width="172" height="122" alt="${esc(mail.company.name)}" style="display:block;width:172px;height:122px;margin:0 auto;">
+    <img src="${LOGO_URL}" width="172" height="122" alt="${esc(mail.company.name)}" style="display:block;width:172px;height:122px;margin:0 auto;">
   </td></tr>
   <tr><td style="padding:28px 24px 4px;">
     <div style="font-size:20px;line-height:28px;font-weight:600;color:#172530;">Service Report &amp; Invoice</div>
