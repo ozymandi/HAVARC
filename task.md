@@ -90,7 +90,9 @@ Frontend and desktop breakpoint are on prod (`2c6b5c8`, https://havarc.vercel.ap
 
 - Step 7 done (2026-09-12): Share sheet shares the real files. Rows = ready PDFs (from the `documents` bucket via signed URLs) + the job's photos, all on by default; Share fetches the selected files as `File`s (`WO-10029-service-report.pdf`, `WO-10029-invoice-646.pdf`, `WO-10029-photo-1.jpg`) and hands them to the system share sheet (Web Share API with files: Messages, Mail, WhatsApp, AirDrop); a browser without file sharing (desktop) downloads them instead. "Preparing…" while fetching, error line on failure, closing the system sheet is not an error. Verified on desktop (downloads); the phone path is Yaroslav's to try: Job Detail → Share PDFs → Share 3 files.
 
-Next: step 8 part 2 (email the PDFs after generation), step 9 remainder (Work performed checklist from step data), step 10 (tests, handover).
+- Step 8 part 2 done (2026-09-12): after a generation run the function emails both PDFs (`WO-…-service-report.pdf`, `WO-…-invoice-…pdf`) to Settings → notify email through the Brevo SMTP relay (`api/_email.ts`, nodemailer; SMTP_USER / SMTP_PASS / SMTP_SENDER added to Vercel for Production + Preview via `vercel env add`, password sensitive). Branded HTML with a summary table (customer, address, date, technician, final status, invoice number and total); `documents.emailed_at` stamped. Mail failures are logged in Vercel, never fail the PDFs. Verified locally end to end (WO-10029 → email to ozymandiuz@gmail.com, emailed_at set). notify_email is still the test address — switch to the client's in Settings row (`settings.notify_email`) at handover.
+
+Next: step 9 remainder (Work performed checklist from step data), step 10 (tests, handover).
 
 ### Handover (when the client is ready)
 
