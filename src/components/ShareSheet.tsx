@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Job } from '../data/mockJobs'
+import type { Job } from '../data/jobs'
 
 interface ShareItem {
   key: string

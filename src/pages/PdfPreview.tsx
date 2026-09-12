@@ -4,7 +4,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { TopBar } from '../components/TopBar'
 import { readDraft } from '../data/draft'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
-import { MOCK_JOBS } from '../data/mockJobs'
+import { useJob } from '../data/jobs'
 import { invoiceForJob, reportForJob, SAMPLE_INVOICE_ITEMS } from '../data/sampleReport'
 import { invoicePages } from '../pdf/InvoicePdf'
 import { PDF_HEIGHT, PDF_WIDTH, PdfSheet } from '../pdf/primitives'
@@ -17,7 +17,7 @@ import { serviceReportPages } from '../pdf/ServiceReport'
 export function PdfPreview({ kind }: { kind: 'report' | 'invoice' }) {
   const { id } = useParams()
   const navigate = useNavigate()
-  const job = MOCK_JOBS.find((j) => j.id === id)
+  const { data: job, loading } = useJob(id)
   const stackRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
 
@@ -29,8 +29,9 @@ export function PdfPreview({ kind }: { kind: 'report' | 'invoice' }) {
     const observer = new ResizeObserver(update)
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [job]) // the stack only mounts once the job has loaded
 
+  if (loading) return null
   if (!job) return <Navigate to="/jobs" replace />
 
   // The invoice editor keeps its edits in the draft store under the job id, so the preview

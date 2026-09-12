@@ -1,27 +1,39 @@
-import { MOCK_JOBS } from './mockJobs'
+import { useAsync } from '../hooks/useAsync'
+import { supabase } from '../lib/supabase'
 
 export interface Customer {
+  id: string
   name: string
   address: string
+  phone: string | null
+  /** Access codes etc. — auto-filled into the work order's Customer notes (client decision). */
+  notes: string | null
   previousJobs: number
   hasNotes: boolean
 }
 
-/** Derived from MOCK_JOBS rather than a separate hand-authored list — a customer's real
- *  "previous jobs" count and notes-on-file flag should always match what's actually in the
- *  job history, and deriving it avoids the two ever drifting out of sync. */
-const buildCustomers = (): Customer[] => {
-  const byName = new Map<string, Customer>()
-  for (const job of MOCK_JOBS) {
-    const existing = byName.get(job.customer)
-    if (existing) {
-      existing.previousJobs += 1
-      existing.hasNotes = existing.hasNotes || !!job.customerNotes
-    } else {
-      byName.set(job.customer, { name: job.customer, address: job.address, previousJobs: 1, hasNotes: !!job.customerNotes })
-    }
-  }
-  return [...byName.values()]
+interface CustomerRow {
+  id: string
+  name: string
+  address: string
+  phone: string | null
+  notes: string | null
+  jobs: { count: number }[]
 }
 
-export const CUSTOMERS: Customer[] = buildCustomers()
+/** Customers with their job count, for the Step 1 suggestions list. */
+export async function fetchCustomers(): Promise<Customer[]> {
+  const { data, error } = await supabase.from('customers').select('id, name, address, phone, notes, jobs(count)').order('name')
+  if (error) throw error
+  return (data as unknown as CustomerRow[]).map((c) => ({
+    id: c.id,
+    name: c.name,
+    address: c.address,
+    phone: c.phone,
+    notes: c.notes,
+    previousJobs: c.jobs[0]?.count ?? 0,
+    hasNotes: !!c.notes?.trim(),
+  }))
+}
+
+export const useCustomers = () => useAsync(fetchCustomers, 'customers')

@@ -67,9 +67,19 @@ Equipment history, configurable required fields, dynamic sections by equipment t
 
 See `team.md`. Propose before implementing; estimates in hours only; the designer verifies every result.
 
-## Next steps
+## Status (2026-09-12)
 
-1. Export Figma variables to `src/styles/tokens.css` + Tailwind config.
-2. Scaffold Vite app, PWA shell, routing per screen groups above.
-3. Supabase schema + RLS, then screens in the order: Login → Jobs → Steps 1–4 → Job Detail → Invoice → Settings.
-4. PDF templates (Letter) in edge function.
+Frontend and desktop breakpoint are on prod (`2c6b5c8`, https://havarc.vercel.app). Backend in progress per `docs/backend-plan.md`:
+
+- Step 1 done: schema, RLS, grants, buckets, seed applied to Supabase project `ldpxlkhppyzomejrjarf` (commit `daee86c`).
+- Step 2 done: supabase-js client (`src/lib/supabase.ts`), session provider + `RequireAuth` route guard (`src/auth/`), real Login (01b wrong-password state from the Supabase error), Reset password → recovery email → Set new password, Change password (current password re-checked by signing in), Sign out. Jobs, Job Detail, PDF preview, Invoice editor, Step 1 customer suggestions / next WO number and Settings (debounced autosave, logo to Storage) read from the DB; `mockJobs.ts` is gone. Delete job removes the row and its Storage files.
+- Verified in the browser without a session: `/jobs` bounces to Login, wrong credentials show the 01b error. Signed-in screens (Jobs list from seed, Job Detail, Settings autosave) still need a manual pass with a real account (`secrets/accounts.txt`).
+
+Next: step 3 — writing a job (Complete on Step 4, draft autosave, photos and signatures to Storage, Edit job, invoice save).
+
+### Open items before step 3 / deploy
+
+1. Supabase Auth → URL Configuration: set Site URL to `https://havarc.vercel.app` and add Redirect URLs `https://havarc.vercel.app/reset-password` and `http://localhost:5173/reset-password`. Without this the recovery link lands on the default Site URL.
+2. Vercel project env: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (values in `.env.local`). The app throws at startup without them, so this must precede the next push to `main`.
+3. Supabase built-in SMTP is limited to a few emails per hour and only to project members' addresses — fine for testing, but a custom SMTP / Resend sender is needed before the client uses Reset password (also the plan's step 8).
+4. Type generation (`supabase gen types`) could not reach the DB from this machine (direct host is IPv6-only, pooler connection also failed via the CLI); row types are hand-written in `src/data/*.ts` and must be kept in step with migrations.

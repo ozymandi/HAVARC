@@ -1,5 +1,5 @@
 import { AlertCircle, Building2, Clock, Plus } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
 import { BottomNav } from '../components/BottomNav'
@@ -10,18 +10,14 @@ import { EMPTY_EQUIPMENT, EquipmentCard, type Equipment } from '../components/Eq
 import { FormField } from '../components/FormField'
 import { Section } from '../components/Section'
 import { useDraftState } from '../data/draft'
-import { CUSTOMERS } from '../data/customers'
-import { MOCK_JOBS } from '../data/mockJobs'
+import { useCustomers, type Customer } from '../data/customers'
+import { fetchNextWorkOrder } from '../data/jobs'
 
 const SERVICE_TYPES = ['Preventive Maintenance', 'Diagnostic / Repair Call']
 const COMPLAINTS = ['No Cooling', 'No Heating', 'Water Leak', 'Airflow Issue', 'Noise / Vibration', 'Thermostat / Controls']
 
 const nowLabel = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
 const todayLabel = () => new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
-const nextWorkOrder = () => {
-  const max = Math.max(0, ...MOCK_JOBS.map((j) => Number(j.workOrder.replace('WO-', '')) || 0))
-  return `WO-${max + 1}`
-}
 
 /** Figma: 03 · Step 1 · Service Call & Equipment (100:3579), validation 03d (182:3282),
  *  discard confirm 03e (100:4142). Next doesn't advance yet — Step 2 isn't built. The
@@ -30,7 +26,7 @@ const nextWorkOrder = () => {
 export function Step1() {
   const navigate = useNavigate()
 
-  const [workOrder, setWorkOrder] = useDraftState('step1.workOrder', nextWorkOrder)
+  const [workOrder, setWorkOrder] = useDraftState('step1.workOrder', '')
   const [date, setDate] = useDraftState('step1.date', todayLabel)
   const [technician, setTechnician] = useDraftState('step1.technician', 'T. Holloway')
   const [showErrors, setShowErrors] = useState(false)
@@ -47,18 +43,37 @@ export function Step1() {
   const [complaintDetails, setComplaintDetails] = useDraftState('step1.complaintDetails', '')
   const [equipment, setEquipment] = useDraftState<Equipment[]>('step1.equipment', [EMPTY_EQUIPMENT('unit-1')])
 
+  // The next work-order number comes from the jobs table; only fill it while the draft
+  // has none, so a number the technician typed (or a resumed draft) is never overwritten.
+  useEffect(() => {
+    if (workOrder) return
+    let active = true
+    fetchNextWorkOrder().then(
+      (next) => {
+        if (active) setWorkOrder((prev) => prev || next)
+      },
+      () => {},
+    )
+    return () => {
+      active = false
+    }
+  }, [workOrder, setWorkOrder])
+
+  const { data: customers } = useCustomers()
+
   const toggleComplaint = (c: string) => setComplaints((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
 
   const updateEquipment = (id: string, value: Equipment) => setEquipment((prev) => prev.map((u) => (u.id === id ? value : u)))
   const removeEquipment = (id: string) => setEquipment((prev) => prev.filter((u) => u.id !== id))
   const addEquipment = () => setEquipment((prev) => [...prev, EMPTY_EQUIPMENT(`unit-${prev.length + 1}`)])
 
-  const customerMatches = customer.trim() ? CUSTOMERS.filter((c) => c.name.toLowerCase().includes(customer.trim().toLowerCase())) : []
+  const customerMatches = customer.trim() ? (customers ?? []).filter((c) => c.name.toLowerCase().includes(customer.trim().toLowerCase())) : []
   const showSuggestions = customerFocused && customer.trim().length > 0
 
-  const selectCustomer = (c: (typeof CUSTOMERS)[number]) => {
+  const selectCustomer = (c: Customer) => {
     setCustomer(c.name)
     setAddress(c.address)
+    if (c.notes) setCustomerNotes(c.notes) // per-customer notes auto-fill every work order (client decision)
     setCustomerFocused(false)
   }
 

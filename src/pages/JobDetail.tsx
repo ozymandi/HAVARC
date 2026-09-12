@@ -11,8 +11,9 @@ import { PhotoTile } from '../components/PhotoTile'
 import { Section } from '../components/Section'
 import { ShareSheet } from '../components/ShareSheet'
 import { StatusBanner } from '../components/StatusBanner'
+import { SyncBanner } from '../components/SyncBanner'
 import { TopBar } from '../components/TopBar'
-import { MOCK_JOBS, removeJob } from '../data/mockJobs'
+import { deleteJob, useJob } from '../data/jobs'
 
 const badgeClass: Record<'draft' | 'completed' | 'pending', string> = {
   draft: 'bg-warning-soft text-warning',
@@ -24,17 +25,41 @@ const badgeLabel = { draft: 'Draft', completed: 'Completed', pending: 'Pending s
 
 /** Figma: 08 · Job Detail (100:3229). Summary/status/documents/photos only render once the
  *  job has gone through Step 4 · Complete Service Call — a draft or pending job simply
- *  doesn't have that data yet. */
+ *  doesn't have that data yet. Documents appear once the PDF generator has written them
+ *  (backend step 6), so until then completed jobs have no Documents section or Share button. */
 export function JobDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const job = MOCK_JOBS.find((j) => j.id === id)
+  const { data: job, loading, error, reload } = useJob(id)
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteFailed, setDeleteFailed] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
 
-  if (!job) return <Navigate to="/jobs" replace />
+  if (!loading && !error && !job) return <Navigate to="/jobs" replace />
+  if (!job) {
+    return (
+      <div className="flex min-h-svh flex-col bg-canvas">
+        <TopBar variant="child" title="" onBack={() => navigate(-1)} />
+        {error && <SyncBanner state="error" message="Couldn't load this job — tap to retry" onRetry={reload} />}
+      </div>
+    )
+  }
+
+  const confirmDelete = async () => {
+    setDeleting(true)
+    setDeleteFailed(false)
+    try {
+      await deleteJob(job.id)
+      navigate('/jobs', { replace: true })
+    } catch {
+      setDeleting(false)
+      setConfirmingDelete(false)
+      setDeleteFailed(true)
+    }
+  }
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
@@ -46,6 +71,7 @@ export function JobDetail() {
         action={<MoreHorizontal size={24} strokeWidth={1.5} />}
         onAction={() => setMenuOpen(true)}
       />
+      {deleteFailed && <SyncBanner state="error" message="Couldn't delete this job — tap to retry" onRetry={() => setConfirmingDelete(true)} />}
 
       <div className="app-col flex flex-1 flex-col gap-lg p-lg pb-5xl">
         {/* Desktop (320:15062): head block and status banner side by side (358px each, banner
@@ -150,13 +176,14 @@ export function JobDetail() {
           }
           title="Delete this job?"
           message={`${job.workOrder} · ${job.customer}, its service report, invoice and photos will be permanently removed on all devices.`}
-          primaryLabel="Delete job"
+          primaryLabel={deleting ? 'Deleting…' : 'Delete job'}
           onPrimary={() => {
-            removeJob(job.id)
-            navigate('/jobs')
+            if (!deleting) void confirmDelete()
           }}
           secondaryLabel="Cancel"
-          onSecondary={() => setConfirmingDelete(false)}
+          onSecondary={() => {
+            if (!deleting) setConfirmingDelete(false)
+          }}
         />
       )}
 

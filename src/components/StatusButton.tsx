@@ -1,15 +1,10 @@
 import { Check } from 'lucide-react'
+import { STATUS_OPTIONS } from '../data/status'
 import type { StatusColor } from './StatusBanner'
 
 /** Figma: Status Button (14:63) — "Final system status selector. Left-aligned, radius/sm.
  *  Selected: 1.5px stroke color/status/{color}-border + check top-right." Interactive
  *  4-color grid used on Step 4; StatusBanner (read-only, no picker) covers Job Detail. */
-const STATUS_OPTIONS: { color: StatusColor; label: string; description: string }[] = [
-  { color: 'green', label: 'Green', description: 'Operating Normally' },
-  { color: 'yellow', label: 'Yellow', description: 'Repairs Recommended' },
-  { color: 'orange', label: 'Orange', description: 'Limited Operation' },
-  { color: 'red', label: 'Red', description: 'Not Operational' },
-]
 
 const bgClass: Record<StatusColor, string> = {
   green: 'bg-status-green',

@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { RequireAuth } from './auth/AuthProvider'
 import { ChangePassword } from './pages/ChangePassword'
 import { CheckEmail } from './pages/CheckEmail'
 import { ForgotPassword } from './pages/ForgotPassword'
@@ -27,18 +28,22 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/forgot-password/check-email" element={<CheckEmail />} />
-          <Route path="/reset-password" element={<SetNewPassword />} />
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/jobs/new" element={<Step1 />} />
-          <Route path="/jobs/new/step-2" element={<Step2 />} />
-          <Route path="/jobs/new/step-3" element={<Step3 />} />
-          <Route path="/jobs/new/step-4" element={<Step4 />} />
-          <Route path="/jobs/:id" element={<JobDetail />} />
-          <Route path="/jobs/:id/invoice" element={<InvoiceEditorPage />} />
-          <Route path="/jobs/:id/invoice/pdf" element={<PdfPreview kind="invoice" />} />
-          <Route path="/jobs/:id/report" element={<PdfPreview kind="report" />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/settings/change-password" element={<ChangePassword />} />
+          {/* Everything below needs a Supabase session; RequireAuth bounces to Login otherwise.
+              /reset-password is included: the emailed recovery link arrives with a session. */}
+          <Route element={<RequireAuth />}>
+            <Route path="/reset-password" element={<SetNewPassword />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/jobs/new" element={<Step1 />} />
+            <Route path="/jobs/new/step-2" element={<Step2 />} />
+            <Route path="/jobs/new/step-3" element={<Step3 />} />
+            <Route path="/jobs/new/step-4" element={<Step4 />} />
+            <Route path="/jobs/:id" element={<JobDetail />} />
+            <Route path="/jobs/:id/invoice" element={<InvoiceEditorPage />} />
+            <Route path="/jobs/:id/invoice/pdf" element={<PdfPreview kind="invoice" />} />
+            <Route path="/jobs/:id/report" element={<PdfPreview kind="report" />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/settings/change-password" element={<ChangePassword />} />
+          </Route>
           <Route path="/" element={<Navigate to="/splash" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

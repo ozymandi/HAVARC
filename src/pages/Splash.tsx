@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../auth/context'
 import { SplashLogo } from '../components/SplashLogo'
 
 /** Figma: 00 · Login (166:8077) — full-bleed brand splash, shown briefly on cold start
@@ -11,15 +12,21 @@ import { SplashLogo } from '../components/SplashLogo'
  *  in staggered) — the timeout below is long enough for that ~1.6s animation to finish
  *  before navigating away, longer than the old static 1200ms display.
  *
- *  There's no real session to check yet, so this just times out to Login after a beat —
- *  once Supabase auth exists, this becomes "check session, then route to /login or /jobs". */
+ *  Routing waits for both: the intro to finish and the persisted Supabase session to be
+ *  read — then Jobs if someone is signed in, Login otherwise. */
 export function Splash() {
   const navigate = useNavigate()
+  const { session, loading } = useAuth()
+  const [introDone, setIntroDone] = useState(false)
 
   useEffect(() => {
-    const timer = setTimeout(() => navigate('/login', { replace: true }), 2000)
+    const timer = setTimeout(() => setIntroDone(true), 2000)
     return () => clearTimeout(timer)
-  }, [navigate])
+  }, [])
+
+  useEffect(() => {
+    if (introDone && !loading) navigate(session ? '/jobs' : '/login', { replace: true })
+  }, [introDone, loading, session, navigate])
 
   return (
     <div className="relative flex h-svh flex-col items-center overflow-hidden px-md pb-2xl">

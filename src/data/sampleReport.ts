@@ -1,7 +1,7 @@
 import type { LineItem } from '../components/LineItemRow'
 import type { InvoicePdfData, PdfEquipment, ReportData } from '../pdf/types'
 import type { InvoiceData } from './invoice'
-import type { Job } from './mockJobs'
+import type { Job } from './jobs'
 
 /** The worked example from the Figma PDF templates (WO-10031 · Brenda Johnson). Until jobs
  *  carry full step data from the backend, a job's PDFs are this sample with the job's own

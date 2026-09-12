@@ -8,7 +8,7 @@ import { InstallSheet } from '../components/InstallSheet'
 import { JobCard, type JobStatus } from '../components/JobCard'
 import { SyncBanner } from '../components/SyncBanner'
 import { TopBar } from '../components/TopBar'
-import { MOCK_JOBS } from '../data/mockJobs'
+import { useJobs } from '../data/jobs'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
 
 type Filter = 'all' | JobStatus
@@ -25,13 +25,14 @@ export function Jobs() {
   const [filter, setFilter] = useState<Filter>('all')
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const { data: allJobs, loading, error, reload } = useJobs()
 
   const jobs = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return MOCK_JOBS.filter((j) => filter === 'all' || j.status === filter).filter(
-      (j) => !q || j.workOrder.toLowerCase().includes(q) || j.customer.toLowerCase().includes(q) || j.meta.toLowerCase().includes(q),
-    )
-  }, [filter, query])
+    return (allJobs ?? [])
+      .filter((j) => filter === 'all' || j.status === filter)
+      .filter((j) => !q || j.workOrder.toLowerCase().includes(q) || j.customer.toLowerCase().includes(q) || j.meta.toLowerCase().includes(q))
+  }, [allJobs, filter, query])
 
   const today = jobs.filter((j) => j.group === 'today')
   const earlier = jobs.filter((j) => j.group === 'earlier')
@@ -40,6 +41,7 @@ export function Jobs() {
     <div className="flex min-h-svh flex-col bg-canvas">
       <TopBar variant="root" onAction={() => navigate('/settings')} />
       {!online && <SyncBanner state="offline" message="Offline — changes are saved on this device and will sync when connected" />}
+      {online && error && <SyncBanner state="error" message="Couldn't load jobs — tap to retry" onRetry={reload} />}
 
       <div className="app-col flex flex-1 flex-col gap-lg px-lg pb-5xl pt-lg">
         {searchOpen ? (
@@ -84,7 +86,7 @@ export function Jobs() {
           </>
         )}
 
-        {jobs.length === 0 ? (
+        {loading || error ? null : jobs.length === 0 ? (
           <div className="flex flex-1 flex-col items-center gap-2xl pt-3xl text-center">
             {query || filter !== 'all' ? (
               <img src="/images/illustrations/no-matches.webp" srcSet="/images/illustrations/no-matches.webp 1x, /images/illustrations/no-matches@2x.webp 2x" alt="" className="h-auto w-[188px]" />

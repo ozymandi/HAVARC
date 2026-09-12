@@ -10,7 +10,7 @@ import { TotalsRow } from '../components/TotalsRow'
 import { TopBar } from '../components/TopBar'
 import { useDraftState } from '../data/draft'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
-import { MOCK_JOBS } from '../data/mockJobs'
+import { useJob } from '../data/jobs'
 import { SAMPLE_INVOICE_ITEMS } from '../data/sampleReport'
 
 const money = (n: number) => `$${n.toFixed(2)}`
@@ -179,12 +179,13 @@ export function InvoiceEditor({ workOrder, billTo, value, onChange, onBack, onSa
 export function InvoiceEditorPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const job = MOCK_JOBS.find((j) => j.id === id)
+  const { data: job, loading } = useJob(id)
 
   // Kept in the draft store (keyed by job id) rather than component state so the PDF
   // preview route shows the edited items, not the seed rows.
   const [invoice, setInvoice] = useDraftState<InvoiceData>(`invoice.${id}`, () => ({ ...EMPTY_INVOICE, items: SAMPLE_INVOICE_ITEMS }))
 
+  if (loading) return null
   if (!job) return <Navigate to="/jobs" replace />
 
   return (
