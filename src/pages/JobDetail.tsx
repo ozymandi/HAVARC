@@ -1,5 +1,5 @@
 import { MoreHorizontal, Share } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { ActionMenu } from '../components/ActionMenu'
 import { Button } from '../components/Button'
@@ -15,6 +15,7 @@ import { SyncBanner } from '../components/SyncBanner'
 import { TopBar } from '../components/TopBar'
 import { loadJobIntoDraft } from '../data/jobDraft'
 import { deleteJob, useJob } from '../data/jobs'
+import { useSyncState } from '../data/sync'
 
 const badgeClass: Record<'draft' | 'completed' | 'pending', string> = {
   draft: 'bg-warning-soft text-warning',
@@ -32,6 +33,13 @@ export function JobDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: job, loading, error, reload } = useJob(id)
+  const sync = useSyncState()
+  // Pending sync → Completed happens here without leaving the screen.
+  const mounted = useRef(false)
+  useEffect(() => {
+    if (mounted.current) reload()
+    mounted.current = true
+  }, [sync.pending, sync.lastSyncAt, reload])
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)

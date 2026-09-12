@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
+import { startSyncEngine, stopSyncEngine } from '../data/sync'
 import { supabase } from '../lib/supabase'
 import { AuthContext, useAuth, type AuthState } from './context'
 
@@ -22,6 +23,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.subscription.unsubscribe()
     }
   }, [])
+
+  // The outbox can only be written to Supabase with a session (RLS), so the sync engine
+  // runs exactly while someone is signed in.
+  useEffect(() => {
+    if (state.session) startSyncEngine()
+    else stopSyncEngine()
+  }, [state.session])
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>
 }

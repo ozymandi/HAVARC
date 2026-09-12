@@ -12,7 +12,6 @@ import { Section } from '../components/Section'
 import { SignatureCapture } from '../components/SignatureCapture'
 import type { StatusColor } from '../components/StatusBanner'
 import { StatusButtonGrid } from '../components/StatusButton'
-import { SyncBanner } from '../components/SyncBanner'
 import { clearDraft, readDraft, useDraftState } from '../data/draft'
 import { completeDraft } from '../data/draftSync'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
@@ -35,8 +34,8 @@ const joinOr = (values: string[], fallback: string) => (values.length ? values.j
 
 /** Figma: 06 · Step 4 · Complete Service Call (100:3943), success state
  *  06b · Step 4 · Job saved (100:4004). Photos are compressed and uploaded as they are
- *  added, signatures when they are drawn; Complete uploads anything that failed, then
- *  writes the whole job as completed through the same queue as autosave. */
+ *  added, signatures when they are drawn; anything that fails to upload stays on the
+ *  device and goes with the job through the outbox when Complete queues it. */
 export function Step4() {
   const navigate = useNavigate()
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -48,7 +47,6 @@ export function Step4() {
   const [signing, setSigning] = useState<Signer>(null)
   const [saved, setSaved] = useState(false)
   const [completing, setCompleting] = useState(false)
-  const [completeFailed, setCompleteFailed] = useState(false)
   const { data: settings } = useSettings()
 
   // Desktop rule (Yaroslav 2026-09-11): with a mouse there's no drawing overlay — the slot
@@ -111,15 +109,14 @@ export function Step4() {
     setSignature(signatureTarget, await readFileAsDataUrl(file))
   }
 
+  // Queues the job as completed; the sync engine writes it when the network allows and
+  // the Jobs list shows Pending sync / Syncing / Sync error meanwhile.
   const complete = async () => {
     setCompleting(true)
-    setCompleteFailed(false)
     applyDefaultTax()
     try {
       await completeDraft()
       setSaved(true)
-    } catch {
-      setCompleteFailed(true)
     } finally {
       setCompleting(false)
     }
@@ -162,7 +159,6 @@ export function Step4() {
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
       <AppHeader step={4} title="Complete Service Call" onExit={() => void exitDraft(navigate)} />
-      {completeFailed && <SyncBanner state="error" message="Couldn't save the job — check your connection and tap to retry" onRetry={() => void complete()} />}
 
       <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         <Section label="FINAL SYSTEM STATUS">

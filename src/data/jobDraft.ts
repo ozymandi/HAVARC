@@ -1,7 +1,7 @@
 import type { Equipment } from '../components/EquipmentCard'
 import type { StatusColor } from '../components/StatusBanner'
 import { supabase } from '../lib/supabase'
-import { loadDraft, readDraft, setDraftValue } from './draft'
+import { loadDraft, readDraft, readPersistedDraft, restoreDraft, setDraftValue } from './draft'
 import { EMPTY_INVOICE, type InvoiceData } from './invoice'
 import { saveInvoice, type JobStatusValue } from './jobs'
 
@@ -77,6 +77,8 @@ export interface JobDraft {
   jobId: string
   status: JobStatusValue
   completedAt: string | null
+  /** Server `updated_at` this edit started from (Edit job); null for a job born here. */
+  updatedAt: string | null
   workOrder: string
   date: string
   technician: string
@@ -123,6 +125,7 @@ export const readJobDraft = (): JobDraft => ({
   jobId: readDraft('job.id', ''),
   status: readDraft<JobStatusValue>('job.status', 'draft'),
   completedAt: readDraft<string | null>('job.completedAt', null),
+  updatedAt: readDraft<string | null>('job.updatedAt', null),
   workOrder: readDraft('step1.workOrder', ''),
   date: readDraft('step1.date', ''),
   technician: readDraft('step1.technician', ''),
@@ -292,9 +295,6 @@ async function uploadPending(d: JobDraft): Promise<JobDraft> {
   if (!techSignaturePath && d.techSignature?.startsWith('data:')) {
     techSignaturePath = await uploadSignatureData(d.jobId, 'technician', d.techSignature)
   }
-  if (photos.some((p, i) => p !== d.photos[i])) setDraftValue('step4.photos', photos)
-  if (customerSignaturePath !== d.customerSignaturePath) setDraftValue('job.customerSignaturePath', customerSignaturePath)
-  if (techSignaturePath !== d.techSignaturePath) setDraftValue('job.techSignaturePath', techSignaturePath)
   return { ...d, photos, customerSignaturePath, techSignaturePath }
 }
 
@@ -324,11 +324,20 @@ const readingsRow = (r: Readings, c: Conditions) => ({
   heating_check: c.heating,
 })
 
-/** Writes the whole draft: the job row plus every child table. `complete` marks the job completed and stamps the final-status / signature fields;
- *  otherwise the row keeps its current status. */
-export async function saveJobDraft(input: JobDraft, complete = false): Promise<string> {
-  const d = complete ? await uploadPending(input) : input
-  const jobId = d.jobId || ensureJobId()
+export interface SavedJob {
+  jobId: string
+  /** The draft as written: uploaded paths, final status and the server's new updated_at. */
+  draft: JobDraft
+  updatedAt: string
+}
+
+/** Writes the whole draft: the job row plus every child table. `complete` marks the job
+ *  completed and stamps the final-status / signature fields; otherwise the row keeps its
+ *  current status. Pure with respect to the on-screen draft — the sync engine decides what
+ *  to feed back into it (the snapshot may belong to a job no longer being edited). */
+export async function saveJobDraft(input: JobDraft, complete = false): Promise<SavedJob> {
+  const d = await uploadPending(input)
+  const jobId = d.jobId || crypto.randomUUID()
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -336,7 +345,9 @@ export async function saveJobDraft(input: JobDraft, complete = false): Promise<s
   const status: JobStatusValue = complete ? 'completed' : d.status
   const completedAt = complete ? (d.completedAt ?? new Date().toISOString()) : d.completedAt
 
-  const { error: jobError } = await supabase.from('jobs').upsert({
+  const { data: written, error: jobError } = await supabase
+    .from('jobs')
+    .upsert({
     id: jobId,
     work_order: d.workOrder.trim() || `WO-${jobId.slice(0, 8)}`,
     customer_id: customerId,
@@ -359,7 +370,9 @@ export async function saveJobDraft(input: JobDraft, complete = false): Promise<s
     technician_signature_path: d.techSignaturePath,
     completed_at: completedAt,
     created_by: session?.user.id ?? null,
-  })
+    })
+    .select('updated_at')
+    .single()
   if (jobError) throw jobError
 
   // Children are replaced wholesale: a draft is small and this keeps positions and
@@ -410,16 +423,36 @@ export async function saveJobDraft(input: JobDraft, complete = false): Promise<s
     if (photoError) throw photoError
   }
 
-  if (complete) {
-    setDraftValue('job.status', status)
-    setDraftValue('job.completedAt', completedAt)
-  }
-  return jobId
+  return { jobId, draft: { ...d, jobId, status, completedAt, updatedAt: written.updated_at }, updatedAt: written.updated_at }
+}
+
+/* ------------------------------------------------------------------ persisted draft (reload) */
+let hydrated: Promise<void> | null = null
+/** Restores the draft persisted by the store (draft.ts) after a reload. Object URLs of
+ *  photos die with the page, so they are rebuilt from the kept blob, or from a signed URL
+ *  when the file is already in Storage (best effort — offline the tile stays empty). */
+export const hydrateDraft = (): Promise<void> => {
+  hydrated ??= (async () => {
+    const stored = await readPersistedDraft()
+    if (!stored) return
+    const photos = (stored['step4.photos'] as DraftPhoto[] | undefined) ?? []
+    const rebuilt = await Promise.all(
+      photos.map(async (p) => {
+        if (p.blob) return { ...p, url: URL.createObjectURL(p.blob) }
+        if (!p.path) return { ...p, url: '' }
+        const { data } = await supabase.storage.from('photos').createSignedUrl(p.path, 60 * 60)
+        return { ...p, url: data?.signedUrl ?? '' }
+      }),
+    ).catch(() => photos)
+    restoreDraft({ ...stored, 'step4.photos': rebuilt })
+  })()
+  return hydrated
 }
 
 /* ------------------------------------------------------------------ read back (Edit job) */
 interface StoredJob {
   id: string
+  updated_at: string
   work_order: string
   customer_name: string
   address: string
@@ -485,7 +518,7 @@ export async function loadJobIntoDraft(jobId: string): Promise<void> {
   const { data, error } = await supabase
     .from('jobs')
     .select(
-      `id, work_order, customer_name, address, unit_suite, technician, job_date, arrival_time, departure_time, service_type,
+      `id, updated_at, work_order, customer_name, address, unit_suite, technician, job_date, arrival_time, departure_time, service_type,
        complaints, complaint_details, customer_notes, status, final_status, customer_rep_name, customer_signature_path,
        technician_signature_path, completed_at,
        equipment(position, equipment_id, location, type, manufacturer, model, serial, tonnage, refrigerant, voltage, filter_size),
@@ -554,6 +587,7 @@ export async function loadJobIntoDraft(jobId: string): Promise<void> {
     'job.id': job.id,
     'job.status': job.status,
     'job.completedAt': job.completed_at,
+    'job.updatedAt': job.updated_at,
     'job.customerSignaturePath': job.customer_signature_path,
     'job.techSignaturePath': job.technician_signature_path,
     'step1.workOrder': job.work_order,

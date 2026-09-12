@@ -2,7 +2,10 @@ import type { JobStatus } from '../components/JobCard'
 import type { StatusColor } from '../components/StatusBanner'
 import { useAsync } from '../hooks/useAsync'
 import { supabase } from '../lib/supabase'
+import { readCache, withCache } from './cache'
 import type { InvoiceData } from './invoice'
+import type { JobDraft } from './jobDraft'
+import { getEntry, getOutbox, loadOutbox } from './outbox'
 import { statusOption } from './status'
 
 export type JobStatusValue = JobStatus
@@ -213,23 +216,64 @@ const toDetailJob = async (row: JobDetailRow, today: string): Promise<Job> => {
   }
 }
 
+/** A job that exists only in the outbox so far (created offline), shaped for the list
+ *  and the lighter Job Detail. Completed offline it already shows its final status. */
+const jobFromDraft = (d: JobDraft, today: string): Job => {
+  const m = d.date.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/)
+  const isoDate = m ? `${m[3].length === 2 ? `20${m[3]}` : m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}` : today
+  return {
+    id: d.jobId,
+    workOrder: d.workOrder || 'WO-…',
+    customer: d.customer,
+    address: d.address,
+    meta: `${d.address} · ${shortDate(isoDate)}`,
+    status: 'pending',
+    group: isoDate === today ? 'today' : 'earlier',
+    customerNotes: d.customerNotes || undefined,
+    finalStatus: d.finalStatus ? statusOption(d.finalStatus) : undefined,
+    phone: undefined,
+    invoice: d.invoice,
+  }
+}
+
 // ---------------------------------------------------------------- queries
+/** Server list (or the cached copy when offline), with the outbox laid over it: queued
+ *  jobs show as Pending sync, jobs created offline appear at the top. */
 export async function fetchJobs(): Promise<Job[]> {
-  const { data, error } = await supabase
-    .from('jobs')
-    .select(LIST_COLUMNS)
-    .order('job_date', { ascending: false })
-    .order('created_at', { ascending: false })
-  if (error) throw error
   const today = localIsoDate(new Date())
-  return (data as JobRow[]).map((row) => toListJob(row, today))
+  const [list] = await Promise.all([
+    withCache('jobs', async () => {
+      const { data, error } = await supabase
+        .from('jobs')
+        .select(LIST_COLUMNS)
+        .order('job_date', { ascending: false })
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return (data as JobRow[]).map((row) => toListJob(row, today))
+    }),
+    loadOutbox(),
+  ])
+  const queued = getOutbox()
+  const known = new Set(list.map((j) => j.id))
+  const pending = new Set(queued.map((e) => e.jobId))
+  const offlineOnly = queued.filter((e) => !known.has(e.jobId)).map((e) => jobFromDraft(e.draft, today))
+  return [...offlineOnly.reverse(), ...list.map((j) => (pending.has(j.id) ? { ...j, status: 'pending' as const } : j))]
 }
 
 export async function fetchJob(id: string): Promise<Job | null> {
-  const { data, error } = await supabase.from('jobs').select(DETAIL_COLUMNS).eq('id', id).maybeSingle()
-  if (error) throw error
-  if (!data) return null
-  return toDetailJob(data as unknown as JobDetailRow, localIsoDate(new Date()))
+  const today = localIsoDate(new Date())
+  const [job] = await Promise.all([
+    withCache<Job | null>(`job:${id}`, async () => {
+      const { data, error } = await supabase.from('jobs').select(DETAIL_COLUMNS).eq('id', id).maybeSingle()
+      if (error) throw error
+      if (!data) return null
+      return toDetailJob(data as unknown as JobDetailRow, today)
+    }),
+    loadOutbox(),
+  ])
+  const entry = getEntry(id)
+  if (!entry) return job
+  return job ? { ...job, status: 'pending' } : jobFromDraft(entry.draft, today)
 }
 
 /** Removes the row (cascades to equipment, readings, findings, invoice, documents, photos)
@@ -276,10 +320,14 @@ export async function saveInvoice(jobId: string, invoice: InvoiceData): Promise<
 /** "WO-10031" → "WO-10032". Work orders are short strings on a two-user table, so reading
  *  them all and taking the numeric max is simpler than a Postgres sequence for now. */
 export async function fetchNextWorkOrder(): Promise<string> {
-  const { data, error } = await supabase.from('jobs').select('work_order')
-  if (error) throw error
-  const numbers = (data as { work_order: string }[]).map((r) => Number(r.work_order.replace(/\D/g, '')) || 0)
-  return `WO-${Math.max(10000, ...numbers) + 1}`
+  const numbers = await withCache('workOrders', async () => {
+    const { data, error } = await supabase.from('jobs').select('work_order')
+    if (error) throw error
+    return (data as { work_order: string }[]).map((r) => Number(r.work_order.replace(/\D/g, '')) || 0)
+  }).catch(async () => ((await readCache<Job[]>('jobs')) ?? []).map((j) => Number(j.workOrder.replace(/\D/g, '')) || 0))
+  await loadOutbox()
+  const queued = getOutbox().map((e) => Number(e.draft.workOrder.replace(/\D/g, '')) || 0)
+  return `WO-${Math.max(10000, ...numbers, ...queued) + 1}`
 }
 
 // ---------------------------------------------------------------- hooks

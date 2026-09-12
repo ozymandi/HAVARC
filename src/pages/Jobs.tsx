@@ -1,8 +1,9 @@
 import { Plus, Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { ChoiceChip } from '../components/ChoiceChip'
+import { Dialog } from '../components/Dialog'
 import { Fab } from '../components/Fab'
 import { InstallSheet } from '../components/InstallSheet'
 import { JobCard, type JobStatus } from '../components/JobCard'
@@ -10,6 +11,7 @@ import { SyncBanner } from '../components/SyncBanner'
 import { TopBar } from '../components/TopBar'
 import { clearDraft } from '../data/draft'
 import { useJobs } from '../data/jobs'
+import { resolveConflict, runSync, useSyncState } from '../data/sync'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
 
 type Filter = 'all' | JobStatus
@@ -27,6 +29,17 @@ export function Jobs() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const { data: allJobs, loading, error, reload } = useJobs()
+  const sync = useSyncState()
+
+  // The list is a projection of server + outbox: re-read it whenever the queue changes
+  // size or a sync pass finishes (the hook already loads once on mount).
+  const mounted = useRef(false)
+  useEffect(() => {
+    if (mounted.current) reload()
+    mounted.current = true
+  }, [sync.pending, sync.lastSyncAt, reload])
+  const conflict = sync.conflict
+  const jobsWord = `${sync.pending} ${sync.pending === 1 ? 'job' : 'jobs'}`
   const newJob = () => {
     clearDraft() // a draft left behind by "Keep draft & exit" is resumed via Edit job, not here
     navigate('/jobs/new')
@@ -45,8 +58,11 @@ export function Jobs() {
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
       <TopBar variant="root" onAction={() => navigate('/settings')} />
+      {/* Figma 02e Syncing / 02f Sync error; offline wins over both. */}
       {!online && <SyncBanner state="offline" message="Offline — changes are saved on this device and will sync when connected" />}
-      {online && error && <SyncBanner state="error" message="Couldn't load jobs — tap to retry" onRetry={reload} />}
+      {online && sync.status === 'syncing' && <SyncBanner state="syncing" message={`Syncing ${jobsWord}…`} />}
+      {online && sync.status === 'error' && <SyncBanner state="error" message={`Couldn't sync ${jobsWord}. Tap to retry.`} onRetry={() => void runSync()} />}
+      {online && sync.status === 'idle' && error && <SyncBanner state="error" message="Couldn't load jobs — tap to retry" onRetry={reload} />}
 
       <div className="app-col flex flex-1 flex-col gap-lg px-lg pb-5xl pt-lg">
         {searchOpen ? (
@@ -137,6 +153,26 @@ export function Jobs() {
         <Fab label="New job" onClick={newJob} />
       </div>
       <InstallSheet />
+
+      {/* Figma 02g · Jobs · Sync conflict: the same job was edited on the other device. */}
+      {conflict && (
+        <Dialog
+          icon={
+            <img
+              src="/images/illustrations/dialog-sync.webp"
+              srcSet="/images/illustrations/dialog-sync.webp 1x, /images/illustrations/dialog-sync@2x.webp 2x"
+              alt=""
+              className="h-[140px] w-auto"
+            />
+          }
+          title="Sync conflict"
+          message={`${conflict.draft.workOrder || 'This job'} · ${conflict.draft.customer} was also edited on another device. Which version should be kept?`}
+          primaryLabel="Keep my version"
+          onPrimary={() => void resolveConflict(conflict.jobId, 'mine')}
+          secondaryLabel="Use the other version"
+          onSecondary={() => void resolveConflict(conflict.jobId, 'theirs')}
+        />
+      )}
     </div>
   )
 }

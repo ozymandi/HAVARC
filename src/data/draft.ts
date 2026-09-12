@@ -1,4 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react'
+import { idbGet, idbPut } from './idb'
 
 /** In-memory draft of the job being created in Steps 1–4. Each step used to keep purely
  *  local `useState`, so nothing survived navigating between steps and Step 4's Final Review
@@ -10,7 +11,26 @@ import { useCallback, useSyncExternalStore } from 'react'
 const values = new Map<string, unknown>()
 const listeners = new Set<() => void>()
 
-const notify = () => listeners.forEach((listener) => listener())
+const PERSIST_DELAY_MS = 300
+let persistTimer: ReturnType<typeof setTimeout> | undefined
+/** True once anything in this session has written the store; the persisted copy from a
+ *  previous session is only restored while this is still false. */
+let touched = false
+/** Mirrors the whole map into IndexedDB shortly after it changes, so a reload (or iOS
+ *  killing the PWA) resumes exactly where the technician was. Blobs clone into IDB as-is.
+ *  Whole-draft replacements (clear, load) are written at once, not debounced. */
+const persist = (immediate = false) => {
+  touched = true
+  clearTimeout(persistTimer)
+  const write = () => void idbPut('kv', 'draft', Object.fromEntries(values))
+  if (immediate) write()
+  else persistTimer = setTimeout(write, PERSIST_DELAY_MS)
+}
+
+const notify = (immediate = false) => {
+  persist(immediate)
+  listeners.forEach((listener) => listener())
+}
 const subscribe = (listener: () => void) => {
   listeners.add(listener)
   return () => {
@@ -46,7 +66,7 @@ export const readDraft = <T,>(key: string, fallback: T): T => (values.has(key) ?
 /** Called once the job is completed (Step 4 → Job saved) so the next "New job" starts clean. */
 export const clearDraft = () => {
   values.clear()
-  notify()
+  notify(true)
 }
 
 /** Write one key outside React (uploads finishing, ids being assigned). */
@@ -59,8 +79,32 @@ export const setDraftValue = (key: string, value: unknown) => {
 export const loadDraft = (entries: Record<string, unknown>) => {
   values.clear()
   for (const [key, value] of Object.entries(entries)) values.set(key, value)
-  notify()
+  notify(true)
 }
 
 /** Fires after every change; the autosave loop (DraftSync) hangs off this. */
 export const subscribeDraft = subscribe
+
+/* The sync engine writes server-side results (Storage paths, updated_at) back into the
+ * live draft. Those writes must not count as edits, or they would queue another sync. */
+let suppressed = false
+export const withoutAutosave = (fn: () => void) => {
+  suppressed = true
+  try {
+    fn()
+  } finally {
+    suppressed = false
+  }
+}
+export const isAutosaveSuppressed = () => suppressed
+
+/** The persisted map, if any — read once at start by `hydrateDraft` (jobDraft.ts). */
+export const readPersistedDraft = () => idbGet<Record<string, unknown>>('kv', 'draft')
+
+/** Restores persisted entries without re-persisting; skipped once this session has
+ *  written the store itself (a "New job" or "Edit job" that happened before the steps mounted). */
+export const restoreDraft = (entries: Record<string, unknown>) => {
+  if (touched || values.size > 0) return
+  for (const [key, value] of Object.entries(entries)) values.set(key, value)
+  listeners.forEach((listener) => listener())
+}

@@ -8,6 +8,7 @@ import { Section } from '../components/Section'
 import { SyncBanner } from '../components/SyncBanner'
 import { TopBar } from '../components/TopBar'
 import { logoUrl, saveSettings, uploadLogo, useSettings, type CompanySettings } from '../data/settings'
+import { relativeTime, useSyncState } from '../data/sync'
 import { useAsync } from '../hooks/useAsync'
 import { supabase } from '../lib/supabase'
 
@@ -21,6 +22,7 @@ export function Settings() {
   const navigate = useNavigate()
   const { session } = useAuth()
   const { data: saved, error: loadError, reload } = useSettings()
+  const sync = useSyncState()
 
   // The loaded row is the form until the first edit; edits then carry the full row.
   const [edits, setEdits] = useState<CompanySettings | null>(null)
@@ -156,7 +158,7 @@ export function Settings() {
           </div>
         </Section>
 
-        <p className="mt-auto w-full text-center text-caption text-ink-faint">Version 1.0.0 · Last sync 2 min ago</p>
+        <p className="mt-auto w-full text-center text-caption text-ink-faint">Version 1.0.0 · Last sync {relativeTime(sync.lastSyncAt)}</p>
       </div>
     </div>
   )
