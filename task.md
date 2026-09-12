@@ -88,7 +88,9 @@ Frontend and desktop breakpoint are on prod (`2c6b5c8`, https://havarc.vercel.ap
 
 - Step 9 item done early (2026-09-12): auto-reload on a new version. `registerSW` is called from `main.tsx` (registerType `autoUpdate` reloads once the new worker takes over) and the app checks for a new worker whenever it returns to the foreground and once an hour — found during the prod test, where an open tab kept running the previous bundle. Reloads are safe: draft and outbox live in IndexedDB.
 
-Next: step 7 — Share sheet with the real files (Web Share API on phones, downloads on desktop). Then step 8 part 2 (email the PDFs after generation), step 9 remainder (Work performed checklist from step data), step 10 (tests, handover).
+- Step 7 done (2026-09-12): Share sheet shares the real files. Rows = ready PDFs (from the `documents` bucket via signed URLs) + the job's photos, all on by default; Share fetches the selected files as `File`s (`WO-10029-service-report.pdf`, `WO-10029-invoice-646.pdf`, `WO-10029-photo-1.jpg`) and hands them to the system share sheet (Web Share API with files: Messages, Mail, WhatsApp, AirDrop); a browser without file sharing (desktop) downloads them instead. "Preparing…" while fetching, error line on failure, closing the system sheet is not an error. Verified on desktop (downloads); the phone path is Yaroslav's to try: Job Detail → Share PDFs → Share 3 files.
+
+Next: step 8 part 2 (email the PDFs after generation), step 9 remainder (Work performed checklist from step data), step 10 (tests, handover).
 
 ### Handover (when the client is ready)
 

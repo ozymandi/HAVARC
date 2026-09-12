@@ -59,9 +59,14 @@ export async function requestPdfs(jobId: string, kinds: PdfKind[] = ['report', '
   }).catch(() => undefined)
 }
 
-/** Opens a generated PDF from Storage in a new tab (signed URL, one hour). */
-export async function openStoredDocument(path: string): Promise<void> {
+/** Signed URL (one hour) for a generated PDF in the private `documents` bucket. */
+export async function documentUrl(path: string): Promise<string> {
   const { data, error } = await supabase.storage.from('documents').createSignedUrl(path, SIGNED_URL_TTL)
   if (error || !data) throw error ?? new Error('No URL')
-  window.open(data.signedUrl, '_blank', 'noopener')
+  return data.signedUrl
+}
+
+/** Opens a generated PDF in a new tab. */
+export async function openStoredDocument(path: string): Promise<void> {
+  window.open(await documentUrl(path), '_blank', 'noopener')
 }
