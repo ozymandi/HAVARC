@@ -134,9 +134,60 @@ export function buildInvoiceData(src: PdfSource): InvoicePdfData {
     discount: inv?.discount ?? 0,
     description: str(inv?.description),
     equipment: equipmentOf(job),
-    // The paper checklist has no in-app counterpart yet (backend plan, step 9).
-    workPerformed: [],
+    workPerformed: workPerformedFor(job),
   }
+}
+
+/** The invoice's WORK PERFORMED checklist is the client's paper form; the app has no
+ *  such step, so its ticks are derived from what the technician actually recorded:
+ *  repairs and findings (Step 3), readings and condition checks (Step 2), parts text and
+ *  the service type (Step 1). A Preventive Maintenance call ticks the routine checks. */
+export function workPerformedFor(job: PdfJobRow): string[] {
+  const ticks = new Set<string>()
+  const tick = (...labels: string[]) => labels.forEach((l) => ticks.add(l))
+  const f = one(job.findings)
+  const r = one(job.readings)
+  const has = (v: string | null | undefined) => !!v && v.trim() !== ''
+
+  if (job.service_type === 'Preventive Maintenance') {
+    tick('Checked Coils', 'Checked air filter', 'Checked Motors', 'Checked Electrical Connections', 'Checked Safety Controls', 'Checked thermostat')
+  }
+  if (job.complaints.includes('Thermostat / Controls')) tick('Checked thermostat')
+
+  for (const repair of f?.repairs ?? []) {
+    if (repair === 'Coil Cleaning') tick('Cleaned O/D Coil', 'Checked Coils')
+    if (repair === 'Refrigerant Added') tick('Adjusted Refrigerant', 'Checked Refrigerant')
+    if (repair === 'Leak Search') tick('Checked for Ref. Leaks', 'Checked Refrigerant')
+    if (repair === 'Electrical Repair') tick('Checked Electrical Connections')
+  }
+  for (const finding of f?.findings ?? []) {
+    if (finding === 'Dirty Condenser Coil' || finding === 'Dirty Evaporator Coil') tick('Checked Coils')
+    if (finding === 'Low Refrigerant') tick('Checked Refrigerant')
+    if (finding === 'Leak Suspected') tick('Checked for Ref. Leaks')
+    if (finding === 'Blower Motor Issue' || finding === 'Condenser Fan Motor Issue') tick('Checked Motors')
+    if (finding === 'Electrical / Wiring') tick('Checked Electrical Connections')
+    if (finding === 'Failed / Weak Capacitor' || finding === 'Failed / Burned Contactor') tick('Checked Electrical Connections', 'Amp Check')
+  }
+
+  const parts = (f?.parts ?? '').toLowerCase()
+  if (/filter/.test(parts)) tick('Changed air filter', 'Checked air filter')
+  if (/thermocouple/.test(parts)) tick('Replace Thermocouple')
+
+  if (r) {
+    if (r.filter_check) tick('Checked air filter')
+    if (r.heating_check) tick('Checked Heat Exchange')
+    if (has(r.incoming_v)) tick('Volt Check')
+    if (has(r.compressor_a) || has(r.cond_fan_a) || has(r.blower_a)) tick('Amp Check')
+    if (has(r.outdoor_f)) tick('Outdoor temp')
+    if (has(r.return_air)) tick('RA temp', 'Indoor temp')
+    if (has(r.supply_air)) tick('SA temp')
+    if (has(r.head_psig)) tick('Head PSIG')
+    if (has(r.suction_psig)) tick('Suction PSIG')
+    if (has(r.subcooling)) tick('Subcool')
+    if (has(r.superheat)) tick('Superheat Degrees F')
+    if (has(r.suction_psig) || has(r.head_psig) || has(r.superheat) || has(r.subcooling)) tick('Checked Refrigerant')
+  }
+  return [...ticks]
 }
 
 /* ------------------------------------------------------------------ print-route payload
