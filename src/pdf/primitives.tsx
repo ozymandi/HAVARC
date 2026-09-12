@@ -1,6 +1,7 @@
 import { Check, Mail, MapPin, Phone } from 'lucide-react'
 import { useContext, type CSSProperties, type ReactNode } from 'react'
-import { CompanyContext, splitFooterNote } from './company'
+import { CompanyContext } from './CompanyContext.js'
+import { splitFooterNote } from './company.js'
 
 /** Building blocks shared by the Service Report and Invoice templates (Figma page
  *  "PDF Templates Design", 213:3678). Every sheet is US Letter at 72 dpi: 612 × 792 px,

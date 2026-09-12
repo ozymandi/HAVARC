@@ -15,3 +15,6 @@ Thumbs.db
 
 # local secrets (db password, service keys) — never commit
 secrets/
+
+.vercel
+.env*

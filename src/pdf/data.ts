@@ -1,7 +1,7 @@
-import { statusOption } from '../data/status'
-import type { PdfCompany } from './company'
-import { one, type PdfJobRow } from './query'
-import type { InvoicePdfData, PdfEquipment, PdfReadings, PdfSignature, ReportData } from './types'
+import { statusOption } from '../data/status.js'
+import type { PdfCompany } from './company.js'
+import { one, type PdfJobRow } from './query.js'
+import type { InvoicePdfData, PdfEquipment, PdfReadings, PdfSignature, ReportData } from './types.js'
 
 /* Builds the data the PDF templates render from stored rows. Shared by the in-app
  * preview and the Vercel function, so both produce the same document. */

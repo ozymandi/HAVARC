@@ -1,5 +1,5 @@
-import type { LineItem } from '../components/LineItemRow'
-import type { StatusColor } from '../components/StatusBanner'
+import type { LineItem } from '../components/LineItemRow.js'
+import type { StatusColor } from '../components/StatusBanner.js'
 
 /** Data shapes the PDF templates render. They are deliberately independent of the mock
  *  `Job` list shape and of the step draft store — `sampleReport.ts` builds them from either,

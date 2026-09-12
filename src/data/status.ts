@@ -1,4 +1,4 @@
-import type { StatusColor } from '../components/StatusBanner'
+import type { StatusColor } from '../components/StatusBanner.js'
 
 /** The four final-system-status options (Figma Status Button 14:63). Shared by the Step 4
  *  picker and by Job Detail / PDFs, which turn a stored `final_status` back into its label. */

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import { CompanyContext } from '../pdf/company'
+import { CompanyContext } from '../pdf/CompanyContext'
 import { decodePdfPayload } from '../pdf/data'
 import { invoicePages } from '../pdf/InvoicePdf'
 import { PdfSheet } from '../pdf/primitives'

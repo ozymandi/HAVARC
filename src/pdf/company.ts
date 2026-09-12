@@ -1,5 +1,3 @@
-import { createContext } from 'react'
-
 /** Company block printed on every PDF: contacts in the hero, the footer line and the
  *  closing note. Name / contacts / note come from Settings; the slogan is brand copy. */
 export interface PdfCompany {
@@ -20,9 +18,6 @@ export const DEFAULT_COMPANY: PdfCompany = {
   footerNote: 'We appreciate your business! If you have any questions, please contact us at 678-750-0411.',
   slogan: ['QUALITY SERVICE.', 'COMFORT YOU CAN COUNT ON.'],
 }
-
-/** The PDF primitives read the company from here; PdfPreview and the print route provide it. */
-export const CompanyContext = createContext<PdfCompany>(DEFAULT_COMPANY)
 
 export interface CompanySettingsLike {
   company_name: string
