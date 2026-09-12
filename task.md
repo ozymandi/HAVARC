@@ -67,6 +67,21 @@ Equipment history, configurable required fields, dynamic sections by equipment t
 
 See `team.md`. Propose before implementing; estimates in hours only; the designer verifies every result.
 
+## Resume here (state as of 2026-09-12, end of day)
+
+**Where we are.** Backend plan steps 1–10 are done; the app is live at https://havarc.vercel.app and verified on phone, tablet and desktop. The client (Trey, via Denys on Fiverr) has been handed the app for a **test round** with the login `owner@havarc.com` (password in `secrets/accounts.txt`; that mailbox does not exist, so "Forgot password" for it is done by us — Supabase Dashboard → Authentication → Users, or a new account on his real email). The DB is the seed again (5 jobs, 5 customers, Storage empty, invoice counter 649). `settings.notify_email` = `info@havarcservices.com`, so every Complete emails the PDFs to the client's office.
+
+**Waiting on the client:** approval of the test; his work email (+ a second one if two technicians); the real next invoice number and prefix; DNS access for `havarcservices.com` (Brevo domain auth); a decision on accounts/plans (Vercel Hobby is non-commercial → Pro or his own account; Supabase Free pauses after 7 idle days). Client email draft with all of this was written on 2026-09-12 (chat).
+
+**On approval, in this order:** (1) create his account(s) on the real email(s), (2) clear his test jobs (see the cleanup recipe below), set `next_invoice_number` / `invoice_prefix` / `notify_email` / Settings email, (3) Brevo: authenticate his domain, switch `SMTP_SENDER`, `npm run config:push`, (4) transfers — Supabase project → his org, GitHub repo → his account (or keep + grant access), Vercel project → his account (env vars move along; add the SMTP vars if not), (5) after the transfer we lose access unless he adds us as members. Client quick guide: `docs/client-guide.md`.
+
+**How to work on this machine.** `npm run dev`; `npm run build` = `tsc -b && vite build` (Vercel runs the same, so api/ type errors break the deploy); `npm run gen:types` after migrations; `npm run db:push` (linked project, DB password from `secrets/password.txt`, `printf 'Y
+' |` for the prompt); `npm run config:diff` / `npm run config:push` (the push must be run by Yaroslav — the agent sandbox blocks it; template *content* changes don't show in the diff JSON but are pushed); Vercel CLI is logged in and linked (`npx vercel logs havarc.vercel.app --follow`, `npx vercel env ls`; never `vercel link` without `--project havarc`); `npx tsx scripts/pdf-local.ts WO-10029 <outDir>` renders PDFs with the desktop Chrome against the dev server and sends the email. Secrets: `.env.local` + `secrets/` (gitignored; audit on 2026-09-12 found nothing leaked in git history), Vercel env (Secret), Supabase server. `secrets/accounts.txt` password for `ozymandiuz@gmail.com` is stale (Yaroslav reset it).
+
+**Cleanup recipe (used 2026-09-12):** from a signed-in tab, REST as the user — delete Storage objects under `<jobId>/` in photos / signatures / documents, delete `jobs` rows (cascade), delete non-seed `customers`, `PATCH settings next_invoice_number`. Seed work orders are WO-10027…10031 and the five seed customers.
+
+**Watch on the next real completion:** PDF function stage timings in Vercel logs (`pdf <id> <stage> +ms`); a cold run once took ~3 min. If "browser launched" is slow, keep the function warm (cron ping) or move Chromium to `@sparticuz/chromium-min` with the binary in Storage.
+
 ## Status (2026-09-12)
 
 Frontend and desktop breakpoint are on prod (`2c6b5c8`, https://havarc.vercel.app). Backend in progress per `docs/backend-plan.md`:
