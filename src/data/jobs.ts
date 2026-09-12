@@ -123,7 +123,7 @@ const toListJob = (row: JobRow, today: string): Job => ({
   workOrder: row.work_order,
   customer: row.customer_name,
   address: row.address,
-  meta: `${row.address} · ${shortDate(row.job_date)}`,
+  meta: join([row.address, shortDate(row.job_date)], ' · '),
   status: row.status,
   group: row.job_date === today ? 'today' : 'earlier',
 })
@@ -226,7 +226,7 @@ const jobFromDraft = (d: JobDraft, today: string): Job => {
     workOrder: d.workOrder || 'WO-…',
     customer: d.customer,
     address: d.address,
-    meta: `${d.address} · ${shortDate(isoDate)}`,
+    meta: join([d.address, shortDate(isoDate)], ' · '),
     status: 'pending',
     group: isoDate === today ? 'today' : 'earlier',
     customerNotes: d.customerNotes || undefined,
@@ -320,14 +320,20 @@ export async function saveInvoice(jobId: string, invoice: InvoiceData): Promise<
 /** "WO-10031" → "WO-10032". Work orders are short strings on a two-user table, so reading
  *  them all and taking the numeric max is simpler than a Postgres sequence for now. */
 export async function fetchNextWorkOrder(): Promise<string> {
-  const numbers = await withCache('workOrders', async () => {
-    const { data, error } = await supabase.from('jobs').select('work_order')
-    if (error) throw error
-    return (data as { work_order: string }[]).map((r) => Number(r.work_order.replace(/\D/g, '')) || 0)
-  }).catch(async () => ((await readCache<Job[]>('jobs')) ?? []).map((j) => Number(j.workOrder.replace(/\D/g, '')) || 0))
-  await loadOutbox()
-  const queued = getOutbox().map((e) => Number(e.draft.workOrder.replace(/\D/g, '')) || 0)
-  return `WO-${Math.max(10000, ...numbers, ...queued) + 1}`
+  const num = (s: string) => Number(s.replace(/\D/g, '')) || 0
+  // Offline, the server list may be stale; the cached Jobs list (refreshed on every visit)
+  // and the outbox are consulted as well so two drafts never claim the same number.
+  const [server, cachedList] = await Promise.all([
+    withCache('workOrders', async () => {
+      const { data, error } = await supabase.from('jobs').select('work_order')
+      if (error) throw error
+      return (data as { work_order: string }[]).map((r) => num(r.work_order))
+    }).catch(() => [] as number[]),
+    readCache<Job[]>('jobs'),
+    loadOutbox(),
+  ])
+  const queued = getOutbox().map((e) => num(e.draft.workOrder))
+  return `WO-${Math.max(10000, ...server, ...(cachedList ?? []).map((j) => num(j.workOrder)), ...queued) + 1}`
 }
 
 // ---------------------------------------------------------------- hooks

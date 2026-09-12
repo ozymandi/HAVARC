@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { loadDraft, readDraft, readPersistedDraft, restoreDraft, setDraftValue } from './draft'
 import { EMPTY_INVOICE, type InvoiceData } from './invoice'
 import { saveInvoice, type JobStatusValue } from './jobs'
+import { getEntry, loadOutbox } from './outbox'
 
 /* ------------------------------------------------------------------ draft shapes
  * The four steps keep their fields in the in-memory draft store under `step1.*` …
@@ -513,9 +514,55 @@ const signedUrl = async (bucket: string, path: string | null) => {
   return data?.signedUrl ?? null
 }
 
-/** Pulls a stored job into the draft store so Steps 1–4 open with its data. Autosave
- *  then updates the same row (same id, same status). */
+/** The store keys for a draft snapshot — the inverse of `readJobDraft`. */
+const draftToEntries = (d: JobDraft): Record<string, unknown> => ({
+  'job.id': d.jobId,
+  'job.status': d.status,
+  'job.completedAt': d.completedAt,
+  'job.updatedAt': d.updatedAt,
+  'job.customerSignaturePath': d.customerSignaturePath,
+  'job.techSignaturePath': d.techSignaturePath,
+  'step1.workOrder': d.workOrder,
+  'step1.date': d.date,
+  'step1.technician': d.technician,
+  'step1.unitSuite': d.unitSuite,
+  'step1.customer': d.customer,
+  'step1.address': d.address,
+  'step1.arrival': d.arrival,
+  'step1.departure': d.departure,
+  'step1.customerNotes': d.customerNotes,
+  'step1.serviceType': d.serviceType,
+  'step1.complaints': d.complaints,
+  'step1.complaintDetails': d.complaintDetails,
+  'step1.equipment': d.equipment,
+  'step2.readingsOpen': d.readingsOpen,
+  'step2.readings': d.readings,
+  'step2.conditions': d.conditions,
+  'step3.findings': d.findings,
+  'step3.repairs': d.repairs,
+  'step3.recommendations': d.recommendations,
+  'step3.serviceNotes': d.serviceNotes,
+  'step3.parts': d.parts,
+  'step3.recommendedWork': d.recommendedWork,
+  'step4.status': d.finalStatus,
+  'step4.photos': d.photos.map((p) => ({ ...p, url: p.blob ? URL.createObjectURL(p.blob) : p.url })),
+  'step4.customerName': d.customerName,
+  'step4.customerSignature': d.customerSignature,
+  'step4.techSignature': d.techSignature,
+  'step4.invoice': d.invoice,
+})
+
+/** Pulls a job into the draft store so Steps 1–4 open with its data. A job still waiting
+ *  in the outbox (created or edited offline) is taken from there — the server copy may not
+ *  exist yet or is older; otherwise the stored row is read. Autosave then updates the same
+ *  row (same id, same status). */
 export async function loadJobIntoDraft(jobId: string): Promise<void> {
+  await loadOutbox()
+  const queued = getEntry(jobId)
+  if (queued) {
+    loadDraft(draftToEntries(queued.draft))
+    return
+  }
   const { data, error } = await supabase
     .from('jobs')
     .select(
