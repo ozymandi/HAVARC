@@ -11,9 +11,13 @@ additional_redirect_urls = ["https://havarc.vercel.app/**", "http://localhost:51
 # Matches the app's own rule: "At least 8 characters, including a number."
 minimum_password_length = 8
 password_requirements = "letters_digits"
+# The two technician accounts are created by us; nobody self-registers.
+# (This is the project-wide "allow new users to sign up" switch.)
+enable_signup = false
 
 [auth.email]
-# The two technician accounts are created by us; nobody self-registers.
-enable_signup = false
+# Keep the email+password provider ON — `enable_signup` here toggles the whole
+# provider and turning it off disables sign-in too ("Email logins are disabled").
+enable_signup = true
 enable_confirmations = false
 secure_password_change = false
