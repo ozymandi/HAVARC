@@ -1,9 +1,9 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import puppeteer from 'puppeteer-core'
-import type { Database } from '../src/lib/database.types'
-import { companyFromSettings } from '../src/pdf/company'
-import { buildInvoiceData, buildReportData, encodePdfPayload, type PdfKind, type PdfPayload, type PdfSource } from '../src/pdf/data'
-import { PDF_JOB_SELECT, type PdfJobRow } from '../src/pdf/query'
+import type { Database } from '../src/lib/database.types.js'
+import { companyFromSettings } from '../src/pdf/company.js'
+import { buildInvoiceData, buildReportData, encodePdfPayload, type PdfKind, type PdfPayload, type PdfSource } from '../src/pdf/data.js'
+import { PDF_JOB_SELECT, type PdfJobRow } from '../src/pdf/query.js'
 
 /* Server-side PDF generation (backend plan, step 6). Loads the job with the service key,
  * builds the same template data the app uses, renders the app's own /print routes in

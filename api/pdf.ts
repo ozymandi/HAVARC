@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { generatePdfs } from './_pdf'
+import { generatePdfs } from './_pdf.js'
 
 /* POST /api/pdf  { jobId, kinds?: ('report'|'invoice')[] }
  * Caller must be a signed-in app user (Supabase access token as Bearer); the work itself

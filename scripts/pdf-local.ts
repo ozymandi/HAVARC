@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { createClient } from '@supabase/supabase-js'
-import { generatePdfs } from '../api/_pdf'
+import { generatePdfs } from '../api/_pdf.js'
 
 /* Local run of the PDF function against the Vite dev server, with the desktop Chrome:
  *   npx tsx scripts/pdf-local.ts <jobId> [outDir]
