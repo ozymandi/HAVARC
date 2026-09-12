@@ -41,8 +41,9 @@ export function JobDetail() {
     if (mounted.current) reload()
     mounted.current = true
   }, [sync.pending, sync.lastSyncAt, reload])
-  // While the server is rendering PDFs (08e), poll until every row is ready or failed.
-  const generating = !!job?.documents?.some((d) => d.status === 'pending')
+  // While the server is rendering PDFs (08e), poll until every row is ready or failed —
+  // including rows the client only presumes failed (a slow cold start may still finish).
+  const generating = !!job?.documents?.some((d) => d.status === 'pending' || d.stale)
   useEffect(() => {
     if (!generating) return
     const timer = setInterval(reload, 3000)

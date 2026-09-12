@@ -40,6 +40,9 @@ export interface Job {
 export interface JobDocument {
   kind: 'report' | 'invoice'
   status: 'pending' | 'ready' | 'error'
+  /** `error` inferred from a pending row nobody touched for a while — the server may still be
+   *  working on it, so Job Detail keeps polling these. */
+  stale?: boolean
   title: string
   meta: string
   path: string | null
@@ -189,6 +192,7 @@ const buildDocuments = (row: JobDetailRow): JobDocument[] => {
       return {
         kind: d.kind,
         status,
+        stale,
         path: d.storage_path,
         title:
           d.kind === 'report'

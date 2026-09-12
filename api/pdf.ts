@@ -30,6 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (kinds.length === 0) return res.status(400).json({ error: 'No document kinds requested' })
 
   const chromium = (await import('@sparticuz/chromium')).default
+  chromium.setGraphicsMode = false // no WebGL needed for print; skips extracting swiftshader on cold start
   const host = (req.headers['x-forwarded-host'] as string | undefined) ?? req.headers.host ?? ''
   const origin = process.env.PDF_ORIGIN ?? `https://${host}`
 

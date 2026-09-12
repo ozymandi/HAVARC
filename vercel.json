@@ -7,7 +7,7 @@
   ],
   "functions": {
     "api/pdf.ts": {
-      "maxDuration": 60
+      "maxDuration": 300
     }
   }
 }

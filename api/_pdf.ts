@@ -32,8 +32,17 @@ const SIGNED_URL_TTL = 15 * 60
 const KIND_LABEL: Record<PdfKind, string> = { report: 'Service Report', invoice: 'Invoice' }
 
 export async function generatePdfs(opts: GenerateOptions): Promise<GeneratedDocument[]> {
+  const started = Date.now()
+  const log = (stage: string) => console.log(`pdf ${opts.jobId.slice(0, 8)} ${stage} +${Date.now() - started}ms`)
   const service = createClient<Database>(opts.supabaseUrl, opts.serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
+  /** Job Detail treats a `pending` row untouched for 2 minutes as dead; touching the rows at
+   *  each stage keeps a slow (cold-start) run from being shown as failed while it works. */
+  const heartbeat = async (kinds: PdfKind[]) => {
+    await service.from('documents').upsert(kinds.map((kind) => ({ job_id: opts.jobId, kind, status: 'pending' as const, error: null })), { onConflict: 'job_id,kind' })
+  }
+  await heartbeat(opts.kinds)
   const { source, notifyEmail } = await loadSource(service, opts.jobId)
+  log('source loaded')
   const rendered = new Map<PdfKind, Uint8Array>()
 
   const browser = await puppeteer.launch({
@@ -42,11 +51,14 @@ export async function generatePdfs(opts: GenerateOptions): Promise<GeneratedDocu
     headless: true,
     defaultViewport: { width: 612, height: 792, deviceScaleFactor: 1 },
   })
+  log('browser launched')
   const results: GeneratedDocument[] = []
   try {
     for (const kind of opts.kinds) {
       try {
+        await heartbeat([kind])
         const pdf = await renderKind(browser, opts.origin, kind, source)
+        log(`${kind} rendered (${pdf.byteLength} bytes)`)
         const path = `${opts.jobId}/${kind}.pdf`
         const { error: uploadError } = await service.storage.from('documents').upload(path, pdf, { contentType: 'application/pdf', upsert: true })
         if (uploadError) throw uploadError
@@ -56,6 +68,7 @@ export async function generatePdfs(opts: GenerateOptions): Promise<GeneratedDocu
         if (rowError) throw rowError
         rendered.set(kind, pdf)
         results.push({ kind, path, size: pdf.byteLength })
+        log(`${kind} stored`)
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
         await service.from('documents').upsert({ job_id: opts.jobId, kind, status: 'error', error: message }, { onConflict: 'job_id,kind' })
@@ -64,6 +77,7 @@ export async function generatePdfs(opts: GenerateOptions): Promise<GeneratedDocu
     }
   } finally {
     await browser.close()
+    log('browser closed')
   }
 
   // Step 8 part 2: the finished documents go to the office (Settings → notify email).
@@ -71,6 +85,7 @@ export async function generatePdfs(opts: GenerateOptions): Promise<GeneratedDocu
   if (notifyEmail && smtpConfigured()) {
     try {
       await emailDocuments(service, opts, source, notifyEmail, rendered)
+      log('email sent')
     } catch (err) {
       console.error('documents email failed', err)
     }
