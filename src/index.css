@@ -92,6 +92,26 @@ body {
   animation: text-rise 450ms ease-out forwards;
 }
 
+/* Native date/time inputs: keep the system picker, drop the browser's own indicator (a
+   small arrow on Android, a calendar glyph on desktop Chrome) — FormField draws the icon.
+   The invisible indicator is stretched over the field so a tap anywhere opens the picker. */
+.native-picker {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: var(--size-control);
+}
+.native-picker::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.native-picker::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 /* PDF templates (src/pdf/): on screen the 612×792 sheets are scaled to fit the phone by
    PdfPreview; in print each sheet is one US Letter page at 1:1, so "Print → Save as PDF"
    yields the real document until server-side rendering (headless Chrome, same components)

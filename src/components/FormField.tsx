@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react'
+import { Calendar, ChevronDown, Clock } from 'lucide-react'
 import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 
 /** Figma: Form Field (15:92) — "Label + input. Type: Text / Select / Textarea.
@@ -53,6 +53,17 @@ export function FormField({ label, error, id, className = '', ...props }: FormFi
         </div>
       ) : props.type === 'textarea' ? (
         <textarea id={fieldId} className={fieldClass(!!error, true)} {...props} />
+      ) : props.type === 'date' || props.type === 'time' ? (
+        /* Native pickers (system calendar / clock on phones) behind our own icon: the browser's
+           tiny indicator is hidden by the `native-picker` rules in index.css. */
+        <div className="relative">
+          <input id={fieldId} className={`${fieldClass(!!error, false)} native-picker pr-3xl`} {...props} />
+          {props.type === 'date' ? (
+            <Calendar size={20} strokeWidth={1.5} className="pointer-events-none absolute right-md top-1/2 -translate-y-1/2 text-icon-soft" />
+          ) : (
+            <Clock size={20} strokeWidth={1.5} className="pointer-events-none absolute right-md top-1/2 -translate-y-1/2 text-icon-soft" />
+          )}
+        </div>
       ) : (
         <input id={fieldId} className={fieldClass(!!error, false)} {...props} />
       )}
