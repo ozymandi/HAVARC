@@ -111,6 +111,10 @@ body {
 .native-picker::-webkit-date-and-time-value {
   text-align: left;
 }
+.native-picker::-webkit-inner-spin-button,
+.native-picker::-webkit-clear-button {
+  display: none;
+}
 
 /* PDF templates (src/pdf/): on screen the 612×792 sheets are scaled to fit the phone by
    PdfPreview; in print each sheet is one US Letter page at 1:1, so "Print → Save as PDF"
