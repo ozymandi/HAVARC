@@ -13,6 +13,7 @@ import { ShareSheet } from '../components/ShareSheet'
 import { StatusBanner } from '../components/StatusBanner'
 import { SyncBanner } from '../components/SyncBanner'
 import { TopBar } from '../components/TopBar'
+import { openStoredDocument, requestPdfs } from '../data/documents'
 import { loadJobIntoDraft } from '../data/jobDraft'
 import { deleteJob, useJob } from '../data/jobs'
 import { useSyncState } from '../data/sync'
@@ -40,6 +41,13 @@ export function JobDetail() {
     if (mounted.current) reload()
     mounted.current = true
   }, [sync.pending, sync.lastSyncAt, reload])
+  // While the server is rendering PDFs (08e), poll until every row is ready or failed.
+  const generating = !!job?.documents?.some((d) => d.status === 'pending')
+  useEffect(() => {
+    if (!generating) return
+    const timer = setInterval(reload, 3000)
+    return () => clearInterval(timer)
+  }, [generating, reload])
   const [menuOpen, setMenuOpen] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -135,10 +143,17 @@ export function JobDetail() {
             <div className="flex w-full flex-col gap-2xs">
               {job.documents.map((doc) => (
                 <DocumentRow
-                  key={doc.title}
+                  key={doc.kind}
                   title={doc.title}
                   meta={doc.meta}
-                  onClick={doc.title.startsWith('Invoice') ? () => navigate(`/jobs/${job.id}/invoice`) : () => navigate(`/jobs/${job.id}/report`)}
+                  state={doc.status}
+                  onClick={
+                    doc.status === 'ready' && doc.path
+                      ? () => void openStoredDocument(doc.path as string).catch(() => reload())
+                      : doc.status === 'error'
+                        ? () => void requestPdfs(job.id, [doc.kind]).then(reload)
+                        : undefined
+                  }
                 />
               ))}
             </div>
@@ -161,7 +176,13 @@ export function JobDetail() {
       {job.documents && (
         <div className="w-full shrink-0 border-t border-line bg-surface px-lg pb-2xl pt-md shadow-nav">
           <div className="app-col flex md:justify-end">
-            <Button variant="primary" icon={<Share size={16} strokeWidth={1.5} />} className="w-full md:w-auto md:min-w-[200px]" onClick={() => setShareOpen(true)}>
+            <Button
+              variant="primary"
+              icon={<Share size={16} strokeWidth={1.5} />}
+              className="w-full md:w-auto md:min-w-[200px]"
+              disabled={job.documents.some((d) => d.status !== 'ready')}
+              onClick={() => setShareOpen(true)}
+            >
               Share PDFs
             </Button>
           </div>

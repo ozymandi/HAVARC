@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from '../lib/supabase'
 import { invalidateCache } from './cache'
+import { requestPdfs } from './documents'
 import { clearDraft, readDraft, setDraftValue, withoutAutosave } from './draft'
 import { idbGet, idbPut } from './idb'
 import { saveJobDraft, type DraftPhoto, type SavedJob } from './jobDraft'
@@ -74,6 +75,8 @@ export async function runSync(): Promise<void> {
       }
       applyToLiveDraft(saved)
       await invalidateCache(`job:${entry.jobId}`)
+      // A completed job (just completed, or edited after completion) gets fresh PDFs.
+      if (saved.draft.status === 'completed') void requestPdfs(saved.jobId)
     }
     const at = new Date().toISOString()
     void idbPut('kv', 'lastSyncAt', at)

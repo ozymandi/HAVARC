@@ -1,6 +1,6 @@
 import { Check, Mail, MapPin, Phone } from 'lucide-react'
-import type { CSSProperties, ReactNode } from 'react'
-import { COMPANY } from '../data/company'
+import { useContext, type CSSProperties, type ReactNode } from 'react'
+import { CompanyContext, splitFooterNote } from './company'
 
 /** Building blocks shared by the Service Report and Invoice templates (Figma page
  *  "PDF Templates Design", 213:3678). Every sheet is US Letter at 72 dpi: 612 × 792 px,
@@ -22,6 +22,7 @@ const bg = (name: string) => ({ src: `/pdf/${name}.webp`, srcSet: `/pdf/${name}.
 
 /** Page-1 hero: contacts on the left, document card (band + info table) on the right. */
 export function PdfHeroBig({ title, rows }: { title: string; rows: [string, string | string[]][] }) {
+  const COMPANY = useContext(CompanyContext)
   const contacts: [ReactNode, string][] = [
     [<Phone key="p" size={11} strokeWidth={1.5} />, COMPANY.phone],
     [<Mail key="m" size={11} strokeWidth={1.5} />, COMPANY.email],
@@ -62,6 +63,7 @@ export function PdfHeroBig({ title, rows }: { title: string; rows: [string, stri
 
 /** Compact hero for pages 2+: lockup left, document pill right. */
 export function PdfHeroSmall({ pill }: { pill: string }) {
+  const COMPANY = useContext(CompanyContext)
   return (
     <div className="relative flex h-[83px] w-full shrink-0 items-start justify-between px-3xl pb-lg pt-3xl shadow-[0_4px_24px_0_var(--alpha-navy-30)]">
       <img {...bg('hero')} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -74,6 +76,7 @@ export function PdfHeroSmall({ pill }: { pill: string }) {
 }
 
 export function PdfFooter({ page, total }: { page: number; total: number }) {
+  const COMPANY = useContext(CompanyContext)
   return (
     <div className="relative mt-auto flex h-[88px] w-full shrink-0 items-center justify-between gap-sm border-t border-line p-3xl">
       <img {...bg('footer')} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -157,18 +160,16 @@ export function PdfUnitCard({ title, rows, labelWidth = 110 }: { title: string; 
 
 /** "Thank you!" closing row with the branded slogan band (public/pdf/band.webp). */
 export function PdfThankYou() {
+  const COMPANY = useContext(CompanyContext)
+  const [emphasis, note] = splitFooterNote(COMPANY.footerNote)
   return (
     <div className="flex w-full items-center gap-lg">
       <div className="flex min-w-0 flex-1 flex-col gap-xs">
         <div className="flex flex-col gap-[2px]">
           <p className="text-[16px] font-bold leading-normal text-brand">Thank you!</p>
-          <p className="text-pdf-section text-pdf-footer">{COMPANY.thankYou}</p>
+          <p className="text-pdf-section text-pdf-footer">{emphasis}</p>
         </div>
-        <p className="text-[12px] leading-normal text-brand">
-          If you have any questions,
-          <br />
-          please contact us at {COMPANY.phone}.
-        </p>
+        <p className="text-[12px] leading-normal text-brand">{note}</p>
       </div>
       <div className="relative flex w-[240px] shrink-0 items-center justify-center overflow-hidden rounded-full px-md py-lg">
         <img {...bg('band')} alt="" className="absolute inset-0 h-full w-full object-cover" />

@@ -9,6 +9,7 @@ import { JobDetail } from './pages/JobDetail'
 import { Jobs } from './pages/Jobs'
 import { Login } from './pages/Login'
 import { PdfPreview } from './pages/PdfPreview'
+import { PrintPage } from './pages/PrintPage'
 import { Settings } from './pages/Settings'
 import { SetNewPassword } from './pages/SetNewPassword'
 import { Splash } from './pages/Splash'
@@ -29,6 +30,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/forgot-password/check-email" element={<CheckEmail />} />
+          {/* Rendered by the PDF function in headless Chrome; all data is in the URL hash. */}
+          <Route path="/print/:kind" element={<PrintPage />} />
           {/* Everything below needs a Supabase session; RequireAuth bounces to Login otherwise.
               /reset-password is included: the emailed recovery link arrives with a session. */}
           <Route element={<RequireAuth />}>

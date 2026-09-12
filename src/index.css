@@ -1,4 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* Inter is served from the app itself (variable font, latin subset): the PWA works offline
+   and the PDF renderer sees the same glyphs as the phone without reaching Google. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter-variable.woff2') format('woff2');
+}
 @import "tailwindcss";
 @import "./styles/tokens.css";
 @import "./styles/typography.css";

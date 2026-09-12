@@ -27,12 +27,22 @@ export interface Job {
   finalStatus?: { color: StatusColor; label: string; description: string }
   completedMeta?: string
   summary?: { label: string; value: string }[]
-  documents?: { title: string; meta: string }[]
+  documents?: JobDocument[]
   photos?: string[]
   phone?: string
   invoiceNumber?: string
   /** The stored invoice (editor + PDF preview); absent until one is saved. */
   invoice?: InvoiceData
+}
+
+/** A row of the Documents section. `pending` while the server renders (08e), `error` when
+ *  that failed or never answered — both invite a retry; `ready` opens the stored file. */
+export interface JobDocument {
+  kind: 'report' | 'invoice'
+  status: 'pending' | 'ready' | 'error'
+  title: string
+  meta: string
+  path: string | null
 }
 
 // ---------------------------------------------------------------- rows (subset of the schema)
@@ -81,7 +91,7 @@ interface JobDetailRow extends JobRow {
   readings: OneOrMany<ReadingsEmbed>
   findings: OneOrMany<FindingsEmbed>
   invoice: OneOrMany<InvoiceEmbed>
-  documents: { kind: 'report' | 'invoice'; status: 'pending' | 'ready' | 'error'; size_bytes: number | null; updated_at: string }[]
+  documents: { kind: 'report' | 'invoice'; status: 'pending' | 'ready' | 'error'; storage_path: string | null; size_bytes: number | null; updated_at: string }[]
   photos: { position: number; storage_path: string }[]
 }
 
@@ -96,7 +106,7 @@ const DETAIL_COLUMNS = `${LIST_COLUMNS}, technician, service_type, complaints, c
   readings(return_air, supply_air, temp_split, suction_psig, head_psig, superheat, subcooling),
   findings:job_findings(findings, repairs, recommendations),
   invoice:invoices(number, tax_rate, discount, description, items:invoice_items(id, position, description, qty, unit_price, customer_paid)),
-  documents(kind, status, size_bytes, updated_at),
+  documents(kind, status, storage_path, size_bytes, updated_at),
   photos(position, storage_path)`
 
 // ---------------------------------------------------------------- formatting
@@ -165,18 +175,33 @@ const invoiceTotal = (invoice: InvoiceEmbed) => {
   return Math.max(0, subtotal + tax - invoice.discount)
 }
 
-const buildDocuments = (row: JobDetailRow): { title: string; meta: string }[] => {
+/** A `pending` row older than this never got an answer from the renderer (offline when it
+ *  was requested, function failed to start): treat it as an error so the tap retries. */
+const PENDING_STALE_MS = 2 * 60 * 1000
+
+const buildDocuments = (row: JobDetailRow): JobDocument[] => {
   const invoice = one(row.invoice)
-  return row.documents
-    .filter((d) => d.status === 'ready')
+  return [...row.documents]
     .sort((a) => (a.kind === 'report' ? -1 : 1))
-    .map((d) => ({
-      title:
-        d.kind === 'report'
-          ? 'Service Report PDF'
-          : join([`Invoice${invoice?.number ? ` #${invoice.number}` : ''}`, invoice ? money(invoiceTotal(invoice)) : null], ' · '),
-      meta: join([`Generated ${shortDate(d.updated_at.slice(0, 10))}`, d.size_bytes ? `${Math.round(d.size_bytes / 1024)} KB` : null], ' · '),
-    }))
+    .map((d) => {
+      const stale = d.status === 'pending' && Date.now() - new Date(d.updated_at).getTime() > PENDING_STALE_MS
+      const status = stale ? 'error' : d.status
+      return {
+        kind: d.kind,
+        status,
+        path: d.storage_path,
+        title:
+          d.kind === 'report'
+            ? 'Service Report PDF'
+            : join([`Invoice${invoice?.number ? ` #${invoice.number}` : ''}`, invoice ? money(invoiceTotal(invoice)) : null], ' · '),
+        meta:
+          status === 'pending'
+            ? 'Generating… usually a few seconds'
+            : status === 'error'
+              ? "Couldn't generate. Tap to retry."
+              : join([`Generated ${shortDate(d.updated_at.slice(0, 10))}`, d.size_bytes ? `${Math.round(d.size_bytes / 1024)} KB` : null], ' · '),
+      }
+    })
 }
 
 const signedPhotoUrls = async (photos: JobDetailRow['photos']): Promise<string[]> => {

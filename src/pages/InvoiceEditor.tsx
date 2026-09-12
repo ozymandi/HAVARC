@@ -11,6 +11,7 @@ import { TotalsRow } from '../components/TotalsRow'
 import { TopBar } from '../components/TopBar'
 import { useDraftState } from '../data/draft'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
+import { requestPdfs } from '../data/documents'
 import { saveInvoice, useJob } from '../data/jobs'
 
 const money = (n: number) => `$${n.toFixed(2)}`
@@ -195,6 +196,7 @@ export function InvoiceEditorPage() {
     try {
       await saveInvoice(job.id, invoice)
       setEdits(null)
+      if (job.status === 'completed') void requestPdfs(job.id, ['invoice'])
       navigate(`/jobs/${job.id}`)
     } catch {
       setSaveFailed(true)
