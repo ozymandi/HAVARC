@@ -4,6 +4,7 @@ import { invalidateCache } from './cache'
 import { clearDraft, readDraft, setDraftValue, withoutAutosave } from './draft'
 import { idbGet, idbPut } from './idb'
 import { saveJobDraft, type DraftPhoto, type SavedJob } from './jobDraft'
+import { fetchNextWorkOrder } from './jobs'
 import { getEntry, getOutbox, loadOutbox, removeEntry, subscribeOutbox, updateEntry, type OutboxEntry } from './outbox'
 
 /* ------------------------------------------------------------------ state */
@@ -62,7 +63,7 @@ export async function runSync(): Promise<void> {
         await updateEntry(entry.jobId, { conflict: true })
         continue
       }
-      const saved = await saveJobDraft(entry.draft, entry.complete)
+      const saved = await saveWithFreshWorkOrder(entry)
       const latest = getEntry(entry.jobId)
       if (latest && latest.enqueuedAt !== entry.enqueuedAt) {
         // A newer snapshot of the same job was queued meanwhile; the server's updated_at
@@ -85,6 +86,24 @@ export async function runSync(): Promise<void> {
       runAgain = false
       void runSync()
     }
+  }
+}
+
+/** Work-order numbers are picked on the device (max + 1), so two technicians starting a
+ *  job at the same time — or one starting offline with a stale list — can pick the same
+ *  one. On the unique-key violation the job takes the next free number and is written
+ *  again; the on-screen draft (if it is this job) shows the new number. */
+const saveWithFreshWorkOrder = async (entry: OutboxEntry): Promise<SavedJob> => {
+  try {
+    return await saveJobDraft(entry.draft, entry.complete)
+  } catch (err) {
+    const violation = typeof err === 'object' && err !== null && (err as { code?: string }).code === '23505'
+    if (!violation || !String((err as { message?: string }).message).includes('work_order')) throw err
+    const workOrder = await fetchNextWorkOrder()
+    const draft = { ...entry.draft, workOrder }
+    await updateEntry(entry.jobId, { draft })
+    if (readDraft<string>('job.id', '') === entry.jobId) withoutAutosave(() => setDraftValue('step1.workOrder', workOrder))
+    return saveJobDraft(draft, entry.complete)
   }
 }
 

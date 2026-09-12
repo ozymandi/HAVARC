@@ -530,7 +530,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      assign_invoice_number: { Args: { p_job_id: string }; Returns: undefined }
     }
     Enums: {
       check_state: "good" | "issue"

@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "gen:types": "supabase gen types typescript --project-id ldpxlkhppyzomejrjarf --schema public > src/lib/database.types.ts",
     "config:diff": "dotenv -e .env.local -- supabase config diff",
-    "config:push": "dotenv -e .env.local -- supabase config push"
+    "config:push": "dotenv -e .env.local -- supabase config push",
+    "db:push": "supabase db push"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

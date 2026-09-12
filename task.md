@@ -81,7 +81,9 @@ Frontend and desktop breakpoint are on prod (`2c6b5c8`, https://havarc.vercel.ap
 
 - Step 9 item done early (2026-09-12): photo input no longer forces the camera (`capture` removed) — phones offer camera / library / files, as the client asked. Yaroslav's phone pass: a job with a photo completed and synced.
 
-Next: step 5 — server-side invoice numbering (sequence, number assigned on completion, "Draft" before). Then step 6 PDF generation.
+- Step 5 done (2026-09-12): invoice numbers are assigned on the server. Migration `20260912000004_invoice_numbers.sql`: `assign_invoice_number(job_id)` takes `settings.next_invoice_number` (with `invoice_prefix`) under a row lock, skips numbers that already exist, writes it to the job's invoice and advances the counter; triggers on `jobs` (status → completed) and on `invoices` (insert/update while number is null) so the order of the app's writes doesn't matter. Verified via REST: draft → no number, complete → 649, counter → 650, re-saving the invoice keeps 649. Counter reset to 649 after the test. The app already shows "Draft" until a number exists (editor header, PDF). Also: the sync engine recovers from a work-order collision (unique violation → next free number → retry), closing open item 6. `npm run db:push` applies migrations (linked project, password prompt); run `npm run gen:types` after.
+
+Next: step 6 — PDF generation (print routes, serverless function with headless Chrome on Vercel, documents rows, "Generating PDFs" state).
 
 ### Open items before step 4 / deploy
 
@@ -90,4 +92,4 @@ Next: step 5 — server-side invoice numbering (sequence, number assigned on com
 3. ~~Own sender~~ Done 2026-09-12 (plan step 8, part 1): Brevo SMTP relay (`[auth.email.smtp]`, credentials via `env(SMTP_USER|SMTP_PASS|SMTP_SENDER)` from `.env.local`, loaded by `dotenv-cli` in the config scripts) and the branded recovery email (`supabase/templates/recovery.html`) are pushed and verified. Brevo account is Yaroslav's (Free, 300/day), sender `HAV'ARC Heating and Air <ozymandiuz@gmail.com>`, verified. Before handover: authenticate a domain in Brevo (client's, or okhra.space) and switch `SMTP_SENDER` to it — a gmail sender fails DKIM/DMARC alignment and risks spam. Remaining part of step 8: auto-emailing the generated PDFs (after step 6).
 4. ~~Type generation~~ Done 2026-09-12: the CLI is logged in (`npx.cmd supabase login`), `npm run gen:types` regenerates `src/lib/database.types.ts` from the project and the client is `createClient<Database>`. Re-run it after every migration.
 5. ~~Reload loses the draft~~ Done in step 4: the draft is persisted to IndexedDB and restored when the steps mount.
-6. Work-order numbers are `max + 1` on the client; two technicians starting a job at the same moment could collide on the unique `work_order` (autosave then fails silently until Complete). A server-side sequence can come with step 5's invoice numbering.
+6. ~~Work-order collision~~ Handled in step 5: on a unique violation the sync engine takes the next free number and retries; the draft on screen updates.
