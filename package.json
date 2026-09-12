@@ -9,8 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "gen:types": "supabase gen types typescript --project-id ldpxlkhppyzomejrjarf --schema public > src/lib/database.types.ts",
-    "config:diff": "supabase config diff",
-    "config:push": "supabase config push"
+    "config:diff": "dotenv -e .env.local -- supabase config diff",
+    "config:push": "dotenv -e .env.local -- supabase config push"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
@@ -27,6 +27,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "dotenv-cli": "^11.0.0",
     "oxlint": "^1.79.0",
     "supabase": "^2.117.0",
     "typescript": "~6.0.2",

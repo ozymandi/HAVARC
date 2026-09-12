@@ -21,3 +21,19 @@ enable_signup = false
 enable_signup = true
 enable_confirmations = false
 secure_password_change = false
+
+# Outgoing mail: Brevo SMTP relay (free tier, 300/day). Credentials come from .env.local
+# via `dotenv -e .env.local` in the npm scripts, so nothing secret is committed.
+[auth.email.smtp]
+enabled = true
+host = "smtp-relay.brevo.com"
+port = 587
+user = "env(SMTP_USER)"
+pass = "env(SMTP_PASS)"
+# Must be a sender verified in Brevo (single-sender verification, no DNS needed).
+admin_email = "env(SMTP_SENDER)"
+sender_name = "HAV'ARC Heating and Air"
+
+[auth.email.template.recovery]
+subject = "HAV'ARC — Reset your password"
+content_path = "./supabase/templates/recovery.html"
