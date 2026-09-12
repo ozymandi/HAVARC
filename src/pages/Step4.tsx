@@ -177,7 +177,6 @@ export function Step4() {
                 ref={photoInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 className="hidden"
                 onChange={(e) => {
                   void addPhoto(e.target.files?.[0])
@@ -186,6 +185,8 @@ export function Step4() {
               />
               <AddPhotoTile onClick={() => photoInputRef.current?.click()} />
             </div>
+            {/* No `capture` on the input: with it, phones open the camera only; without it, iOS and
+                Android offer camera, photo library and files (client request, 2026-09-12). */}
             {/* Figma 06c · Step 4 · No photos (100:4212) shows a hint instead of the count. */}
             <p className="text-caption text-ink-faint">
               {photos.length === 0
