@@ -17,8 +17,17 @@ import { exitDraft } from './stepExit'
 const SERVICE_TYPES = ['Preventive Maintenance', 'Diagnostic / Repair Call']
 const COMPLAINTS = ['No Cooling', 'No Heating', 'Water Leak', 'Airflow Issue', 'Noise / Vibration', 'Thermostat / Controls']
 
-const nowLabel = () => new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-const todayLabel = () => new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+// Native date/time inputs (Yaroslav 2026-09-12): the phone's own pickers, values kept in the
+// input formats — "YYYY-MM-DD" and 24-hour "HH:MM" — and shown localised by the field itself.
+const pad = (n: number) => String(n).padStart(2, '0')
+const nowLabel = () => {
+  const d = new Date()
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+const todayLabel = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
 
 /** Figma: 03 · Step 1 · Service Call & Equipment (100:3579), validation 03d (182:3282),
  *  discard confirm 03e (100:4142). Next doesn't advance yet — Step 2 isn't built. The
@@ -114,7 +123,7 @@ export function Step1() {
           <div className="flex w-full flex-col gap-md p-md">
             <div className="flex w-full gap-2xs">
               <FormField className="min-w-0 flex-1" label="Work Order #" value={workOrder} onChange={(e) => setWorkOrder(e.target.value)} error={requiredError('workOrder')} />
-              <FormField className="min-w-0 flex-1" label="Date" value={date} onChange={(e) => setDate(e.target.value)} error={requiredError('date')} />
+              <FormField className="min-w-0 flex-1" label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} error={requiredError('date')} />
             </div>
             <div className="flex w-full gap-2xs">
               <FormField className="min-w-0 flex-1" label="Technician" value={technician} onChange={(e) => setTechnician(e.target.value)} error={requiredError('technician')} />
@@ -171,8 +180,8 @@ export function Step1() {
             </div>
             <FormField label="Service Address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Street, city, state ZIP" error={requiredError('address')} />
             <div className="flex w-full gap-2xs">
-              <FormField className="min-w-0 flex-1" label="Arrival Time" value={arrival} onChange={(e) => setArrival(e.target.value)} placeholder="—" />
-              <FormField className="min-w-0 flex-1" label="Departure Time" value={departure} onChange={(e) => setDeparture(e.target.value)} placeholder="—" />
+              <FormField className="min-w-0 flex-1" label="Arrival Time" type="time" value={arrival} onChange={(e) => setArrival(e.target.value)} />
+              <FormField className="min-w-0 flex-1" label="Departure Time" type="time" value={departure} onChange={(e) => setDeparture(e.target.value)} />
             </div>
             <div className="flex w-full gap-2xs">
               <Button variant="text" icon={<Clock size={16} strokeWidth={1.5} />} className="min-w-0 flex-1" onClick={() => setArrival(nowLabel())}>

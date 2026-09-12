@@ -170,16 +170,15 @@ const nullable = (s: string | null | undefined) => (s && s.trim() !== '' ? s.tri
 const localIsoDate = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
-/** Step 1 types the date as MM/DD/YYYY (US); anything unparsable falls back to today. */
+/** Step 1's date input yields "YYYY-MM-DD"; older drafts may still hold "MM/DD/YYYY".
+ *  Anything unparsable falls back to today. */
 const parseUsDate = (value: string): string => {
-  const m = value.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/)
+  const v = value.trim()
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
+  const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/)
   if (!m) return localIsoDate(new Date())
   const year = m[3].length === 2 ? `20${m[3]}` : m[3]
   return `${year}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`
-}
-const formatUsDate = (iso: string) => {
-  const [y, m, d] = iso.split('-')
-  return `${m}/${d}/${y}`
 }
 
 const furthestStep = (d: JobDraft): number => {
@@ -639,7 +638,7 @@ export async function loadJobIntoDraft(jobId: string): Promise<void> {
     'job.customerSignaturePath': job.customer_signature_path,
     'job.techSignaturePath': job.technician_signature_path,
     'step1.workOrder': job.work_order,
-    'step1.date': formatUsDate(job.job_date),
+    'step1.date': job.job_date,
     'step1.technician': job.technician,
     'step1.unitSuite': str(job.unit_suite),
     'step1.customer': job.customer_name,

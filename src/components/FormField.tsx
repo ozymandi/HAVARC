@@ -18,7 +18,7 @@ interface Shared {
 
 type TextFieldProps = Shared &
   Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
-    type?: 'text' | 'email' | 'password' | 'tel' | 'number'
+    type?: 'text' | 'email' | 'password' | 'tel' | 'number' | 'date' | 'time'
   }
 type SelectFieldProps = Shared &
   SelectHTMLAttributes<HTMLSelectElement> & { type: 'select'; children: ReactNode }

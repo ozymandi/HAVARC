@@ -249,7 +249,11 @@ const toDetailJob = async (row: JobDetailRow, today: string): Promise<Job> => {
  *  and the lighter Job Detail. Completed offline it already shows its final status. */
 const jobFromDraft = (d: JobDraft, today: string): Job => {
   const m = d.date.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/)
-  const isoDate = m ? `${m[3].length === 2 ? `20${m[3]}` : m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}` : today
+  const isoDate = /^\d{4}-\d{2}-\d{2}$/.test(d.date.trim())
+    ? d.date.trim()
+    : m
+      ? `${m[3].length === 2 ? `20${m[3]}` : m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`
+      : today
   return {
     id: d.jobId,
     workOrder: d.workOrder || 'WO-…',
