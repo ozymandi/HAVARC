@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
 import { AddPhotoTile, PhotoTile } from '../components/PhotoTile'
+import { BottomSheetPicker } from '../components/BottomSheetPicker'
 import { BottomNav } from '../components/BottomNav'
 import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
@@ -30,6 +31,9 @@ const readFileAsDataUrl = (file: File) =>
 
 type Signer = 'customer' | 'technician' | null
 
+const PHOTO_FROM_CAMERA = 'Take photo'
+const PHOTO_FROM_GALLERY = 'Choose from gallery'
+
 const joinOr = (values: string[], fallback: string) => (values.length ? values.join(', ') : fallback)
 
 /** Figma: 06 · Step 4 · Complete Service Call (100:3943), success state
@@ -38,7 +42,11 @@ const joinOr = (values: string[], fallback: string) => (values.length ? values.j
  *  device and goes with the job through the outbox when Complete queues it. */
 export function Step4() {
   const navigate = useNavigate()
-  const photoInputRef = useRef<HTMLInputElement>(null)
+  // "Add photo" asks camera or gallery through the app's own picker: Android's file chooser
+  // offers only one of the two depending on `capture`, iOS offers both either way.
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const galleryInputRef = useRef<HTMLInputElement>(null)
+  const [photoSourceOpen, setPhotoSourceOpen] = useState(false)
   const [status, setStatus] = useDraftState<StatusColor | null>('step4.status', null)
   const [photos, setPhotos] = useDraftState<DraftPhoto[]>('step4.photos', [])
   const [customerName, setCustomerName] = useDraftState('step4.customerName', '')
@@ -174,7 +182,18 @@ export function Step4() {
                 <PhotoTile key={photo.id} src={photo.url} onRemove={() => removePhoto(i)} />
               ))}
               <input
-                ref={photoInputRef}
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  void addPhoto(e.target.files?.[0])
+                  e.target.value = ''
+                }}
+              />
+              <input
+                ref={galleryInputRef}
                 type="file"
                 accept="image/*"
                 className="hidden"
@@ -183,10 +202,8 @@ export function Step4() {
                   e.target.value = ''
                 }}
               />
-              <AddPhotoTile onClick={() => photoInputRef.current?.click()} />
+              <AddPhotoTile onClick={() => setPhotoSourceOpen(true)} />
             </div>
-            {/* No `capture` on the input: with it, phones open the camera only; without it, iOS and
-                Android offer camera, photo library and files (client request, 2026-09-12). */}
             {/* Figma 06c · Step 4 · No photos (100:4212) shows a hint instead of the count. */}
             <p className="text-caption text-ink-faint">
               {photos.length === 0
@@ -260,6 +277,16 @@ export function Step4() {
             onSave={() => setEditingInvoice(false)}
           />
         </div>
+      )}
+
+      {photoSourceOpen && (
+        <BottomSheetPicker
+          title="Add photo"
+          options={[PHOTO_FROM_CAMERA, PHOTO_FROM_GALLERY]}
+          value=""
+          onChange={(choice) => (choice === PHOTO_FROM_CAMERA ? cameraInputRef : galleryInputRef).current?.click()}
+          onClose={() => setPhotoSourceOpen(false)}
+        />
       )}
 
       {signing && (
