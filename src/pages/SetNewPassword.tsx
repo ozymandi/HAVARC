@@ -1,23 +1,28 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/context'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
 import { FormField } from '../components/FormField'
 import { supabase } from '../lib/supabase'
 
-/** Figma: 01e · Set new password (100:2997). Reached via the emailed recovery link, which
- *  lands here already signed in as that user (RequireAuth sends expired links to Login).
- *  Saving updates the password, then signs this browser out — the copy on 01d tells the
- *  user to go back to the installed app and sign in there with the new password. */
+/** Figma: 01e · Set new password (100:2997). Reached via the emailed recovery link. The link
+ *  carries `?token_hash=…&type=recovery` (see supabase/templates/recovery.html) and the token
+ *  is exchanged for a session only when the new password is saved — so a mail scanner or a
+ *  click tracker opening the link first cannot burn it. A session that is already present
+ *  (older hash-style links, or a signed-in user) works as before. Saving signs this browser
+ *  out — the copy on 01d tells the user to go back to the installed app and sign in there. */
 export function SetNewPassword() {
   const navigate = useNavigate()
-  const { session } = useAuth()
+  const { session, loading } = useAuth()
+  const tokenHash = useMemo(() => new URLSearchParams(window.location.search).get('token_hash'), [])
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
   const [serverError, setServerError] = useState('')
   const [busy, setBusy] = useState(false)
+
+  if (!tokenHash && !loading && !session) return <Navigate to="/login" replace />
 
   const isValid = password.length >= 8 && /\d/.test(password)
 
@@ -28,6 +33,13 @@ export function SetNewPassword() {
     setError('')
     setServerError('')
     setBusy(true)
+    if (tokenHash && !session) {
+      const { error: verifyError } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'recovery' })
+      if (verifyError) {
+        setBusy(false)
+        return setServerError('This reset link has expired or was already used. Request a new one from the sign-in screen.')
+      }
+    }
     const { error: updateError } = await supabase.auth.updateUser({ password })
     if (updateError) {
       setBusy(false)
@@ -42,7 +54,7 @@ export function SetNewPassword() {
 
       <form className="flex flex-col gap-2xl rounded-xs bg-surface p-md shadow-card" onSubmit={submit}>
         <div className="flex flex-col gap-md">
-          <p className="text-caption text-ink-faint">Signed in as {session?.user.email}</p>
+          <p className="text-caption text-ink-faint">{session ? `Signed in as ${session.user.email}` : 'Choose a new password for your account.'}</p>
           <FormField
             label="New password"
             type="password"

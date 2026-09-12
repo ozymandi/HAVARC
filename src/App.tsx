@@ -32,10 +32,11 @@ function App() {
           <Route path="/forgot-password/check-email" element={<CheckEmail />} />
           {/* Rendered by the PDF function in headless Chrome; all data is in the URL hash. */}
           <Route path="/print/:kind" element={<PrintPage />} />
-          {/* Everything below needs a Supabase session; RequireAuth bounces to Login otherwise.
-              /reset-password is included: the emailed recovery link arrives with a session. */}
+          {/* Public: the emailed recovery link brings a token_hash that is only exchanged for a
+              session when the new password is saved (link scanners can't burn it). */}
+          <Route path="/reset-password" element={<SetNewPassword />} />
+          {/* Everything below needs a Supabase session; RequireAuth bounces to Login otherwise. */}
           <Route element={<RequireAuth />}>
-            <Route path="/reset-password" element={<SetNewPassword />} />
             <Route path="/jobs" element={<Jobs />} />
             {/* The four steps share one autosaving draft (DraftSync flushes it on the way out). */}
             <Route element={<DraftSync />}>

@@ -4,7 +4,7 @@ import { useAuth } from '../auth/context'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/Button'
 import { FormField } from '../components/FormField'
-import { supabase } from '../lib/supabase'
+import { authUrlError, supabase } from '../lib/supabase'
 
 /** Figma: 01 · Login (100:2911), hero 100:2915; 01b · Wrong password (100:2932) is the
  *  password field in its error state with the message below it. Supabase answers a wrong
@@ -19,6 +19,13 @@ export function Login() {
   const [busy, setBusy] = useState(false)
 
   if (session) return <Navigate to="/jobs" replace />
+
+  // Reached from a reset link Supabase rejected (expired, or a newer request replaced it).
+  const linkNotice = authUrlError
+    ? authUrlError.code === 'otp_expired'
+      ? 'That password reset link has expired or was already used. Request a new one below.'
+      : authUrlError.description.replace(/\+/g, ' ') || 'That sign-in link is no longer valid.'
+    : null
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,6 +44,7 @@ export function Login() {
 
       <form noValidate className="flex flex-col gap-2xl rounded-xs bg-surface p-md shadow-card" onSubmit={submit}>
         <div className="flex flex-col gap-md">
+          {linkNotice && <p className="text-caption text-danger">{linkNotice}</p>}
           <FormField label="Email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="owner@havarc.com" />
           <FormField
             label="Password"
