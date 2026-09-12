@@ -12,6 +12,7 @@ import { Section } from '../components/Section'
 import { useDraftState } from '../data/draft'
 import { useCustomers, type Customer } from '../data/customers'
 import { fetchNextWorkOrder } from '../data/jobs'
+import { exitDraft } from './stepExit'
 
 const SERVICE_TYPES = ['Preventive Maintenance', 'Diagnostic / Repair Call']
 const COMPLAINTS = ['No Cooling', 'No Heating', 'Water Leak', 'Airflow Issue', 'Noise / Vibration', 'Thermostat / Controls']
@@ -259,7 +260,7 @@ export function Step1() {
           title="Leave this job?"
           message="Your changes are saved as a draft. You can finish it later from the Jobs list."
           primaryLabel="Keep draft & exit"
-          onPrimary={() => navigate('/jobs')}
+          onPrimary={() => void exitDraft(navigate)}
           secondaryLabel="Continue editing"
           onSecondary={() => setShowDiscard(false)}
         />

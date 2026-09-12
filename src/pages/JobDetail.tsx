@@ -13,6 +13,7 @@ import { ShareSheet } from '../components/ShareSheet'
 import { StatusBanner } from '../components/StatusBanner'
 import { SyncBanner } from '../components/SyncBanner'
 import { TopBar } from '../components/TopBar'
+import { loadJobIntoDraft } from '../data/jobDraft'
 import { deleteJob, useJob } from '../data/jobs'
 
 const badgeClass: Record<'draft' | 'completed' | 'pending', string> = {
@@ -35,6 +36,7 @@ export function JobDetail() {
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteFailed, setDeleteFailed] = useState(false)
+  const [editFailed, setEditFailed] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
 
@@ -46,6 +48,16 @@ export function JobDetail() {
         {error && <SyncBanner state="error" message="Couldn't load this job — tap to retry" onRetry={reload} />}
       </div>
     )
+  }
+
+  const edit = async () => {
+    setEditFailed(false)
+    try {
+      await loadJobIntoDraft(job.id)
+      navigate('/jobs/new')
+    } catch {
+      setEditFailed(true)
+    }
   }
 
   const confirmDelete = async () => {
@@ -72,6 +84,7 @@ export function JobDetail() {
         onAction={() => setMenuOpen(true)}
       />
       {deleteFailed && <SyncBanner state="error" message="Couldn't delete this job — tap to retry" onRetry={() => setConfirmingDelete(true)} />}
+      {editFailed && <SyncBanner state="error" message="Couldn't open this job for editing — tap to retry" onRetry={() => void edit()} />}
 
       <div className="app-col flex flex-1 flex-col gap-lg p-lg pb-5xl">
         {/* Desktop (320:15062): head block and status banner side by side (358px each, banner
@@ -152,9 +165,8 @@ export function JobDetail() {
       {menuOpen && (
         <ActionMenu
           onEdit={() => {
-            // Editing a completed job would need Step 1-4 pre-filled from its existing
-            // data, which isn't a capability yet — left as a stub until that's built.
             setMenuOpen(false)
+            void edit()
           }}
           onDelete={() => {
             setMenuOpen(false)

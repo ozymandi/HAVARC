@@ -2,7 +2,10 @@ import type { JobStatus } from '../components/JobCard'
 import type { StatusColor } from '../components/StatusBanner'
 import { useAsync } from '../hooks/useAsync'
 import { supabase } from '../lib/supabase'
+import type { InvoiceData } from './invoice'
 import { statusOption } from './status'
+
+export type JobStatusValue = JobStatus
 
 /** What the screens render. Shaped for the components (Job Card, Job Detail, Share sheet,
  *  PDF preview) rather than for the tables — `meta`, `completedMeta`, `summary` and
@@ -25,6 +28,8 @@ export interface Job {
   photos?: string[]
   phone?: string
   invoiceNumber?: string
+  /** The stored invoice (editor + PDF preview); absent until one is saved. */
+  invoice?: InvoiceData
 }
 
 // ---------------------------------------------------------------- rows (subset of the schema)
@@ -57,7 +62,8 @@ interface InvoiceEmbed {
   number: string | null
   tax_rate: number
   discount: number
-  items: { qty: number; unit_price: number; customer_paid: boolean }[]
+  description: string | null
+  items: { id: string; position: number; description: string; qty: number; unit_price: number; customer_paid: boolean }[]
 }
 
 interface JobDetailRow extends JobRow {
@@ -86,7 +92,7 @@ const DETAIL_COLUMNS = `${LIST_COLUMNS}, technician, service_type, complaints, c
   equipment(position, equipment_id, manufacturer, model, serial),
   readings(return_air, supply_air, temp_split, suction_psig, head_psig, superheat, subcooling),
   findings:job_findings(findings, repairs, recommendations),
-  invoice:invoices(number, tax_rate, discount, items:invoice_items(qty, unit_price, customer_paid)),
+  invoice:invoices(number, tax_rate, discount, description, items:invoice_items(id, position, description, qty, unit_price, customer_paid)),
   documents(kind, status, size_bytes, updated_at),
   photos(position, storage_path)`
 
@@ -194,6 +200,16 @@ const toDetailJob = async (row: JobDetailRow, today: string): Promise<Job> => {
     photos: photos.length ? photos : undefined,
     phone: row.customer?.phone ?? undefined,
     invoiceNumber: invoice?.number ?? undefined,
+    invoice: invoice
+      ? {
+          items: [...invoice.items]
+            .sort((a, b) => a.position - b.position)
+            .map((i) => ({ id: i.id, description: i.description, qty: i.qty, unitPrice: i.unit_price, customerPaid: i.customer_paid })),
+          taxRate: invoice.tax_rate,
+          discount: invoice.discount,
+          description: invoice.description ?? '',
+        }
+      : undefined,
   }
 }
 
@@ -229,6 +245,32 @@ export async function deleteJob(id: string): Promise<void> {
   }
   const { error } = await supabase.from('jobs').delete().eq('id', id)
   if (error) throw error
+}
+
+/** Replaces the job's invoice row and line items with the editor's contents. Line-item
+ *  ids from the editor are kept when they are uuids (rows loaded from the DB) and minted
+ *  otherwise (the editor's `new-…` ids). The invoice number is left alone — step 5 assigns it. */
+export async function saveInvoice(jobId: string, invoice: InvoiceData): Promise<void> {
+  const { error } = await supabase
+    .from('invoices')
+    .upsert({ job_id: jobId, tax_rate: invoice.taxRate, discount: invoice.discount, description: invoice.description || null })
+  if (error) throw error
+  const { error: delError } = await supabase.from('invoice_items').delete().eq('job_id', jobId)
+  if (delError) throw delError
+  if (invoice.items.length === 0) return
+  const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)
+  const { error: insError } = await supabase.from('invoice_items').insert(
+    invoice.items.map((i, index) => ({
+      id: isUuid(i.id) ? i.id : crypto.randomUUID(),
+      job_id: jobId,
+      position: index + 1,
+      description: i.description,
+      qty: i.qty,
+      unit_price: i.unitPrice,
+      customer_paid: i.customerPaid,
+    })),
+  )
+  if (insError) throw insError
 }
 
 /** "WO-10031" → "WO-10032". Work orders are short strings on a two-user table, so reading

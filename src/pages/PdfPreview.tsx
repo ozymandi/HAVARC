@@ -5,7 +5,7 @@ import { TopBar } from '../components/TopBar'
 import { readDraft } from '../data/draft'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
 import { useJob } from '../data/jobs'
-import { invoiceForJob, reportForJob, SAMPLE_INVOICE_ITEMS } from '../data/sampleReport'
+import { invoiceForJob, reportForJob } from '../data/sampleReport'
 import { invoicePages } from '../pdf/InvoicePdf'
 import { PDF_HEIGHT, PDF_WIDTH, PdfSheet } from '../pdf/primitives'
 import { serviceReportPages } from '../pdf/ServiceReport'
@@ -36,7 +36,7 @@ export function PdfPreview({ kind }: { kind: 'report' | 'invoice' }) {
 
   // The invoice editor keeps its edits in the draft store under the job id, so the preview
   // shows what was just edited rather than the seed rows.
-  const invoice = readDraft<InvoiceData>(`invoice.${job.id}`, { ...EMPTY_INVOICE, items: SAMPLE_INVOICE_ITEMS })
+  const invoice = readDraft<InvoiceData | null>(`invoice.${job.id}`, null) ?? job.invoice ?? EMPTY_INVOICE
   const pages = kind === 'report' ? serviceReportPages(reportForJob(job)) : invoicePages(invoiceForJob(job, invoice))
   const title = kind === 'report' ? `Service Report · ${job.workOrder}` : `Invoice · ${job.workOrder}`
 

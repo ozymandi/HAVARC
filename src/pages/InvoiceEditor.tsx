@@ -6,12 +6,12 @@ import { FormField } from '../components/FormField'
 import { InvoiceItemSheet } from '../components/InvoiceItemSheet'
 import { LineItemRow, type LineItem } from '../components/LineItemRow'
 import { Section } from '../components/Section'
+import { SyncBanner } from '../components/SyncBanner'
 import { TotalsRow } from '../components/TotalsRow'
 import { TopBar } from '../components/TopBar'
 import { useDraftState } from '../data/draft'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
-import { useJob } from '../data/jobs'
-import { SAMPLE_INVOICE_ITEMS } from '../data/sampleReport'
+import { saveInvoice, useJob } from '../data/jobs'
 
 const money = (n: number) => `$${n.toFixed(2)}`
 
@@ -174,29 +174,45 @@ export function InvoiceEditor({ workOrder, billTo, value, onChange, onBack, onSa
   )
 }
 
-/** Route `/jobs/:id/invoice` — reached from Job Detail's Invoice document row. The seed
- *  line items are the Figma sample invoice; a real job's items come from the backend. */
+/** Route `/jobs/:id/invoice` — reached from Job Detail's Invoice document row. Starts
+ *  from the stored invoice; Save writes it back and returns to the job. */
 export function InvoiceEditorPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { data: job, loading } = useJob(id)
+  const [saveFailed, setSaveFailed] = useState(false)
 
   // Kept in the draft store (keyed by job id) rather than component state so the PDF
-  // preview route shows the edited items, not the seed rows.
-  const [invoice, setInvoice] = useDraftState<InvoiceData>(`invoice.${id}`, () => ({ ...EMPTY_INVOICE, items: SAMPLE_INVOICE_ITEMS }))
+  // preview route shows the edited items, not the stored rows.
+  const [edits, setEdits] = useDraftState<InvoiceData | null>(`invoice.${id}`, null)
 
   if (loading) return null
   if (!job) return <Navigate to="/jobs" replace />
+  const invoice = edits ?? job.invoice ?? EMPTY_INVOICE
+
+  const save = async () => {
+    setSaveFailed(false)
+    try {
+      await saveInvoice(job.id, invoice)
+      setEdits(null)
+      navigate(`/jobs/${job.id}`)
+    } catch {
+      setSaveFailed(true)
+    }
+  }
 
   return (
-    <InvoiceEditor
-      workOrder={job.workOrder}
-      billTo={{ customer: job.customer, address: job.address, phone: job.phone, invoiceNumber: job.invoiceNumber }}
-      value={invoice}
-      onChange={setInvoice}
-      onBack={() => navigate(-1)}
-      onSave={() => navigate(`/jobs/${job.id}`)}
-      onPreview={() => navigate(`/jobs/${job.id}/invoice/pdf`)}
-    />
+    <>
+      {saveFailed && <SyncBanner state="error" message="Couldn't save the invoice — tap to retry" onRetry={() => void save()} />}
+      <InvoiceEditor
+        workOrder={job.workOrder}
+        billTo={{ customer: job.customer, address: job.address, phone: job.phone, invoiceNumber: job.invoiceNumber }}
+        value={invoice}
+        onChange={setEdits}
+        onBack={() => navigate(-1)}
+        onSave={() => void save()}
+        onPreview={() => navigate(`/jobs/${job.id}/invoice/pdf`)}
+      />
+    </>
   )
 }

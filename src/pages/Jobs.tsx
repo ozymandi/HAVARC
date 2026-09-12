@@ -8,6 +8,7 @@ import { InstallSheet } from '../components/InstallSheet'
 import { JobCard, type JobStatus } from '../components/JobCard'
 import { SyncBanner } from '../components/SyncBanner'
 import { TopBar } from '../components/TopBar'
+import { clearDraft } from '../data/draft'
 import { useJobs } from '../data/jobs'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
 
@@ -26,6 +27,10 @@ export function Jobs() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const { data: allJobs, loading, error, reload } = useJobs()
+  const newJob = () => {
+    clearDraft() // a draft left behind by "Keep draft & exit" is resumed via Edit job, not here
+    navigate('/jobs/new')
+  }
 
   const jobs = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -73,7 +78,7 @@ export function Jobs() {
               </button>
               {/* Desktop (02 · Jobs 320:14793): the FAB is replaced by an accent "New job" button here. */}
               <div className="hidden md:block">
-                <Button variant="accent" icon={<Plus size={16} strokeWidth={1.5} />} className="w-[160px]" onClick={() => navigate('/jobs/new')}>
+                <Button variant="accent" icon={<Plus size={16} strokeWidth={1.5} />} className="w-[160px]" onClick={newJob}>
                   New job
                 </Button>
               </div>
@@ -129,7 +134,7 @@ export function Jobs() {
       </div>
 
       <div className="md:hidden">
-        <Fab label="New job" onClick={() => navigate('/jobs/new')} />
+        <Fab label="New job" onClick={newJob} />
       </div>
       <InstallSheet />
     </div>

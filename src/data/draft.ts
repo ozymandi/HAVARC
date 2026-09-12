@@ -48,3 +48,19 @@ export const clearDraft = () => {
   values.clear()
   notify()
 }
+
+/** Write one key outside React (uploads finishing, ids being assigned). */
+export const setDraftValue = (key: string, value: unknown) => {
+  values.set(key, value)
+  notify()
+}
+
+/** Replace the whole draft at once — used when an existing job is opened for editing. */
+export const loadDraft = (entries: Record<string, unknown>) => {
+  values.clear()
+  for (const [key, value] of Object.entries(entries)) values.set(key, value)
+  notify()
+}
+
+/** Fires after every change; the autosave loop (DraftSync) hangs off this. */
+export const subscribeDraft = subscribe

@@ -5,6 +5,7 @@ import { ChoiceChip } from '../components/ChoiceChip'
 import { FormField } from '../components/FormField'
 import { Section } from '../components/Section'
 import { useDraftState } from '../data/draft'
+import { exitDraft } from './stepExit'
 
 /** Multi-select where one or more labels are "none-like" (No Defects Found, Diagnostic
  *  Only, No Further Action, …): picking an exclusive label clears everything else,
@@ -57,7 +58,7 @@ export function Step3() {
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
-      <AppHeader step={3} title="Findings & Repairs" onExit={() => navigate('/jobs')} />
+      <AppHeader step={3} title="Findings & Repairs" onExit={() => void exitDraft(navigate)} />
 
       <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         {/* Desktop (320:15719): two rows of two sections, right-hand cards stretch to the row. */}

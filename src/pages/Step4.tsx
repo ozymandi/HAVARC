@@ -12,9 +12,14 @@ import { Section } from '../components/Section'
 import { SignatureCapture } from '../components/SignatureCapture'
 import type { StatusColor } from '../components/StatusBanner'
 import { StatusButtonGrid } from '../components/StatusButton'
+import { SyncBanner } from '../components/SyncBanner'
 import { clearDraft, readDraft, useDraftState } from '../data/draft'
+import { completeDraft } from '../data/draftSync'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
+import { addDraftPhoto, ensureJobId, removeDraftPhoto, storeSignature, type DraftPhoto } from '../data/jobDraft'
+import { useSettings } from '../data/settings'
 import { InvoiceEditor } from './InvoiceEditor'
+import { exitDraft } from './stepExit'
 
 const readFileAsDataUrl = (file: File) =>
   new Promise<string>((resolve, reject) => {
@@ -29,17 +34,22 @@ type Signer = 'customer' | 'technician' | null
 const joinOr = (values: string[], fallback: string) => (values.length ? values.join(', ') : fallback)
 
 /** Figma: 06 · Step 4 · Complete Service Call (100:3943), success state
- *  06b · Step 4 · Job saved (100:4004). */
+ *  06b · Step 4 · Job saved (100:4004). Photos are compressed and uploaded as they are
+ *  added, signatures when they are drawn; Complete uploads anything that failed, then
+ *  writes the whole job as completed through the same queue as autosave. */
 export function Step4() {
   const navigate = useNavigate()
   const photoInputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useDraftState<StatusColor | null>('step4.status', null)
-  const [photos, setPhotos] = useDraftState<string[]>('step4.photos', [])
+  const [photos, setPhotos] = useDraftState<DraftPhoto[]>('step4.photos', [])
   const [customerName, setCustomerName] = useDraftState('step4.customerName', '')
   const [customerSignature, setCustomerSignature] = useDraftState<string | null>('step4.customerSignature', null)
   const [techSignature, setTechSignature] = useDraftState<string | null>('step4.techSignature', null)
   const [signing, setSigning] = useState<Signer>(null)
   const [saved, setSaved] = useState(false)
+  const [completing, setCompleting] = useState(false)
+  const [completeFailed, setCompleteFailed] = useState(false)
+  const { data: settings } = useSettings()
 
   // Desktop rule (Yaroslav 2026-09-11): with a mouse there's no drawing overlay — the slot
   // accepts an image file instead. Decided by pointer type, not width, so an iPad (touch)
@@ -64,14 +74,32 @@ export function Step4() {
   const [invoice, setInvoice] = useDraftState<InvoiceData>('step4.invoice', () => ({ ...EMPTY_INVOICE, description: serviceNotes }))
   const [editingInvoice, setEditingInvoice] = useState(false)
 
+  // A new invoice starts at the company's default tax rate (Settings). Applied once, the
+  // first time the invoice is opened or the job is completed — never over an edited rate.
+  const [taxDefaulted, setTaxDefaulted] = useDraftState('step4.invoiceTaxDefaulted', false)
+  const applyDefaultTax = () => {
+    if (taxDefaulted || !settings) return
+    setTaxDefaulted(true)
+    if (invoice.items.length === 0 && invoice.taxRate === 0) setInvoice({ ...invoice, taxRate: settings.default_tax_rate })
+  }
+
   const canComplete = status !== null && !!customerSignature && !!techSignature
 
   const addPhoto = async (file: File | undefined) => {
     if (!file) return
-    const dataUrl = await readFileAsDataUrl(file)
-    setPhotos((prev) => [...prev, dataUrl])
+    const photo = await addDraftPhoto(file)
+    setPhotos((prev) => [...prev, photo])
   }
-  const removePhoto = (i: number) => setPhotos((prev) => prev.filter((_, idx) => idx !== i))
+  const removePhoto = (i: number) => {
+    const photo = photos[i]
+    setPhotos((prev) => prev.filter((_, idx) => idx !== i))
+    if (photo) void removeDraftPhoto(photo)
+  }
+  const setSignature = (who: Exclude<Signer, null>, dataUrl: string) => {
+    if (who === 'customer') setCustomerSignature(dataUrl)
+    else setTechSignature(dataUrl)
+    void storeSignature(who, dataUrl)
+  }
 
   const startSignature = (who: Exclude<Signer, null>) => {
     if (!uploadsSignature) return setSigning(who)
@@ -80,14 +108,26 @@ export function Step4() {
   }
   const uploadSignature = async (file: File | undefined) => {
     if (!file) return
-    const dataUrl = await readFileAsDataUrl(file)
-    if (signatureTarget === 'customer') setCustomerSignature(dataUrl)
-    else setTechSignature(dataUrl)
+    setSignature(signatureTarget, await readFileAsDataUrl(file))
+  }
+
+  const complete = async () => {
+    setCompleting(true)
+    setCompleteFailed(false)
+    applyDefaultTax()
+    try {
+      await completeDraft()
+      setSaved(true)
+    } catch {
+      setCompleteFailed(true)
+    } finally {
+      setCompleting(false)
+    }
   }
 
   const finish = (to: string) => {
     clearDraft()
-    navigate(to)
+    navigate(to, { replace: true })
   }
 
   // Same look as the Figma Signature Pad (17:69, size/signature 155): bordered box,
@@ -121,7 +161,8 @@ export function Step4() {
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
-      <AppHeader step={4} title="Complete Service Call" onExit={() => navigate('/jobs')} />
+      <AppHeader step={4} title="Complete Service Call" onExit={() => void exitDraft(navigate)} />
+      {completeFailed && <SyncBanner state="error" message="Couldn't save the job — check your connection and tap to retry" onRetry={() => void complete()} />}
 
       <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         <Section label="FINAL SYSTEM STATUS">
@@ -133,8 +174,8 @@ export function Step4() {
         <Section label="PHOTO DOCUMENTATION">
           <div className="flex w-full flex-col gap-md p-md">
             <div className="flex w-full gap-sm">
-              {photos.map((src, i) => (
-                <PhotoTile key={i} src={src} onRemove={() => removePhoto(i)} />
+              {photos.map((photo, i) => (
+                <PhotoTile key={photo.id} src={photo.url} onRemove={() => removePhoto(i)} />
               ))}
               <input
                 ref={photoInputRef}
@@ -184,7 +225,10 @@ export function Step4() {
               {reviewRow('Status', status ? `${status.toUpperCase()} — set above` : 'Not set yet')}
             </div>
             <div className="flex w-full md:mt-auto md:justify-end">
-              <Button variant="secondary" icon={<FileText size={16} strokeWidth={1.5} />} className="w-full md:w-auto md:min-w-[200px]" onClick={() => setEditingInvoice(true)}>
+              <Button variant="secondary" icon={<FileText size={16} strokeWidth={1.5} />} className="w-full md:w-auto md:min-w-[200px]" onClick={() => {
+                applyDefaultTax()
+                setEditingInvoice(true)
+              }}>
                 Edit invoice
               </Button>
             </div>
@@ -193,7 +237,7 @@ export function Step4() {
         </div>
       </div>
 
-      <BottomNav isLast onBack={() => navigate('/jobs/new/step-3')} onNext={() => setSaved(true)} nextDisabled={!canComplete} />
+      <BottomNav isLast onBack={() => navigate('/jobs/new/step-3')} onNext={() => void complete()} nextDisabled={!canComplete || completing} />
 
       <input
         ref={signatureInputRef}
@@ -231,8 +275,7 @@ export function Step4() {
           }
           onCancel={() => setSigning(null)}
           onDone={(dataUrl) => {
-            if (signing === 'customer') setCustomerSignature(dataUrl)
-            else setTechSignature(dataUrl)
+            setSignature(signing, dataUrl)
             setSigning(null)
           }}
         />
@@ -244,7 +287,7 @@ export function Step4() {
           title="Job saved"
           message={`${[workOrder, customer].filter(Boolean).join(' · ') || 'This job'} is complete. The service report and invoice are being generated — they will appear in the job in a few seconds.`}
           primaryLabel="View job"
-          onPrimary={() => finish('/jobs/wo-10031')}
+          onPrimary={() => finish(`/jobs/${ensureJobId()}`)}
           secondaryLabel="Back to jobs"
           onSecondary={() => finish('/jobs')}
         />

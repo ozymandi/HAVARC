@@ -8,50 +8,8 @@ import { ChoiceChip } from '../components/ChoiceChip'
 import { FormField } from '../components/FormField'
 import { Section } from '../components/Section'
 import { useDraftState } from '../data/draft'
-
-interface Readings {
-  returnAir: string
-  supplyAir: string
-  tempSplit: string
-  returnStatic: string
-  supplyStatic: string
-  totalStatic: string
-  incomingV: string
-  compressorA: string
-  condFanA: string
-  blowerA: string
-  capRatedMfd: string
-  capActualMfd: string
-  suctionPsig: string
-  headPsig: string
-  outdoorF: string
-  superheat: string
-  subcooling: string
-  refrigerantAdded: string
-}
-
-const EMPTY_READINGS: Readings = {
-  returnAir: '',
-  supplyAir: '',
-  tempSplit: '',
-  returnStatic: '',
-  supplyStatic: '',
-  totalStatic: '',
-  incomingV: '',
-  compressorA: '',
-  condFanA: '',
-  blowerA: '',
-  capRatedMfd: '',
-  capActualMfd: '',
-  suctionPsig: '',
-  headPsig: '',
-  outdoorF: '',
-  superheat: '',
-  subcooling: '',
-  refrigerantAdded: '',
-}
-
-type CheckState = 'good' | 'issue' | null
+import { EMPTY_CONDITIONS, EMPTY_READINGS, type CheckState, type Conditions, type Readings } from '../data/jobDraft'
+import { exitDraft } from './stepExit'
 
 const CONDITION_PAIRS: { key: keyof Conditions; good: string; issue: string }[] = [
   { key: 'filter', good: 'Filter Good', issue: 'Filter Dirty' },
@@ -59,15 +17,6 @@ const CONDITION_PAIRS: { key: keyof Conditions; good: string; issue: string }[] 
   { key: 'ductwork', good: 'Ductwork Good', issue: 'Duct Leakage / Sealing' },
   { key: 'heating', good: 'Heating Good', issue: 'Heating Needs Attention' },
 ]
-
-interface Conditions {
-  filter: CheckState
-  drain: CheckState
-  ductwork: CheckState
-  heating: CheckState
-}
-
-const EMPTY_CONDITIONS: Conditions = { filter: null, drain: null, ductwork: null, heating: null }
 
 /** Figma: 04 · Step 2 · Inspection & Readings (100:3807), collapsed state
  *  04b · Step 2 · Readings skipped (254:7202). Readings default collapsed per the
@@ -88,7 +37,7 @@ export function Step2() {
 
   return (
     <div className="flex min-h-svh flex-col bg-canvas">
-      <AppHeader step={2} title="Inspection & Readings" onExit={() => navigate('/jobs')} />
+      <AppHeader step={2} title="Inspection & Readings" onExit={() => void exitDraft(navigate)} />
 
       <div className="app-col flex flex-1 flex-col gap-lg p-lg">
         <div className="flex w-full flex-col gap-sm">

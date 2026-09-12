@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RequireAuth } from './auth/AuthProvider'
+import { DraftSync } from './components/DraftSync'
 import { ChangePassword } from './pages/ChangePassword'
 import { CheckEmail } from './pages/CheckEmail'
 import { ForgotPassword } from './pages/ForgotPassword'
@@ -33,10 +34,13 @@ function App() {
           <Route element={<RequireAuth />}>
             <Route path="/reset-password" element={<SetNewPassword />} />
             <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/new" element={<Step1 />} />
-            <Route path="/jobs/new/step-2" element={<Step2 />} />
-            <Route path="/jobs/new/step-3" element={<Step3 />} />
-            <Route path="/jobs/new/step-4" element={<Step4 />} />
+            {/* The four steps share one autosaving draft (DraftSync flushes it on the way out). */}
+            <Route element={<DraftSync />}>
+              <Route path="/jobs/new" element={<Step1 />} />
+              <Route path="/jobs/new/step-2" element={<Step2 />} />
+              <Route path="/jobs/new/step-3" element={<Step3 />} />
+              <Route path="/jobs/new/step-4" element={<Step4 />} />
+            </Route>
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/jobs/:id/invoice" element={<InvoiceEditorPage />} />
             <Route path="/jobs/:id/invoice/pdf" element={<PdfPreview kind="invoice" />} />
