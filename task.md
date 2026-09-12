@@ -80,7 +80,7 @@ Next: step 4 — offline queue (IndexedDB, sync when online, Syncing / Sync erro
 
 ### Open items before step 4 / deploy
 
-1. Supabase Auth config is now declared in `supabase/config.toml` (Site URL `https://havarc.vercel.app`, redirect URLs for the app and localhost, password rule 8+ chars with a digit, public signups off). CLI is linked; `npm run config:diff` previews, `npm run config:push` applies. The push itself has to be run by Yaroslav in a terminal (the agent sandbox blocks it). Until pushed, the recovery link lands on the default Site URL.
+1. ~~Supabase Auth URL configuration~~ Done 2026-09-12: `supabase/config.toml` declares Site URL `https://havarc.vercel.app`, redirect URLs for the app and localhost, password rule 8+ chars with a digit, public signups off; pushed and verified (`npm run config:diff` reports no pending changes). Rule: change auth settings in the file, then `npm run config:push` from a terminal (the agent sandbox blocks the push itself).
 2. Vercel project env: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (values in `.env.local`). The app throws at startup without them, so this must precede the next push to `main`.
 3. Supabase built-in SMTP is limited to a few emails per hour and only to project members' addresses — fine for testing, but a custom SMTP / Resend sender is needed before the client uses Reset password (also the plan's step 8).
 4. ~~Type generation~~ Done 2026-09-12: the CLI is logged in (`npx.cmd supabase login`), `npm run gen:types` regenerates `src/lib/database.types.ts` from the project and the client is `createClient<Database>`. Re-run it after every migration.
