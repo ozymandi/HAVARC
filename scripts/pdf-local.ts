@@ -14,6 +14,7 @@ const env = Object.fromEntries(
     .filter((l) => l.includes('='))
     .map((l) => l.split('=', 2).map((s) => s.trim())),
 )
+for (const [k, v] of Object.entries(env)) process.env[k] ??= v // SMTP_* for the documents email
 const [jobArg, outDir = '.'] = process.argv.slice(2)
 if (!jobArg) throw new Error('job id or work order required')
 
