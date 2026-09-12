@@ -53,6 +53,25 @@ export function Step1() {
   const [complaintDetails, setComplaintDetails] = useDraftState('step1.complaintDetails', '')
   const [equipment, setEquipment] = useDraftState<Equipment[]>('step1.equipment', [EMPTY_EQUIPMENT('unit-1')])
 
+  // Drafts saved before the native inputs may hold "MM/DD/YYYY" and "3:45 PM"; normalise
+  // them once so the inputs don't show empty.
+  useEffect(() => {
+    const us = date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+    if (us) setDate(`${us[3]}-${us[1].padStart(2, '0')}-${us[2].padStart(2, '0')}`)
+  }, [date, setDate])
+  useEffect(() => {
+    const to24 = (v: string) => {
+      const m = v.match(/^(\d{1,2}):(\d{2})\s*([AP]M)$/i)
+      if (!m) return null
+      const h = (Number(m[1]) % 12) + (m[3].toUpperCase() === 'PM' ? 12 : 0)
+      return `${pad(h)}:${m[2]}`
+    }
+    const a = to24(arrival)
+    if (a) setArrival(a)
+    const d = to24(departure)
+    if (d) setDeparture(d)
+  }, [arrival, departure, setArrival, setDeparture])
+
   // The next work-order number comes from the jobs table; only fill it while the draft
   // has none, so a number the technician typed (or a resumed draft) is never overwritten.
   useEffect(() => {
