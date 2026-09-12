@@ -10,6 +10,8 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Registered from main.tsx so update checks can run on every return to the app.
+      injectRegister: false,
       manifest: {
         name: "HAV'ARC Field Service",
         short_name: "HAV'ARC",
