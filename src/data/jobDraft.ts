@@ -324,9 +324,7 @@ const readingsRow = (r: Readings, c: Conditions) => ({
   heating_check: c.heating,
 })
 
-/** Writes the whole draft: the job row plus every child table (children are replaced
- *  wholesale — a draft is small and this keeps positions and removals trivially right).
- *  `complete` marks the job completed and stamps the final-status / signature fields;
+/** Writes the whole draft: the job row plus every child table. `complete` marks the job completed and stamps the final-status / signature fields;
  *  otherwise the row keeps its current status. */
 export async function saveJobDraft(input: JobDraft, complete = false): Promise<string> {
   const d = complete ? await uploadPending(input) : input
@@ -364,31 +362,29 @@ export async function saveJobDraft(input: JobDraft, complete = false): Promise<s
   })
   if (jobError) throw jobError
 
-  const replace = async (table: string, rows: Record<string, unknown>[]) => {
-    const { error: delError } = await supabase.from(table).delete().eq('job_id', jobId)
-    if (delError) throw delError
-    if (rows.length === 0) return
-    const { error: insError } = await supabase.from(table).insert(rows)
-    if (insError) throw insError
+  // Children are replaced wholesale: a draft is small and this keeps positions and
+  // removals trivially right.
+  const { error: eqDelError } = await supabase.from('equipment').delete().eq('job_id', jobId)
+  if (eqDelError) throw eqDelError
+  if (d.equipment.length) {
+    const { error: eqError } = await supabase.from('equipment').insert(
+      d.equipment.map((u, i) => ({
+        job_id: jobId,
+        position: i + 1,
+        equipment_id: nullable(u.equipmentId),
+        location: nullable(u.location),
+        type: nullable(u.type),
+        manufacturer: nullable(u.manufacturer),
+        model: nullable(u.model),
+        serial: nullable(u.serial),
+        tonnage: nullable(u.tonnage),
+        refrigerant: nullable(u.refrigerant),
+        voltage: nullable(u.voltage),
+        filter_size: nullable(u.filterSize),
+      })),
+    )
+    if (eqError) throw eqError
   }
-
-  await replace(
-    'equipment',
-    d.equipment.map((u, i) => ({
-      job_id: jobId,
-      position: i + 1,
-      equipment_id: nullable(u.equipmentId),
-      location: nullable(u.location),
-      type: nullable(u.type),
-      manufacturer: nullable(u.manufacturer),
-      model: nullable(u.model),
-      serial: nullable(u.serial),
-      tonnage: nullable(u.tonnage),
-      refrigerant: nullable(u.refrigerant),
-      voltage: nullable(u.voltage),
-      filter_size: nullable(u.filterSize),
-    })),
-  )
 
   const { error: readingsError } = await supabase.from('readings').upsert({ job_id: jobId, ...readingsRow(d.readings, d.conditions) })
   if (readingsError) throw readingsError
@@ -406,10 +402,13 @@ export async function saveJobDraft(input: JobDraft, complete = false): Promise<s
 
   await saveInvoice(jobId, d.invoice)
 
-  await replace(
-    'photos',
-    d.photos.filter((p) => p.path).map((p, i) => ({ id: p.id, job_id: jobId, position: i + 1, storage_path: p.path })),
-  )
+  const { error: photoDelError } = await supabase.from('photos').delete().eq('job_id', jobId)
+  if (photoDelError) throw photoDelError
+  const photoRows = d.photos.flatMap((p, i) => (p.path ? [{ id: p.id, job_id: jobId, position: i + 1, storage_path: p.path }] : []))
+  if (photoRows.length) {
+    const { error: photoError } = await supabase.from('photos').insert(photoRows)
+    if (photoError) throw photoError
+  }
 
   if (complete) {
     setDraftValue('job.status', status)
