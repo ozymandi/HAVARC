@@ -3,7 +3,8 @@ import puppeteer from 'puppeteer-core'
 import type { Database } from '../src/lib/database.types.js'
 import { companyFromSettings } from '../src/pdf/company.js'
 import { buildInvoiceData, buildReportData, encodePdfPayload, type PdfKind, type PdfPayload, type PdfSource } from '../src/pdf/data.js'
-import { PDF_JOB_SELECT, type PdfJobRow } from '../src/pdf/query.js'
+import { PDF_JOB_SELECT, one, type PdfJobRow } from '../src/pdf/query.js'
+import { sendDocumentsEmail, smtpConfigured } from './_email.js'
 
 /* Server-side PDF generation (backend plan, step 6). Loads the job with the service key,
  * builds the same template data the app uses, renders the app's own /print routes in
@@ -32,7 +33,8 @@ const KIND_LABEL: Record<PdfKind, string> = { report: 'Service Report', invoice:
 
 export async function generatePdfs(opts: GenerateOptions): Promise<GeneratedDocument[]> {
   const service = createClient<Database>(opts.supabaseUrl, opts.serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
-  const source = await loadSource(service, opts.jobId)
+  const { source, notifyEmail } = await loadSource(service, opts.jobId)
+  const rendered = new Map<PdfKind, Uint8Array>()
 
   const browser = await puppeteer.launch({
     executablePath: opts.executablePath,
@@ -52,6 +54,7 @@ export async function generatePdfs(opts: GenerateOptions): Promise<GeneratedDocu
           .from('documents')
           .upsert({ job_id: opts.jobId, kind, status: 'ready', storage_path: path, size_bytes: pdf.byteLength, error: null }, { onConflict: 'job_id,kind' })
         if (rowError) throw rowError
+        rendered.set(kind, pdf)
         results.push({ kind, path, size: pdf.byteLength })
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
@@ -62,13 +65,60 @@ export async function generatePdfs(opts: GenerateOptions): Promise<GeneratedDocu
   } finally {
     await browser.close()
   }
+
+  // Step 8 part 2: the finished documents go to the office (Settings → notify email).
+  // Never fatal — a mail problem must not turn a generated PDF into an error row.
+  if (notifyEmail && smtpConfigured()) {
+    try {
+      await emailDocuments(service, opts, source, notifyEmail, rendered)
+    } catch (err) {
+      console.error('documents email failed', err)
+    }
+  } else if (notifyEmail) {
+    console.warn('documents email skipped: SMTP_USER / SMTP_PASS / SMTP_SENDER not set')
+  }
   return results
 }
 
-async function loadSource(service: SupabaseClient<Database>, jobId: string): Promise<PdfSource> {
+/** Attaches both PDFs (the ones just rendered, the other one from Storage) and stamps
+ *  documents.emailed_at on the rows that went out. */
+async function emailDocuments(
+  service: SupabaseClient<Database>,
+  opts: GenerateOptions,
+  source: PdfSource,
+  to: string,
+  rendered: Map<PdfKind, Uint8Array>,
+): Promise<void> {
+  const wo = source.job.work_order.replace(/[^\w.-]+/g, '-')
+  const number = one(source.job.invoice)?.number
+  const attachments: { kind: PdfKind; filename: string; content: Uint8Array }[] = []
+  for (const kind of ['report', 'invoice'] as PdfKind[]) {
+    let content = rendered.get(kind)
+    if (!content) {
+      const { data } = await service.storage.from('documents').download(`${opts.jobId}/${kind}.pdf`)
+      if (!data) continue
+      content = new Uint8Array(await data.arrayBuffer())
+    }
+    attachments.push({
+      kind,
+      filename: kind === 'report' ? `${wo}-service-report.pdf` : `${wo}-invoice${number ? `-${number.replace(/[^\w.-]+/g, '-')}` : ''}.pdf`,
+      content,
+    })
+  }
+  if (attachments.length === 0) return
+  await sendDocumentsEmail({ to, job: source.job, company: source.company, origin: opts.origin, attachments })
+  const { error } = await service
+    .from('documents')
+    .update({ emailed_at: new Date().toISOString() })
+    .eq('job_id', opts.jobId)
+    .in('kind', attachments.map((a) => a.kind))
+  if (error) throw error
+}
+
+async function loadSource(service: SupabaseClient<Database>, jobId: string): Promise<{ source: PdfSource; notifyEmail: string | null }> {
   const [{ data: job, error }, { data: settings, error: settingsError }] = await Promise.all([
     service.from('jobs').select(PDF_JOB_SELECT).eq('id', jobId).single(),
-    service.from('settings').select('company_name, phone, email, address, invoice_footer').eq('id', true).single(),
+    service.from('settings').select('company_name, phone, email, address, invoice_footer, notify_email').eq('id', true).single(),
   ])
   if (error) throw error
   if (settingsError) throw settingsError
@@ -88,11 +138,14 @@ async function loadSource(service: SupabaseClient<Database>, jobId: string): Pro
     return data.signedUrl
   }
   return {
-    job: row,
-    photoUrls,
-    customerSignatureUrl: await signed(row.customer_signature_path),
-    technicianSignatureUrl: await signed(row.technician_signature_path),
-    company: companyFromSettings(settings),
+    source: {
+      job: row,
+      photoUrls,
+      customerSignatureUrl: await signed(row.customer_signature_path),
+      technicianSignatureUrl: await signed(row.technician_signature_path),
+      company: companyFromSettings(settings),
+    },
+    notifyEmail: settings.notify_email?.trim() || null,
   }
 }
 
