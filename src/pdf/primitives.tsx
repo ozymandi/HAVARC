@@ -34,11 +34,11 @@ export function PdfHeroBig({ title, rows }: { title: string; rows: [string, stri
       <img {...bg('hero_big')} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="relative flex h-full min-w-0 flex-1 flex-col justify-between">
         <img src="/brand/header-lockup.svg" alt={COMPANY.name} width={174} height={45} className="h-[45px] w-auto self-start" />
-        <div className="flex flex-col gap-xs text-inverse">
+        <div className="flex flex-col gap-xs text-inverse [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]">
           {contacts.map(([icon, text], i) => (
             <div key={i} className="flex items-center gap-xs">
               {icon}
-              <p className="text-pdf-body whitespace-nowrap">{text}</p>
+              <p className="text-pdf-body font-medium whitespace-nowrap">{text}</p>
             </div>
           ))}
         </div>
@@ -69,7 +69,7 @@ export function PdfHeroSmall({ pill }: { pill: string }) {
     <div className="relative flex h-[83px] w-full shrink-0 items-start justify-between px-3xl pb-lg pt-3xl shadow-[0_4px_24px_0_var(--alpha-navy-30)]">
       <img {...bg('hero')} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <img src="/brand/header-lockup.svg" alt={COMPANY.name} width={137} height={35} className="relative h-[35px] w-auto" />
-      <div className="relative rounded-full bg-[var(--alpha-white-05)] px-lg py-[10px]">
+      <div className="relative rounded-full bg-brand-strong px-lg py-[10px]">
         <p className="text-pdf-body whitespace-nowrap text-inverse">{pill}</p>
       </div>
     </div>

@@ -80,7 +80,7 @@ export function invoicePages(inv: InvoicePdfData): ReactNode[] {
   const signatureField = (label: string, className = '') => (
     <div className={`flex flex-col gap-[3px] pt-[14px] ${className}`}>
       <div className="h-px w-full bg-line-strong" />
-      <p className="text-pdf-small text-ink-faint">{label}</p>
+      <p className="text-pdf-small text-icon">{label}</p>
     </div>
   )
 

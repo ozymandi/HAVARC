@@ -125,7 +125,7 @@ export function serviceReportPages(r: ReportData): ReactNode[] {
           <PdfSection title="TECHNICIAN NOTES" className="flex-1">
             <p className="text-pdf-body text-ink">{r.serviceNotes || "—"}</p>
             {r.parts && (
-              <p className="text-pdf-body text-ink-faint">Parts: {r.parts}</p>
+              <p className="text-pdf-body text-icon">Parts: {r.parts}</p>
             )}
           </PdfSection>
           <PdfSection title="RECOMMENDATIONS" className="flex-1">
@@ -259,7 +259,7 @@ export function serviceReportPages(r: ReportData): ReactNode[] {
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <p className="text-pdf-small text-ink-faint">
+                <p className="text-pdf-small text-icon">
                   {i + 1}. {photo.caption ?? "Photo"}
                 </p>
               </div>
