@@ -45,10 +45,10 @@ export function PdfHeroBig({ title, rows }: { title: string; rows: [string, stri
       </div>
       <div className="relative flex w-[250px] shrink-0 flex-col">
         <div className="rounded-t-xs bg-brand px-md py-sm text-pdf-emphasis text-inverse">{title}</div>
-        <div className="flex flex-col rounded-b-xs bg-[var(--alpha-neutral-05)]">
+        <div className="flex flex-col rounded-b-xs bg-brand-strong">
           {rows.map(([label, value]) => (
             <div key={label} className="flex items-start gap-sm px-sm py-2xs">
-              <p className="w-[92px] shrink-0 text-pdf-section text-ink-soft">{label}</p>
+              <p className="w-[92px] shrink-0 text-pdf-section text-inverse">{label}</p>
               <div className="min-w-0 flex-1 text-pdf-body text-inverse">
                 {(Array.isArray(value) ? value : [value]).map((line, i) => (
                   <p key={i}>{line}</p>
@@ -149,7 +149,7 @@ export function PdfUnitCard({ title, rows, labelWidth = 110 }: { title: string; 
       </div>
       {rows.map(([label, value]) => (
         <div key={label} className="flex items-start gap-sm border-t border-line px-sm py-[3px]">
-          <p className="shrink-0 text-pdf-body text-ink-faint" style={{ width: labelWidth }}>
+          <p className="shrink-0 text-pdf-body text-icon" style={{ width: labelWidth }}>
             {label}
           </p>
           <p className="min-w-0 flex-1 text-pdf-body text-ink">{value || '—'}</p>

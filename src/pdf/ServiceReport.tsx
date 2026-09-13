@@ -64,7 +64,7 @@ const signature = (label: string, sig: PdfSignature | null) => (
         />
       )}
     </div>
-    <p className="text-pdf-small text-ink-faint">{label}</p>
+    <p className="text-pdf-small text-icon">{label}</p>
     <p className="text-pdf-body text-ink">
       {sig ? `${sig.name} · ${sig.signedAt}` : "—"}
     </p>
