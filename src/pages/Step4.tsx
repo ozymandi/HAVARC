@@ -16,7 +16,7 @@ import { StatusButtonGrid } from '../components/StatusButton'
 import { clearDraft, readDraft, useDraftState } from '../data/draft'
 import { completeDraft } from '../data/draftSync'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
-import { addDraftPhoto, ensureJobId, removeDraftPhoto, storeSignature, type DraftPhoto } from '../data/jobDraft'
+import { addDraftPhoto, ensureJobId, hasStep1Required, removeDraftPhoto, storeSignature, type DraftPhoto } from '../data/jobDraft'
 import { useSettings } from '../data/settings'
 import { InvoiceEditor } from './InvoiceEditor'
 import { exitDraft } from './stepExit'
@@ -89,7 +89,7 @@ export function Step4() {
     if (invoice.items.length === 0 && invoice.taxRate === 0) setInvoice({ ...invoice, taxRate: settings.default_tax_rate })
   }
 
-  const canComplete = status !== null && !!customerSignature && !!techSignature
+  const canComplete = status !== null && !!customerSignature && !!techSignature && hasStep1Required()
 
   const addPhoto = async (file: File | undefined) => {
     if (!file) return

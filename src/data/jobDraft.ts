@@ -161,6 +161,12 @@ export const readJobDraft = (): JobDraft => ({
 
 /** A draft is worth a row once it names a customer or carries a file; an untouched
  *  "New job" that is backed out of leaves nothing behind in the Jobs list. */
+/** Step 1's required fields that identify a job. Steps 2–4 and Complete refuse to run
+ *  without them: after Complete the draft is cleared but Steps 1–3 stay in the browser
+ *  history, so Back used to land on an empty Step 3 and let an empty job be completed. */
+export const hasStep1Required = () =>
+  ['step1.workOrder', 'step1.customer', 'step1.address'].every((key) => readDraft<string>(key, '').trim() !== '')
+
 export const hasContent = (d: JobDraft) =>
   d.customer.trim() !== '' || d.photos.length > 0 || !!d.customerSignaturePath || !!d.techSignaturePath || d.status !== 'draft'
 
