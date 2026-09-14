@@ -58,7 +58,7 @@ Auth (email + password, reset), shared data for both users, job list + search + 
 
 Equipment history, configurable required fields, dynamic sections by equipment type, photo categories/captions, "customer declined to sign", repeat visits / parts orders, email PDFs from the app, integrations (QuickBooks, HubSpot).
 
-**Client wish list, received 2026-09-14 (after the test round), not estimated with the client yet — rough hours below are ours, for the reply:**
+**Client wish list, received 2026-09-14 (after the test round), the client asked only whether these can be built on the existing app and stack (answer sent: yes, all six, no rebuild, roles first). Hours below are our internal rough guess, NOT sent to the client:**
 
 | # | Wish (client's words → what it means) | Rough hours |
 |---|---|---|
