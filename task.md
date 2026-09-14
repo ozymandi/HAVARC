@@ -69,7 +69,10 @@ Equipment history, configurable required fields, dynamic sections by equipment t
 | 5 | Contracts to be signed — a contract template with the company's terms, filled from the job/customer, signed on the phone like the report, stored as PDF, emailed | 14–20 |
 | 6 | Bid proposal — a proposal/estimate document (scope, line items, total, validity), sent to the customer as PDF, "Accepted" turns it into a job and its invoice | 18–26 |
 
-Order that makes sense technically: 4 (roles) first, because 1–3 and 6 need "who may see what"; then 2 (price book) as it feeds 3 and 6; then 1, 6, 5, 3. Total rough range 96–136 h across all six.
+**Decision 2026-09-14 (Yaroslav): nothing starts until the client describes his pipeline and hands over the spreadsheets he keeps today (parts list, prices, schedule).** Architecture notes from the discussion, for when that happens:
+
+- Four branches, each its own migrations, RLS and screens, shippable one by one: (a) admin: `profiles` with a role, RLS by role, edge function on the Admin API, Users screen; (b) items: one `items` catalogue (name, SKU, price, stock, part/service) + `job_items` (job → item, qty, price at the time) — the invoice takes its lines from `job_items`, stock is deducted by a trigger on Complete, free-text `parts` stays as a fallback; import from CSV/Excel + manual add, cached on the phone like customers, search-as-you-type picker in Step 3 and the invoice editor; (c) scheduling: no separate events table — `jobs` gets slot start/end, status `scheduled` before `draft`, `assigned_to` → user; desktop "Schedule" screen (week/day, column per technician, Unscheduled list, create job from a short form, reschedule by editing the slot, no drag-and-drop in v1); phone: Today list shows the time and a Start button that opens Step 1 pre-filled; email to the technician via Brevo instead of push; (d) documents: contracts and proposals as new PDF kinds on the existing renderer/signature/email, proposal "Accepted" → job + invoice using `job_items`.
+- Order: a → b → c and d in parallel. Internal rough total 96–136 h, not sent to the client.
 
 ## Known constraints
 
