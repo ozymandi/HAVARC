@@ -58,6 +58,19 @@ Auth (email + password, reset), shared data for both users, job list + search + 
 
 Equipment history, configurable required fields, dynamic sections by equipment type, photo categories/captions, "customer declined to sign", repeat visits / parts orders, email PDFs from the app, integrations (QuickBooks, HubSpot).
 
+**Client wish list, received 2026-09-14 (after the test round), not estimated with the client yet — rough hours below are ours, for the reply:**
+
+| # | Wish (client's words → what it means) | Rough hours |
+|---|---|---|
+| 1 | Calendar scheduling for the back office — jobs get a scheduled date/time slot and a technician; day / week calendar view on the desktop, "today" on the phone; unscheduled jobs list | 20–28 |
+| 2 | Pricing — a price book (services, labor rates, common parts with prices) that fills invoice lines from a picker instead of typing | 12–16 |
+| 3 | Inventory of parts — parts catalogue with quantities on hand, "Parts used" on a job deducts stock, low-stock list; no purchase orders | 16–24 |
+| 4 | User levels / admin — roles (admin, office, technician), admin manages users in the app (invite, disable), per-role visibility (e.g. technicians see only their jobs, no Settings, no delete). Replaces today's "everyone sees everything" RLS | 16–22 |
+| 5 | Contracts to be signed — a contract template with the company's terms, filled from the job/customer, signed on the phone like the report, stored as PDF, emailed | 14–20 |
+| 6 | Bid proposal — a proposal/estimate document (scope, line items, total, validity), sent to the customer as PDF, "Accepted" turns it into a job and its invoice | 18–26 |
+
+Order that makes sense technically: 4 (roles) first, because 1–3 and 6 need "who may see what"; then 2 (price book) as it feeds 3 and 6; then 1, 6, 5, 3. Total rough range 96–136 h across all six.
+
 ## Known constraints
 
 - iOS PWA: no install prompt (manual hint screen), storage may be evicted, no background sync — sync only with app open. Server is the source of truth, local storage is a buffer.
