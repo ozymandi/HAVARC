@@ -54,7 +54,7 @@ Optional, same time: the app can get its own address, for example **app.havarcse
 
 ## Step 5 — Keep us as helpers (recommended, and you can undo it any time)
 
-After the transfer we no longer have access to anything. If you want us to maintain the app, fix something, or build the next features, invite us as a member in each service. We will send you the exact clicks for each one when we get there; it is "Members → Invite → paste our email" in all three. You can remove us the same way at any time.
+After the transfer we no longer have access to anything. If you want us to maintain the app, fix something, or build the next features, invite our developer as a member in each service. The email to invite is **ozymandiuz@gmail.com** (Yaroslav, the developer of the app). It is "Members → Invite → paste the email" in all three services; we will send you the exact clicks for each one when we get there. You can remove us the same way at any time.
 
 ## Step 6 — Final check on your phone
 
