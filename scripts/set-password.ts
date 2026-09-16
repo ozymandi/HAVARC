@@ -24,4 +24,4 @@ const user = data.users.find((u) => u.email?.toLowerCase() === email.toLowerCase
 if (!user) throw new Error(`no user ${email}`)
 const { error: updErr } = await db.auth.admin.updateUserById(user.id, { password })
 if (updErr) throw updErr
-console.log(`password set for ${email}`)
+console.log(`password set for ${email}: ${password.length} characters, starts "${password.slice(0, 3)}…", ends "…${password.slice(-2)}"`)
