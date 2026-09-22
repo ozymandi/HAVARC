@@ -281,6 +281,8 @@ export type Database = {
           departure_time: string | null
           final_status: Database["public"]["Enums"]["final_status"] | null
           id: string
+          invoice_signature_path: string | null
+          invoice_signed_at: string | null
           job_date: string
           service_type: string | null
           status: Database["public"]["Enums"]["job_status"]
@@ -307,6 +309,8 @@ export type Database = {
           departure_time?: string | null
           final_status?: Database["public"]["Enums"]["final_status"] | null
           id?: string
+          invoice_signature_path?: string | null
+          invoice_signed_at?: string | null
           job_date?: string
           service_type?: string | null
           status?: Database["public"]["Enums"]["job_status"]
@@ -333,6 +337,8 @@ export type Database = {
           departure_time?: string | null
           final_status?: Database["public"]["Enums"]["final_status"] | null
           id?: string
+          invoice_signature_path?: string | null
+          invoice_signed_at?: string | null
           job_date?: string
           service_type?: string | null
           status?: Database["public"]["Enums"]["job_status"]

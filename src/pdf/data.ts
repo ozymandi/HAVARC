@@ -14,6 +14,7 @@ export interface PdfSource {
   photoUrls: Record<string, string>
   customerSignatureUrl: string | null
   technicianSignatureUrl: string | null
+  invoiceSignatureUrl: string | null
   company: PdfCompany
 }
 
@@ -135,6 +136,9 @@ export function buildInvoiceData(src: PdfSource): InvoicePdfData {
     description: str(inv?.description),
     equipment: equipmentOf(job),
     workPerformed: workPerformedFor(job),
+    customerSignature: src.invoiceSignatureUrl
+      ? { image: src.invoiceSignatureUrl, name: job.customer_rep_name || job.customer_name, signedAt: signedAt(job.invoice_signed_at) }
+      : null,
   }
 }
 

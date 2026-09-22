@@ -129,6 +129,7 @@ const applyToLiveDraft = (saved: SavedJob) => {
     )
     setDraftValue('job.customerSignaturePath', saved.draft.customerSignaturePath)
     setDraftValue('job.techSignaturePath', saved.draft.techSignaturePath)
+    setDraftValue('job.invoiceSignaturePath', saved.draft.invoiceSignaturePath)
     setDraftValue('job.status', saved.draft.status)
     setDraftValue('job.completedAt', saved.draft.completedAt)
     setDraftValue('job.updatedAt', saved.updatedAt)

@@ -77,12 +77,18 @@ export function invoicePages(inv: InvoicePdfData): ReactNode[] {
     </>
   )
 
-  const signatureField = (label: string, className = '') => (
+  /** A line of the acknowledgment block: blank for a pen, or filled from the app's invoice
+   *  signature (drawn image on the SIGNATURE line, name and date as text on theirs). */
+  const signatureField = (label: string, className = '', value?: string, image?: string) => (
     <div className={`flex flex-col gap-[3px] pt-[14px] ${className}`}>
-      <div className="h-px w-full bg-line-strong" />
+      <div className="relative h-px w-full bg-line-strong">
+        {image && <img src={image} alt="" className="absolute bottom-0 left-0 h-[40px] w-[128px] object-contain object-left-bottom" />}
+        {value && !image && <p className="absolute bottom-[2px] left-0 text-pdf-body text-ink">{value}</p>}
+      </div>
       <p className="text-pdf-small text-icon">{label}</p>
     </div>
   )
+  const sig = inv.customerSignature
 
   const page2 = (
     <>
@@ -112,12 +118,12 @@ export function invoicePages(inv: InvoicePdfData): ReactNode[] {
         <div className="flex w-full flex-col gap-[10px] rounded-2xs border border-line px-[10px] pb-[10px] pt-sm">
           <p className="text-pdf-body text-ink">I hereby acknowledge the work performed as described above and agree to the charges.</p>
           <div className="flex w-full items-start gap-lg">
-            {signatureField('DATE COMPLETED', 'w-[150px] shrink-0')}
-            {signatureField('PRINT NAME', 'min-w-0 flex-1')}
+            {signatureField('DATE COMPLETED', 'w-[150px] shrink-0', sig?.signedAt)}
+            {signatureField('PRINT NAME', 'min-w-0 flex-1', sig?.name)}
           </div>
           <div className="flex w-full items-start gap-lg">
             {signatureField('JOB TITLE', 'w-[150px] shrink-0')}
-            {signatureField('SIGNATURE', 'min-w-0 flex-1')}
+            {signatureField('SIGNATURE', 'min-w-0 flex-1', undefined, sig?.image)}
           </div>
         </div>
 

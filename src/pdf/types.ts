@@ -100,4 +100,6 @@ export interface InvoicePdfData extends PdfJobHeader {
   equipment: PdfEquipment[]
   /** Ticked labels of the WORK PERFORMED checklist (the client's paper-invoice checklist). */
   workPerformed: string[]
+  /** The customer's separate signature under the invoice total; null = lines left for a pen. */
+  customerSignature: PdfSignature | null
 }

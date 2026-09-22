@@ -16,7 +16,7 @@ import { StatusButtonGrid } from '../components/StatusButton'
 import { clearDraft, readDraft, useDraftState } from '../data/draft'
 import { completeDraft } from '../data/draftSync'
 import { EMPTY_INVOICE, type InvoiceData } from '../data/invoice'
-import { addDraftPhoto, ensureJobId, hasStep1Required, removeDraftPhoto, storeSignature, type DraftPhoto } from '../data/jobDraft'
+import { addDraftPhoto, ensureJobId, hasStep1Required, removeDraftPhoto, storeSignature, type DraftPhoto, type SignatureKind } from '../data/jobDraft'
 import { useSettings } from '../data/settings'
 import { InvoiceEditor } from './InvoiceEditor'
 import { exitDraft } from './stepExit'
@@ -29,7 +29,7 @@ const readFileAsDataUrl = (file: File) =>
     reader.readAsDataURL(file)
   })
 
-type Signer = 'customer' | 'technician' | null
+type Signer = SignatureKind | null
 
 const PHOTO_FROM_CAMERA = 'Take photo'
 const PHOTO_FROM_GALLERY = 'Choose from gallery'
@@ -52,6 +52,9 @@ export function Step4() {
   const [customerName, setCustomerName] = useDraftState('step4.customerName', '')
   const [customerSignature, setCustomerSignature] = useDraftState<string | null>('step4.customerSignature', null)
   const [techSignature, setTechSignature] = useDraftState<string | null>('step4.techSignature', null)
+  // Separate signature under the invoice total (client request 2026-09-22) — optional at
+  // Complete, so a job can be closed before the total is settled and signed later via Edit job.
+  const [invoiceSignature, setInvoiceSignature] = useDraftState<string | null>('step4.invoiceSignature', null)
   const [signing, setSigning] = useState<Signer>(null)
   const [saved, setSaved] = useState(false)
   const [completing, setCompleting] = useState(false)
@@ -103,9 +106,15 @@ export function Step4() {
   }
   const setSignature = (who: Exclude<Signer, null>, dataUrl: string) => {
     if (who === 'customer') setCustomerSignature(dataUrl)
-    else setTechSignature(dataUrl)
+    else if (who === 'technician') setTechSignature(dataUrl)
+    else setInvoiceSignature(dataUrl)
     void storeSignature(who, dataUrl)
   }
+
+  // Same arithmetic as the invoice editor / PDF, for the signing prompt.
+  const invoiceSubtotal = invoice.items.reduce((sum, i) => sum + (i.customerPaid ? 0 : i.qty * i.unitPrice), 0)
+  const invoiceTotal = Math.max(0, invoiceSubtotal + invoiceSubtotal * (invoice.taxRate / 100) - invoice.discount)
+  const invoiceTotalLabel = `$${invoiceTotal.toFixed(2)}`
 
   const startSignature = (who: Exclude<Signer, null>) => {
     if (!uploadsSignature) return setSigning(who)
@@ -246,6 +255,7 @@ export function Step4() {
                 Edit invoice
               </Button>
             </div>
+            {signatureSlot(`Invoice Signature · customer agrees to pay ${invoiceTotalLabel}`, invoiceSignature, 'invoice')}
           </div>
         </Section>
         </div>
@@ -291,11 +301,13 @@ export function Step4() {
 
       {signing && (
         <SignatureCapture
-          title={signing === 'customer' ? 'Customer signature' : 'Technician signature'}
+          title={signing === 'customer' ? 'Customer signature' : signing === 'technician' ? 'Technician signature' : 'Invoice signature'}
           instructions={
             signing === 'customer'
-              ? `${customerName || 'Customer'} — please sign below to acknowledge the work performed and agree to the charges.`
-              : 'Technician — please sign below to confirm the work performed.'
+              ? `${customerName || 'Customer'} — please sign below to acknowledge the work performed.`
+              : signing === 'technician'
+                ? 'Technician — please sign below to confirm the work performed.'
+                : `${customerName || 'Customer'} — please sign below to agree to the invoice total of ${invoiceTotalLabel}.`
           }
           onCancel={() => setSigning(null)}
           onDone={(dataUrl) => {

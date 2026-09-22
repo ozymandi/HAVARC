@@ -158,6 +158,7 @@ async function loadSource(service: SupabaseClient<Database>, jobId: string): Pro
       photoUrls,
       customerSignatureUrl: await signed(row.customer_signature_path),
       technicianSignatureUrl: await signed(row.technician_signature_path),
+      invoiceSignatureUrl: await signed(row.invoice_signature_path),
       company: companyFromSettings(settings),
     },
     notifyEmail: settings.notify_email?.trim() || null,

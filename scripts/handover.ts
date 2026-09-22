@@ -26,7 +26,7 @@ const SETTINGS = { invoice_prefix: 'INV-', next_invoice_number: 1234 }
 const BUCKETS = ['photos', 'signatures', 'documents']
 
 const db = createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } })
-const fail = (what: string, error: { message: string } | null) => {
+function fail(what: string, error: { message: string } | null): asserts error is null {
   if (error) throw new Error(`${what}: ${error.message}`)
 }
 console.log(apply ? '== APPLY ==' : '== DRY RUN (add --apply to execute) ==')

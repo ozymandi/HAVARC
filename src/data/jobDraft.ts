@@ -109,6 +109,10 @@ export interface JobDraft {
   techSignature: string | null
   customerSignaturePath: string | null
   techSignaturePath: string | null
+  /** Separate customer signature under the invoice total (client request 2026-09-22). */
+  invoiceSignature: string | null
+  invoiceSignaturePath: string | null
+  invoiceSignedAt: string | null
   invoice: InvoiceData
 }
 
@@ -156,6 +160,9 @@ export const readJobDraft = (): JobDraft => ({
   techSignature: readDraft<string | null>('step4.techSignature', null),
   customerSignaturePath: readDraft<string | null>('job.customerSignaturePath', null),
   techSignaturePath: readDraft<string | null>('job.techSignaturePath', null),
+  invoiceSignature: readDraft<string | null>('step4.invoiceSignature', null),
+  invoiceSignaturePath: readDraft<string | null>('job.invoiceSignaturePath', null),
+  invoiceSignedAt: readDraft<string | null>('job.invoiceSignedAt', null),
   invoice: readDraft<InvoiceData>('step4.invoice', EMPTY_INVOICE),
 })
 
@@ -168,7 +175,7 @@ export const hasStep1Required = () =>
   ['step1.workOrder', 'step1.customer', 'step1.address'].every((key) => readDraft<string>(key, '').trim() !== '')
 
 export const hasContent = (d: JobDraft) =>
-  d.customer.trim() !== '' || d.photos.length > 0 || !!d.customerSignaturePath || !!d.techSignaturePath || d.status !== 'draft'
+  d.customer.trim() !== '' || d.photos.length > 0 || !!d.customerSignaturePath || !!d.techSignaturePath || !!d.invoiceSignaturePath || d.status !== 'draft'
 
 /* ------------------------------------------------------------------ formatting helpers */
 const nullable = (s: string | null | undefined) => (s && s.trim() !== '' ? s.trim() : null)
@@ -188,7 +195,7 @@ const parseUsDate = (value: string): string => {
 }
 
 const furthestStep = (d: JobDraft): number => {
-  if (d.finalStatus || d.photos.length || d.customerSignature || d.techSignature || d.customerName) return 4
+  if (d.finalStatus || d.photos.length || d.customerSignature || d.techSignature || d.invoiceSignature || d.customerName) return 4
   if (d.findings.length || d.repairs.length || d.recommendations.length || d.serviceNotes || d.parts || d.recommendedWork) return 3
   if (d.readingsOpen || Object.values(d.conditions).some(Boolean)) return 2
   return 1
@@ -264,10 +271,18 @@ const dataUrlToBlob = async (dataUrl: string) => (await fetch(dataUrl)).blob()
 
 /** Uploads a signature PNG to `signatures/<job>/<who>.png` and records the path in the
  *  draft. Failures are swallowed here too — Complete retries any signature without a path. */
-export async function storeSignature(who: 'customer' | 'technician', dataUrl: string): Promise<void> {
+export type SignatureKind = 'customer' | 'technician' | 'invoice'
+const SIGNATURE_PATH_KEY: Record<SignatureKind, string> = {
+  customer: 'job.customerSignaturePath',
+  technician: 'job.techSignaturePath',
+  invoice: 'job.invoiceSignaturePath',
+}
+
+export async function storeSignature(who: SignatureKind, dataUrl: string): Promise<void> {
   const jobId = ensureJobId()
-  const key = who === 'customer' ? 'job.customerSignaturePath' : 'job.techSignaturePath'
+  const key = SIGNATURE_PATH_KEY[who]
   setDraftValue(key, null)
+  if (who === 'invoice') setDraftValue('job.invoiceSignedAt', new Date().toISOString())
   try {
     const path = await uploadSignatureData(jobId, who, dataUrl)
     setDraftValue(key, path)
@@ -276,7 +291,7 @@ export async function storeSignature(who: 'customer' | 'technician', dataUrl: st
   }
 }
 
-async function uploadSignatureData(jobId: string, who: 'customer' | 'technician', dataUrl: string): Promise<string> {
+async function uploadSignatureData(jobId: string, who: SignatureKind, dataUrl: string): Promise<string> {
   const path = `${jobId}/${who}.png`
   const { error } = await supabase.storage.from('signatures').upload(path, await dataUrlToBlob(dataUrl), { contentType: 'image/png', upsert: true })
   if (error) throw error
@@ -294,14 +309,17 @@ async function uploadPending(d: JobDraft): Promise<JobDraft> {
     }
     photos.push({ ...photo, path: await uploadPhotoBlob(d.jobId, photo.id, photo.blob), blob: undefined })
   }
-  let { customerSignaturePath, techSignaturePath } = d
+  let { customerSignaturePath, techSignaturePath, invoiceSignaturePath } = d
   if (!customerSignaturePath && d.customerSignature?.startsWith('data:')) {
     customerSignaturePath = await uploadSignatureData(d.jobId, 'customer', d.customerSignature)
   }
   if (!techSignaturePath && d.techSignature?.startsWith('data:')) {
     techSignaturePath = await uploadSignatureData(d.jobId, 'technician', d.techSignature)
   }
-  return { ...d, photos, customerSignaturePath, techSignaturePath }
+  if (!invoiceSignaturePath && d.invoiceSignature?.startsWith('data:')) {
+    invoiceSignaturePath = await uploadSignatureData(d.jobId, 'invoice', d.invoiceSignature)
+  }
+  return { ...d, photos, customerSignaturePath, techSignaturePath, invoiceSignaturePath }
 }
 
 /* ------------------------------------------------------------------ write */
@@ -375,6 +393,8 @@ export async function saveJobDraft(input: JobDraft, complete = false): Promise<S
     customer_rep_name: nullable(d.customerName),
     customer_signature_path: d.customerSignaturePath,
     technician_signature_path: d.techSignaturePath,
+    invoice_signature_path: d.invoiceSignaturePath,
+    invoice_signed_at: d.invoiceSignaturePath ? d.invoiceSignedAt : null,
     completed_at: completedAt,
     created_by: session?.user.id ?? null,
     })
@@ -477,6 +497,8 @@ interface StoredJob {
   customer_rep_name: string | null
   customer_signature_path: string | null
   technician_signature_path: string | null
+  invoice_signature_path: string | null
+  invoice_signed_at: string | null
   completed_at: string | null
   equipment: {
     position: number
@@ -527,6 +549,8 @@ const draftToEntries = (d: JobDraft): Record<string, unknown> => ({
   'job.updatedAt': d.updatedAt,
   'job.customerSignaturePath': d.customerSignaturePath,
   'job.techSignaturePath': d.techSignaturePath,
+  'job.invoiceSignaturePath': d.invoiceSignaturePath,
+  'job.invoiceSignedAt': d.invoiceSignedAt,
   'step1.workOrder': d.workOrder,
   'step1.date': d.date,
   'step1.technician': d.technician,
@@ -554,6 +578,7 @@ const draftToEntries = (d: JobDraft): Record<string, unknown> => ({
   'step4.customerName': d.customerName,
   'step4.customerSignature': d.customerSignature,
   'step4.techSignature': d.techSignature,
+  'step4.invoiceSignature': d.invoiceSignature,
   'step4.invoice': d.invoice,
 })
 
@@ -573,7 +598,7 @@ export async function loadJobIntoDraft(jobId: string): Promise<void> {
     .select(
       `id, updated_at, work_order, customer_name, address, unit_suite, technician, job_date, arrival_time, departure_time, service_type,
        complaints, complaint_details, customer_notes, status, final_status, customer_rep_name, customer_signature_path,
-       technician_signature_path, completed_at,
+       technician_signature_path, invoice_signature_path, invoice_signed_at, completed_at,
        equipment(position, equipment_id, location, type, manufacturer, model, serial, tonnage, refrigerant, voltage, filter_size),
        readings(*), findings:job_findings(*),
        invoice:invoices(tax_rate, discount, description, items:invoice_items(id, position, description, qty, unit_price, customer_paid)),
@@ -591,9 +616,10 @@ export async function loadJobIntoDraft(jobId: string): Promise<void> {
   const photoUrls = photos.length
     ? ((await supabase.storage.from('photos').createSignedUrls(photos.map((p) => p.storage_path), 60 * 60)).data ?? [])
     : []
-  const [customerSignature, techSignature] = await Promise.all([
+  const [customerSignature, techSignature, invoiceSignature] = await Promise.all([
     signedUrl('signatures', job.customer_signature_path),
     signedUrl('signatures', job.technician_signature_path),
+    signedUrl('signatures', job.invoice_signature_path),
   ])
 
   const readings: Readings = r
@@ -643,6 +669,8 @@ export async function loadJobIntoDraft(jobId: string): Promise<void> {
     'job.updatedAt': job.updated_at,
     'job.customerSignaturePath': job.customer_signature_path,
     'job.techSignaturePath': job.technician_signature_path,
+    'job.invoiceSignaturePath': job.invoice_signature_path,
+    'job.invoiceSignedAt': job.invoice_signed_at,
     'step1.workOrder': job.work_order,
     'step1.date': job.job_date,
     'step1.technician': job.technician,
@@ -672,6 +700,7 @@ export async function loadJobIntoDraft(jobId: string): Promise<void> {
     'step4.customerName': str(job.customer_rep_name),
     'step4.customerSignature': customerSignature,
     'step4.techSignature': techSignature,
+    'step4.invoiceSignature': invoiceSignature,
     'step4.invoice': inv
       ? {
           items: [...inv.items].sort((a, b) => a.position - b.position).map((i) => ({ id: i.id, description: i.description, qty: i.qty, unitPrice: i.unit_price, customerPaid: i.customer_paid })),

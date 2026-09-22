@@ -18,16 +18,18 @@ export async function fetchPdfSource(jobId: string): Promise<PdfSource | null> {
   const job = data as unknown as PdfJobRow
 
   const photoPaths = job.photos.map((p) => p.storage_path)
-  const [photoUrls, customerSignatureUrl, technicianSignatureUrl] = await Promise.all([
+  const [photoUrls, customerSignatureUrl, technicianSignatureUrl, invoiceSignatureUrl] = await Promise.all([
     photoPaths.length ? supabase.storage.from('photos').createSignedUrls(photoPaths, SIGNED_URL_TTL) : Promise.resolve({ data: [] }),
     signed('signatures', job.customer_signature_path),
     signed('signatures', job.technician_signature_path),
+    signed('signatures', job.invoice_signature_path),
   ])
   return {
     job,
     photoUrls: Object.fromEntries((photoUrls.data ?? []).flatMap((u) => (u.signedUrl && u.path ? [[u.path, u.signedUrl]] : []))),
     customerSignatureUrl,
     technicianSignatureUrl,
+    invoiceSignatureUrl,
     company: companyFromSettings(settings),
   }
 }
