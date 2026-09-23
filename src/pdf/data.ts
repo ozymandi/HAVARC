@@ -136,9 +136,16 @@ export function buildInvoiceData(src: PdfSource): InvoicePdfData {
     description: str(inv?.description),
     equipment: equipmentOf(job),
     workPerformed: workPerformedFor(job),
-    customerSignature: src.invoiceSignatureUrl
-      ? { image: src.invoiceSignatureUrl, name: job.customer_rep_name || job.customer_name, signedAt: signedAt(job.invoice_signed_at) }
-      : null,
+    // The typed signer name/title print even without a drawn signature (a pen may follow).
+    customerSignature:
+      src.invoiceSignatureUrl || job.invoice_signer_name || job.invoice_signer_title
+        ? {
+            image: src.invoiceSignatureUrl ?? undefined,
+            name: job.invoice_signer_name || job.customer_rep_name || job.customer_name,
+            title: job.invoice_signer_title ?? undefined,
+            signedAt: src.invoiceSignatureUrl ? signedAt(job.invoice_signed_at) : '',
+          }
+        : null,
   }
 }
 

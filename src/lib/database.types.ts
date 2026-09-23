@@ -283,6 +283,8 @@ export type Database = {
           id: string
           invoice_signature_path: string | null
           invoice_signed_at: string | null
+          invoice_signer_name: string | null
+          invoice_signer_title: string | null
           job_date: string
           service_type: string | null
           status: Database["public"]["Enums"]["job_status"]
@@ -311,6 +313,8 @@ export type Database = {
           id?: string
           invoice_signature_path?: string | null
           invoice_signed_at?: string | null
+          invoice_signer_name?: string | null
+          invoice_signer_title?: string | null
           job_date?: string
           service_type?: string | null
           status?: Database["public"]["Enums"]["job_status"]
@@ -339,6 +343,8 @@ export type Database = {
           id?: string
           invoice_signature_path?: string | null
           invoice_signed_at?: string | null
+          invoice_signer_name?: string | null
+          invoice_signer_title?: string | null
           job_date?: string
           service_type?: string | null
           status?: Database["public"]["Enums"]["job_status"]

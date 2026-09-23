@@ -125,7 +125,7 @@ export function invoicePages(inv: InvoicePdfData): ReactNode[] {
             {signatureField('PRINT NAME', 'min-w-0 flex-1', sig?.name)}
           </div>
           <div className="flex w-full items-start gap-lg">
-            {signatureField('JOB TITLE', 'w-[150px] shrink-0')}
+            {signatureField('JOB TITLE', 'w-[150px] shrink-0', sig?.title)}
             {signatureField('SIGNATURE', 'min-w-0 flex-1', undefined, sig?.image)}
           </div>
         </div>

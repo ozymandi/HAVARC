@@ -3,7 +3,7 @@
 
 export const PDF_JOB_SELECT = `id, work_order, customer_name, address, unit_suite, technician, job_date, arrival_time, departure_time,
   service_type, complaints, complaint_details, customer_notes, status, final_status, customer_rep_name,
-  customer_signature_path, technician_signature_path, invoice_signature_path, invoice_signed_at, completed_at,
+  customer_signature_path, technician_signature_path, invoice_signature_path, invoice_signed_at, invoice_signer_name, invoice_signer_title, completed_at,
   customer:customers(phone),
   equipment(position, equipment_id, location, type, manufacturer, model, serial, tonnage, refrigerant, voltage, filter_size),
   readings(*),
@@ -60,6 +60,8 @@ export interface PdfJobRow {
   technician_signature_path: string | null
   invoice_signature_path: string | null
   invoice_signed_at: string | null
+  invoice_signer_name: string | null
+  invoice_signer_title: string | null
   completed_at: string | null
   customer: { phone: string | null } | null
   equipment: {

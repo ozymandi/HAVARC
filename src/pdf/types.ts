@@ -53,6 +53,8 @@ export interface PdfSignature {
   /** Data URL / path of the drawn signature; absent = signed on paper / not captured. */
   image?: string
   name: string
+  /** Signer's job title (invoice acknowledgment only). */
+  title?: string
   /** e.g. "09/02/26 11:38 AM" */
   signedAt: string
 }

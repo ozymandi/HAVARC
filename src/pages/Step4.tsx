@@ -55,6 +55,10 @@ export function Step4() {
   // Separate signature under the invoice total (client request 2026-09-22) — optional at
   // Complete, so a job can be closed before the total is settled and signed later via Edit job.
   const [invoiceSignature, setInvoiceSignature] = useDraftState<string | null>('step4.invoiceSignature', null)
+  // Typed name and job title of the invoice signer (client request 2026-09-23). The name
+  // starts from the acknowledgment name once, then is the signer's own.
+  const [invoiceSignerName, setInvoiceSignerName] = useDraftState('step4.invoiceSignerName', '')
+  const [invoiceSignerTitle, setInvoiceSignerTitle] = useDraftState('step4.invoiceSignerTitle', '')
   const [signing, setSigning] = useState<Signer>(null)
   const [saved, setSaved] = useState(false)
   const [completing, setCompleting] = useState(false)
@@ -255,6 +259,19 @@ export function Step4() {
                 Edit invoice
               </Button>
             </div>
+            <div className="flex w-full gap-2xs">
+              <FormField
+                className="min-w-0 flex-1"
+                label="Signer name"
+                value={invoiceSignerName}
+                onChange={(e) => setInvoiceSignerName(e.target.value)}
+                onFocus={() => {
+                  if (!invoiceSignerName && customerName) setInvoiceSignerName(customerName)
+                }}
+                placeholder={customerName || 'Full name'}
+              />
+              <FormField className="min-w-0 flex-1" label="Job title" value={invoiceSignerTitle} onChange={(e) => setInvoiceSignerTitle(e.target.value)} placeholder="e.g. Office Manager" />
+            </div>
             {signatureSlot(`Invoice Signature · customer agrees to pay ${invoiceTotalLabel}`, invoiceSignature, 'invoice')}
           </div>
         </Section>
@@ -307,7 +324,7 @@ export function Step4() {
               ? `${customerName || 'Customer'} — please sign below to acknowledge the work performed.`
               : signing === 'technician'
                 ? 'Technician — please sign below to confirm the work performed.'
-                : `${customerName || 'Customer'} — please sign below to agree to the invoice total of ${invoiceTotalLabel}.`
+                : `${invoiceSignerName || customerName || 'Customer'} — please sign below to agree to the invoice total of ${invoiceTotalLabel}.`
           }
           onCancel={() => setSigning(null)}
           onDone={(dataUrl) => {

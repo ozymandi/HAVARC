@@ -113,6 +113,9 @@ export interface JobDraft {
   invoiceSignature: string | null
   invoiceSignaturePath: string | null
   invoiceSignedAt: string | null
+  /** Typed name and job title of the invoice signer (PRINT NAME / JOB TITLE on the invoice). */
+  invoiceSignerName: string
+  invoiceSignerTitle: string
   invoice: InvoiceData
 }
 
@@ -163,6 +166,8 @@ export const readJobDraft = (): JobDraft => ({
   invoiceSignature: readDraft<string | null>('step4.invoiceSignature', null),
   invoiceSignaturePath: readDraft<string | null>('job.invoiceSignaturePath', null),
   invoiceSignedAt: readDraft<string | null>('job.invoiceSignedAt', null),
+  invoiceSignerName: readDraft('step4.invoiceSignerName', ''),
+  invoiceSignerTitle: readDraft('step4.invoiceSignerTitle', ''),
   invoice: readDraft<InvoiceData>('step4.invoice', EMPTY_INVOICE),
 })
 
@@ -395,6 +400,8 @@ export async function saveJobDraft(input: JobDraft, complete = false): Promise<S
     technician_signature_path: d.techSignaturePath,
     invoice_signature_path: d.invoiceSignaturePath,
     invoice_signed_at: d.invoiceSignaturePath ? d.invoiceSignedAt : null,
+    invoice_signer_name: nullable(d.invoiceSignerName),
+    invoice_signer_title: nullable(d.invoiceSignerTitle),
     completed_at: completedAt,
     created_by: session?.user.id ?? null,
     })
@@ -499,6 +506,8 @@ interface StoredJob {
   technician_signature_path: string | null
   invoice_signature_path: string | null
   invoice_signed_at: string | null
+  invoice_signer_name: string | null
+  invoice_signer_title: string | null
   completed_at: string | null
   equipment: {
     position: number
@@ -551,6 +560,8 @@ const draftToEntries = (d: JobDraft): Record<string, unknown> => ({
   'job.techSignaturePath': d.techSignaturePath,
   'job.invoiceSignaturePath': d.invoiceSignaturePath,
   'job.invoiceSignedAt': d.invoiceSignedAt,
+  'step4.invoiceSignerName': d.invoiceSignerName,
+  'step4.invoiceSignerTitle': d.invoiceSignerTitle,
   'step1.workOrder': d.workOrder,
   'step1.date': d.date,
   'step1.technician': d.technician,
@@ -598,7 +609,7 @@ export async function loadJobIntoDraft(jobId: string): Promise<void> {
     .select(
       `id, updated_at, work_order, customer_name, address, unit_suite, technician, job_date, arrival_time, departure_time, service_type,
        complaints, complaint_details, customer_notes, status, final_status, customer_rep_name, customer_signature_path,
-       technician_signature_path, invoice_signature_path, invoice_signed_at, completed_at,
+       technician_signature_path, invoice_signature_path, invoice_signed_at, invoice_signer_name, invoice_signer_title, completed_at,
        equipment(position, equipment_id, location, type, manufacturer, model, serial, tonnage, refrigerant, voltage, filter_size),
        readings(*), findings:job_findings(*),
        invoice:invoices(tax_rate, discount, description, items:invoice_items(id, position, description, qty, unit_price, customer_paid)),
@@ -701,6 +712,8 @@ export async function loadJobIntoDraft(jobId: string): Promise<void> {
     'step4.customerSignature': customerSignature,
     'step4.techSignature': techSignature,
     'step4.invoiceSignature': invoiceSignature,
+    'step4.invoiceSignerName': str(job.invoice_signer_name),
+    'step4.invoiceSignerTitle': str(job.invoice_signer_title),
     'step4.invoice': inv
       ? {
           items: [...inv.items].sort((a, b) => a.position - b.position).map((i) => ({ id: i.id, description: i.description, qty: i.qty, unitPrice: i.unit_price, customerPaid: i.customer_paid })),
