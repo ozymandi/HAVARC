@@ -80,11 +80,14 @@ export function invoicePages(inv: InvoicePdfData): ReactNode[] {
   /** A line of the acknowledgment block: blank for a pen, or filled from the app's invoice
    *  signature (drawn image on the SIGNATURE line, name and date as text on theirs). */
   const signatureField = (label: string, className = '', value?: string, image?: string) => (
-    <div className={`flex flex-col gap-[3px] pt-[14px] ${className}`}>
-      <div className="relative h-px w-full bg-line-strong">
-        {image && <img src={image} alt="" className="absolute bottom-0 left-0 h-[40px] w-[128px] object-contain object-left-bottom" />}
+    <div className={`flex flex-col gap-[3px] ${className}`}>
+      {/* Fixed 28px band above the line: the image is clipped to it, so a tall signature
+          image can't overlap the row above; text sits on the baseline like before. */}
+      <div className="relative h-[28px] w-full overflow-hidden">
+        {image && <img src={image} alt="" className="absolute bottom-0 left-0 h-[26px] w-[128px] object-contain object-left-bottom" />}
         {value && !image && <p className="absolute bottom-[2px] left-0 text-pdf-body text-ink">{value}</p>}
       </div>
+      <div className="h-px w-full bg-line-strong" />
       <p className="text-pdf-small text-icon">{label}</p>
     </div>
   )
@@ -115,7 +118,7 @@ export function invoicePages(inv: InvoicePdfData): ReactNode[] {
           </PdfSection>
         </div>
 
-        <div className="flex w-full flex-col gap-[10px] rounded-2xs border border-line px-[10px] pb-[10px] pt-sm">
+        <div className="flex w-full flex-col gap-[6px] rounded-2xs border border-line px-[10px] pb-[10px] pt-sm">
           <p className="text-pdf-body text-ink">I hereby acknowledge the work performed as described above and agree to the charges.</p>
           <div className="flex w-full items-start gap-lg">
             {signatureField('DATE COMPLETED', 'w-[150px] shrink-0', sig?.signedAt)}
